@@ -6,6 +6,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -55,30 +56,28 @@ object Routes {
 
 @Composable
 fun CivilyNavHost(navController: NavHostController = rememberNavController()) {
-    val openNation: (String) -> Unit = { id -> navController.navigate(Routes.nation(id)) }
-    val openRegion: (String) -> Unit = { id -> navController.navigate(Routes.region(id)) }
-    val openSignIn: () -> Unit = { navController.navigate(Routes.SIGN_IN) }
-
     NavHost(navController = navController, startDestination = Routes.LOOKUP) {
-        composable(Routes.LOOKUP) {
+        composable(Routes.LOOKUP) { entry ->
+            val nav = navActions(navController, entry)
             LookupScreen(
-                onOpenNation = openNation,
-                onOpenWorldAssembly = { navController.navigate(Routes.WORLD_ASSEMBLY) },
-                onOpenIssues = { navController.navigate(Routes.ISSUES) },
-                onSignIn = openSignIn,
+                onOpenNation = nav.openNation,
+                onOpenWorldAssembly = { nav.go(Routes.WORLD_ASSEMBLY) },
+                onOpenIssues = { nav.go(Routes.ISSUES) },
+                onSignIn = nav.openSignIn,
             )
         }
 
-        composable(Routes.SIGN_IN) {
+        composable(Routes.SIGN_IN) { entry ->
+            val nav = navActions(navController, entry)
             SignInScreen(
                 onSignedIn = { id ->
                     // Why popUpTo: a signed-in user pressing back must not land on the form
                     // they just completed.
-                    navController.navigate(Routes.nation(id)) {
+                    nav.go(Routes.nation(id)) {
                         popUpTo(Routes.SIGN_IN) { inclusive = true }
                     }
                 },
-                onBack = navController::navigateUp,
+                onBack = nav.back,
             )
         }
 
@@ -86,11 +85,12 @@ fun CivilyNavHost(navController: NavHostController = rememberNavController()) {
             route = Routes.NATION_PATTERN,
             arguments = listOf(navArgument(Routes.ARG_NATION_ID) { type = NavType.StringType }),
         ) { entry ->
+            val nav = navActions(navController, entry)
             NationScreen(
                 nationId = entry.requireArg(Routes.ARG_NATION_ID),
-                onOpenRegion = openRegion,
-                onSignIn = openSignIn,
-                onBack = navController::navigateUp,
+                onOpenRegion = nav.openRegion,
+                onSignIn = nav.openSignIn,
+                onBack = nav.back,
             )
         }
 
@@ -98,13 +98,14 @@ fun CivilyNavHost(navController: NavHostController = rememberNavController()) {
             route = Routes.REGION_PATTERN,
             arguments = listOf(navArgument(Routes.ARG_REGION_ID) { type = NavType.StringType }),
         ) { entry ->
+            val nav = navActions(navController, entry)
             RegionScreen(
                 regionId = entry.requireArg(Routes.ARG_REGION_ID),
-                onOpenNation = openNation,
-                onOpenRegion = openRegion,
-                onOpenMessageBoard = { id -> navController.navigate(Routes.rmb(id)) },
-                onSignIn = openSignIn,
-                onBack = navController::navigateUp,
+                onOpenNation = nav.openNation,
+                onOpenRegion = nav.openRegion,
+                onOpenMessageBoard = { id -> nav.go(Routes.rmb(id)) },
+                onSignIn = nav.openSignIn,
+                onBack = nav.back,
             )
         }
 
@@ -112,21 +113,23 @@ fun CivilyNavHost(navController: NavHostController = rememberNavController()) {
             route = Routes.RMB_PATTERN,
             arguments = listOf(navArgument(Routes.ARG_REGION_ID) { type = NavType.StringType }),
         ) { entry ->
+            val nav = navActions(navController, entry)
             RmbScreen(
                 regionId = entry.requireArg(Routes.ARG_REGION_ID),
-                onOpenNation = openNation,
-                onOpenRegion = openRegion,
-                onSignIn = openSignIn,
-                onBack = navController::navigateUp,
+                onOpenNation = nav.openNation,
+                onOpenRegion = nav.openRegion,
+                onSignIn = nav.openSignIn,
+                onBack = nav.back,
             )
         }
 
         composable(Routes.ISSUES) { entry ->
+            val nav = navActions(navController, entry)
             IssuesScreen(
                 viewModel = issuesViewModel(navController, entry),
-                onOpenIssue = { id -> navController.navigate(Routes.issue(id)) },
-                onSignIn = openSignIn,
-                onBack = navController::navigateUp,
+                onOpenIssue = { id -> nav.go(Routes.issue(id)) },
+                onSignIn = nav.openSignIn,
+                onBack = nav.back,
             )
         }
 
@@ -134,27 +137,69 @@ fun CivilyNavHost(navController: NavHostController = rememberNavController()) {
             route = Routes.ISSUE_PATTERN,
             arguments = listOf(navArgument(Routes.ARG_ISSUE_ID) { type = NavType.IntType }),
         ) { entry ->
+            val nav = navActions(navController, entry)
             IssueDetailScreen(
                 issueId = requireNotNull(entry.arguments?.getInt(Routes.ARG_ISSUE_ID)) {
                     "Route ${Routes.ISSUE_PATTERN} reached without ${Routes.ARG_ISSUE_ID}"
                 },
                 viewModel = issuesViewModel(navController, entry),
-                onOpenNation = openNation,
-                onOpenRegion = openRegion,
-                onBack = navController::navigateUp,
+                onOpenNation = nav.openNation,
+                onOpenRegion = nav.openRegion,
+                onBack = nav.back,
             )
         }
 
-        composable(Routes.WORLD_ASSEMBLY) {
+        composable(Routes.WORLD_ASSEMBLY) { entry ->
+            val nav = navActions(navController, entry)
             WaScreen(
-                onOpenNation = openNation,
-                onOpenRegion = openRegion,
-                onSignIn = openSignIn,
-                onBack = navController::navigateUp,
+                onOpenNation = nav.openNation,
+                onOpenRegion = nav.openRegion,
+                onSignIn = nav.openSignIn,
+                onBack = nav.back,
             )
         }
     }
 }
+
+/**
+ * The navigation one screen may perform, refused once that screen is on its way out.
+ *
+ * Why every destination goes through this: a destination stays composed — and keeps taking
+ * taps — for the whole of its exit transition, so a tap that lands a frame after the user
+ * pressed back is delivered to a screen that is no longer on the back stack. Acting on it
+ * navigates *from* a popped entry: pressing back on the issue list and then tapping a headline
+ * pushed an issue detail with no list beneath it, and [issuesViewModel] — which looks that list
+ * up to share one ViewModel across the pair — then asked for an entry that had gone. The same
+ * stale tap pushes a second copy of any screen a user double-taps.
+ *
+ * The test is that the entry is still the one on top of the back stack — which is what "the
+ * destination the user is on" means, and is the same thing the crash was reporting when it
+ * named the current destination. The lifecycle answer, `RESUMED`, would hold this crash off
+ * too, but it ties the permission to how long an animation runs: an entry is not RESUMED until
+ * its *arrival* transition has finished, so a screen that has drawn refuses to be used until
+ * then, and that window grows with any transition added later. This test has no window at all.
+ * A screen may be moved from the moment it exists; it may not be moved once something else has
+ * taken its place.
+ */
+private class NavActions(
+    private val controller: NavHostController,
+    private val entry: NavBackStackEntry,
+) {
+    val openNation: (String) -> Unit = { id -> go(Routes.nation(id)) }
+    val openRegion: (String) -> Unit = { id -> go(Routes.region(id)) }
+    val openSignIn: () -> Unit = { go(Routes.SIGN_IN) }
+    val back: () -> Unit = { if (current()) controller.navigateUp() }
+
+    fun go(route: String, options: NavOptionsBuilder.() -> Unit = {}) {
+        if (current()) controller.navigate(route, options)
+    }
+
+    private fun current() = controller.currentBackStackEntry == entry
+}
+
+@Composable
+private fun navActions(controller: NavHostController, entry: NavBackStackEntry): NavActions =
+    remember(entry) { NavActions(controller, entry) }
 
 /**
  * Why this fails loudly: the argument is declared non-optional on the route, so a null here
@@ -171,6 +216,9 @@ private fun NavBackStackEntry.requireArg(key: String): String =
  * Why: the list already holds every issue in full, so opening one should not cost a request
  * or show a spinner over data the app is holding. Scoping to the list entry also means the
  * pair is discarded together when the user leaves issues entirely.
+ *
+ * The list is on the back stack whenever the detail is: [NavActions] is what makes that true,
+ * by refusing to open an issue from a list the user has already left.
  */
 @Composable
 private fun issuesViewModel(

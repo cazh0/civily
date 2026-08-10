@@ -240,6 +240,21 @@ that renders NationStates content goes through it — and that content is not pu
 issue text carries HTML too, so `<i>`, `<strong>`, `<br>` and friends are read as the tags
 they are equivalent to, and anything else is dropped. A `<` in prose stays a `<`.
 
+**A screen on its way out cannot navigate.** A destination stays composed for the whole of its
+exit transition and goes on accepting taps, so a tap that lands a frame after the user pressed
+back is delivered by a screen that is no longer on the back stack. Acting on it navigates *from*
+a popped entry: back on the issue list followed by a tap on a headline pushed an issue detail
+with no list beneath it, and the shared `IssuesViewModel` — looked up through the list's entry —
+took the app down with it. Every callback in `CivilyNavHost` therefore goes through `NavActions`,
+which navigates only while its entry is still the current one — which is what "the screen the
+user is on" means. The same guard is what stops a double-tap pushing two copies of a screen.
+
+Lifecycle state is the tempting test — AndroidX's own samples use `RESUMED` — and it stops this
+crash as well. It is not the one here because it answers a slower question: an entry is not
+`RESUMED` until its *arrival* transition has finished, so permission to navigate is held back by
+however long the animation happens to be, and the app grows a dead window the day it gets real
+screen transitions. Being the current entry is true the instant the destination exists.
+
 **Edge-to-edge is the layout.** `enableEdgeToEdge()` runs before `super.onCreate`, and every
 Scaffold consumes its insets. Content that ignores insets lands under the system bars.
 
