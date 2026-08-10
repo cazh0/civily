@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -43,12 +42,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import coil.ImageLoader
-import coil.compose.AsyncImage
 import dev.cazh0.civily.R
 import dev.cazh0.civily.core.session.Accounts
 import dev.cazh0.civily.core.session.Session
 import dev.cazh0.civily.core.text.Initials
 import dev.cazh0.civily.core.text.NsId
+import dev.cazh0.civily.ui.component.AmbientFlag
 import dev.cazh0.civily.ui.component.LinkRow
 import dev.cazh0.civily.ui.component.SectionHeader
 import dev.cazh0.civily.ui.theme.Dimens
@@ -427,33 +426,33 @@ private fun RemoveConfirmation(
  */
 @Composable
 private fun AccountFlag(session: Session, imageLoader: ImageLoader) {
-    val hasFlag = session.flagUrl.isNotEmpty()
+    val size = Modifier.size(Dimens.FlagThumbnailWidth, Dimens.FlagThumbnailHeight)
+
+    if (session.flagUrl.isNotEmpty()) {
+        // Cropped, so the plate shows only where the flag is transparent — which is the one
+        // case where its colour has to be chosen rather than assumed.
+        AmbientFlag(
+            flagUrl = session.flagUrl,
+            contentDescription = null,
+            imageLoader = imageLoader,
+            shape = RoundedCornerShape(Dimens.FlagCornerRadius),
+            contentScale = ContentScale.Crop,
+            modifier = size,
+        )
+        return
+    }
 
     Surface(
         shape = RoundedCornerShape(Dimens.FlagCornerRadius),
-        color = if (hasFlag) {
-            MaterialTheme.colorScheme.surfaceContainerHighest
-        } else {
-            avatarColor(session.nationId)
-        },
-        modifier = Modifier.size(Dimens.FlagThumbnailWidth, Dimens.FlagThumbnailHeight),
+        color = avatarColor(session.nationId),
+        modifier = size,
     ) {
-        if (hasFlag) {
-            AsyncImage(
-                model = session.flagUrl,
-                imageLoader = imageLoader,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = Initials.of(session.nationName),
+                style = MaterialTheme.typography.labelLarge,
+                color = Color.White,
             )
-        } else {
-            Box(contentAlignment = Alignment.Center) {
-                Text(
-                    text = Initials.of(session.nationName),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = Color.White,
-                )
-            }
         }
     }
 }

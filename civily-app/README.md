@@ -41,9 +41,10 @@ app/src/main/kotlin/dev/cazh0/civily/
 ├── nav/             Routes + NavHost
 └── ui/
     ├── theme/       Color · Dimens · Theme          (the only colours and sizes)
-    └── component/   LoadStateScaffold · LoadStateContent · RichText · FlagHero
-                     LinkRow · FactCard · NationAvatar · Pill · SectionHeader
-                     LoadingState · EmptyState · ErrorState
+    │                FlagAmbience                    (a plate mixed from a flag)
+    └── component/   LoadStateScaffold · LoadStateContent · RichText
+                     AmbientFlag · FlagHero · LinkRow · FactCard · NationAvatar
+                     Pill · SectionHeader · LoadingState · EmptyState · ErrorState
 ```
 
 `data/` holds two kinds of type. A `…Dto` is the wire shape, annotated for XML. A plain type
@@ -107,11 +108,35 @@ an object in its own right. Every row therefore *crops to fill* `Dimens.FlagThum
 screen, where `FlagHero` fits it uncropped. An account with no stored flag falls back to its
 initials *in the same box*, so a list never changes shape depending on what the API sent.
 
-**Nothing in the app is a fixed light surface except newsprint.** The plate behind a flag was a
-fixed pale grey, chosen so that transparent PNGs with dark artwork stayed legible. On a dark
-screen that made every flag in the app a lit slab, protecting a minority at the cost of every
-other view, so it now follows the colour scheme like everything else. Cropping to fill removes
-most of the exposure anyway: an opaque flag covers its plate entirely.
+**A flag's plate is mixed from the flag.** It used to be a fixed pale grey, chosen so that
+transparent PNGs with dark artwork stayed legible — which made every flag in the app a lit slab
+at night to protect a minority of them. A theme-coloured plate fixes the slab and swallows that
+minority. Neither is a choice worth making globally, because the right plate is a property of
+the picture, so `FlagAmbience` reads it off the picture: the flag's alpha-weighted average
+colour, pushed away from the artwork's own brightness.
+
+What the picture decides is *which question is being asked*, and there are two. An opaque flag
+covers its plate, so nothing has to be read against it: the plate is only a frame, and it is
+the app's own surface carrying a wash of the flag's colour. Following the surface is what keeps
+it dark in a dark theme — a first attempt blended toward black or white instead, and gave
+Testlandia's red flag a pale pink slab, which is the bright-box problem again in a new colour.
+
+A flag with transparency shows its plate *through* the artwork, so there the plate has a job:
+be the thing that artwork is legible against. Its average colour is the artwork's own, so
+pushing away from that brightness lands the plate on the far side of it. Legibility outranks
+blending in that branch — a black-on-glass flag gets a pale plate even at night, because the
+alternative is a flag nobody can see.
+
+The plate starts at the theme surface and animates to the ambience once the image decodes, so a
+slow flag never flashes a colour it does not have.
+
+Sampling is a fixed 16×16 grid, on `Dispatchers.Default`, keyed on the URL. `FlagAmbience`
+itself is pure — pixels in, colour out — which is the only way it could have a test.
+
+The request that feeds it sets `allowHardware(false)`. Coil decodes to `Bitmap.Config.HARDWARE`
+from API 26, and a hardware bitmap lives in graphics memory with no CPU-readable pixels at all,
+so sampling one throws on every device that has ever run this. The decode is told what it has
+to produce, in the one place that samples; there is no catch around the read.
 
 **Colour comes from the wallpaper.** Dynamic colour is on for Android 12+; the indigo scheme
 is the fallback, not the intent. Anything hardcoded against the brand palette will look wrong
@@ -334,11 +359,9 @@ These are tracked, not hidden (spec §2 R1). Nothing here is stubbed to look lik
 - **Nothing measures §4.** No Macrobenchmark module and no Baseline Profile yet. Compose cold
   start is materially worse without a profile, so this blocks any claim of meeting the
   cold-start target.
-- **A transparent flag with dark artwork is hard to read in dark mode.** Its plate now follows
-  the colour scheme, which is right for the other several hundred flags and wrong for that
-  handful. Fixing it properly means sampling the decoded bitmap for transparency and for its
-  own colours — an ambient plate rather than a grey one — which needs the bitmap in hand and a
-  palette pass. Nothing is faked in the meantime.
+- **The ambient plate is one colour, not a blur.** YouTube's ambient mode scales and blurs the
+  image itself; `Modifier.blur` needs API 31, and minSdk is 21. A flat plate mixed from the
+  flag's colours is the part of that effect which works everywhere.
 - **One theme.** The legacy app ships five, and there is no in-app light/dark override.
 - **The sign-in screen has not been restyled** to match the home screen's card language.
 - **No skeleton loaders and no screen transitions.** Loading is a spinner; navigation uses the
