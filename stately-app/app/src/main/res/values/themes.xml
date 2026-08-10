@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        The Activity theme exists only to paint the window before Compose takes over; all
+        real styling lives in ui/theme. Parenting to the platform theme avoids pulling in
+        AppCompat or the Material View library for a single style declaration (spec §1.4).
+    -->
+    <style name="Theme.Stately" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

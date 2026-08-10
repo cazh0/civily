@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+         Census scale names, indexed by the id the API uses in <RANK id="…">.
+         Order is the scale id, so nothing here may be reordered or removed — only appended
+         when NationStates adds a scale.
+    -->
+    <string-array name="census_scales">
+        <item>Civil Rights</item>
+        <item>Economy</item>
+        <item>Political Freedoms</item>
+        <item>Population</item>
+        <item>Wealth Gaps</item>
+        <item>Death Rate</item>
+        <item>Compassion</item>
+        <item>Eco-Friendliness</item>
+        <item>Social Conservatism</item>
+        <item>Nudity</item>
+        <item>Industry: Automobile Manufacturing</item>
+        <item>Industry: Cheese Exports</item>
+        <item>Industry: Basket Weaving</item>
+        <item>Industry: Information Technology</item>
+        <item>Industry: Pizza Delivery</item>
+        <item>Industry: Trout Fishing</item>
+        <item>Industry: Arms Manufacturing</item>
+        <item>Sector: Agriculture</item>
+        <item>Industry: Beverage Sales</item>
+        <item>Industry: Timber Woodchipping</item>
+        <item>Industry: Mining</item>
+        <item>Industry: Insurance</item>
+        <item>Industry: Furniture Restoration</item>
+        <item>Industry: Retail</item>
+        <item>Industry: Book Publishing</item>
+        <item>Industry: Gambling</item>
+        <item>Sector: Manufacturing</item>
+        <item>Government Size</item>
+        <item>Welfare</item>
+        <item>Public Healthcare</item>
+        <item>Law Enforcement</item>
+        <item>Business Subsidization</item>
+        <item>Religiousness</item>
+        <item>Income Equality</item>
+        <item>Niceness</item>
+        <item>Rudeness</item>
+        <item>Intelligence</item>
+        <item>Ignorance</item>
+        <item>Political Apathy</item>
+        <item>Health</item>
+        <item>Cheerfulness</item>
+        <item>Weather</item>
+        <item>Compliance</item>
+        <item>Safety</item>
+        <item>Lifespan</item>
+        <item>Ideological Radicality</item>
+        <item>Defense Forces</item>
+        <item>Pacifism</item>
+        <item>Economic Freedom</item>
+        <item>Taxation</item>
+        <item>Freedom From Taxation</item>
+        <item>Corruption</item>
+        <item>Integrity</item>
+        <item>Authoritarianism</item>
+        <item>Youth Rebelliousness</item>
+        <item>Culture</item>
+        <item>Employment</item>
+        <item>Public Transport</item>
+        <item>Tourism</item>
+        <item>Weaponization</item>
+        <item>Recreational Drug Use</item>
+        <item>Obesity</item>
+        <item>Secularism</item>
+        <item>Environmental Beauty</item>
+        <item>Charmlessness</item>
+        <item>Influence</item>
+        <item>World Assembly Endorsements</item>
+        <item>Averageness</item>
+        <item>Human Development Index</item>
+        <item>Primitiveness</item>
+        <item>Scientific Advancement</item>
+        <item>Inclusiveness</item>
+        <item>Average Income</item>
+        <item>Average Income of Poor</item>
+        <item>Average Income of Rich</item>
+        <item>Public Education</item>
+        <item>Economic Output</item>
+        <item>Crime</item>
+        <item>Foreign Aid</item>
+        <item>Black Market</item>
+        <item>Residency</item>
+        <item>Z-Day: Survivors</item>
+        <item>Z-Day: Zombies</item>
+        <item>Z-Day: Dead</item>
+        <item>Z-Day: Zombification</item>
+        <item>Average Disposable Income</item>
+        <item>International Artwork</item>
+        <item>Patriotism</item>
+        <item>Food Quality</item>
+        <item>Unknown</item>
+    </string-array>
+    <!-- The unit each scale is measured in, same order as census_scales. -->
+    <string-array name="census_units">
+        <item>Martin Luther King, Jr. Units</item>
+        <item>Krugman-Greenspan Business Outlook Index</item>
+        <item>Diebold Election Inking Scale</item>
+        <item>Capita</item>
+        <item>Rich-to-Poor Income Ratio</item>
+        <item>Bus Surprisal Index</item>
+        <item>Kitten Softness Rating</item>
+        <item>Dolphin Recycling Awareness Index</item>
+        <item>Bush-Santorum Dawning Terror Index</item>
+        <item>Cheeks Per Square Mile</item>
+        <item>Henry Ford Productivity Index</item>
+        <item>Mozzarella Productivity Index</item>
+        <item>Hickory Productivity Index</item>
+        <item>Fann-Boi Productivity Index</item>
+        <item>Pepperoni Propulsion Productivity Index</item>
+        <item>Nemo Depletion Efficiency Index</item>
+        <item>Charon Conveyancy Index</item>
+        <item>Mu-Bah-Daggs Productivity Index</item>
+        <item>Addison-Fukk Productivity Rating</item>
+        <item>Tasmanian Pulp Environmental Export Index</item>
+        <item>Blue Sky Asbestos Index</item>
+        <item>Risk Expulsion Effectiveness Rating</item>
+        <item>Spitz-Pollish Productivity Index</item>
+        <item>Shrinkwrap Consignment Productivity Index</item>
+        <item>Bella Potter Productivity e-Index</item>
+        <item>Kelly Criterion Productivity Index</item>
+        <item>Gooback-Jerbs Productivity Index</item>
+        <item>Bureaucratic Comprehensiveness Rating Scale Index</item>
+        <item>Safety Net Mesh Density Rating</item>
+        <item>Theresa-Nightingale Rating</item>
+        <item>Orwell Orderliness Index</item>
+        <item>Gilded Widget Scale</item>
+        <item>Prayers Per Hour</item>
+        <item>Marx-Engels Emancipation Scale</item>
+        <item>Average Smiles Per Day</item>
+        <item>Insults Per Minute</item>
+        <item>Quips Per Hour</item>
+        <item>Missed References Per Hour</item>
+        <item>Whatever</item>
+        <item>Bananas Ingested Per Day</item>
+        <item>Percentage of Water Glasses Perceived Half-Full</item>
+        <item>Meters of Sunlight</item>
+        <item>Law-Abiding Acts Per Hour</item>
+        <item>Bubble-Rapp Safety Rating</item>
+        <item>Years</item>
+        <item>Paul-Nader Subjective Decentrality Index</item>
+        <item>Total War Preparedness Rating</item>
+        <item>Cheeks Turned Per Day</item>
+        <item>Rand Index</item>
+        <item>Effective Tax Rate</item>
+        <item>Hayek Index</item>
+        <item>Kickbacks Per Hour</item>
+        <item>Percentage of Bribes Refused</item>
+        <item>MilliStalins</item>
+        <item>Stark-Dean Displacement Index</item>
+        <item>Snufflebottom-Wiggendum Pentatonic Scale</item>
+        <item>Workforce Participation Rate</item>
+        <item>Societal Mobility Rating</item>
+        <item>Tourists Per Hour</item>
+        <item>Weapons Per Person</item>
+        <item>Pineapple Fondness Rating</item>
+        <item>Obesity Rate</item>
+        <item>Atheism Rate</item>
+        <item>Pounds of Wildlife Per Square Mile</item>
+        <item>Kardashian Reflex Score</item>
+        <item>Soft Power Disbursement Rating</item>
+        <item>Valid Endorsements</item>
+        <item>Average Standardized Normality Scale</item>
+        <item>HDI</item>
+        <item>Scary Big Number Scale</item>
+        <item>Kurzweil Singularity Index</item>
+        <item>Mandela-Wollstonecraft Non-Discrimination Index</item>
+        <item>Standard Monetary Units</item>
+        <item>Standard Monetary Units</item>
+        <item>Standard Monetary Units</item>
+        <item>Edu-tellignce® Test Score</item>
+        <item>Standard Monetary Units</item>
+        <item>Crimes Per Hour</item>
+        <item>Clooney Contribution Index</item>
+        <item>Standard Monetary Units</item>
+        <item>Days</item>
+        <item>Capita</item>
+        <item>Capita</item>
+        <item>Capita</item>
+        <item>Romero-Brooks Index</item>
+        <item>Standard Monetary Units</item>
+        <item>Bank</item>
+        <item>Flags Saluted Per Person Per Day</item>
+        <item>Meeshlin-Starr Index</item>
+        <item>Mystery Units</item>
+    </string-array>
+</resources>

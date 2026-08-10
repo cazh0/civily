@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Stately</string>
+    <string name="title_nation">Nation</string>
+
+    <!-- Common -->
+    <string name="action_back">Back</string>
+    <string name="action_clear">Clear</string>
+    <string name="action_reveal">Reveal</string>
+    <string name="action_hide">Hide</string>
+    <string name="quote_author">%1$s wrote</string>
+    <string name="spoiler_default_title">Spoiler</string>
+
+    <!-- Home -->
+    <string name="section_your_nation">Your nation</string>
+    <string name="subtitle_your_nation">Open your dashboard</string>
+    <string name="signed_out_title">Sign in to NationStates</string>
+    <string name="signed_out_body">Reach your own nation, its issues and its region.</string>
+    <string name="section_find_nation">Find a nation</string>
+    <string name="label_nation_name">Nation name</string>
+    <string name="lookup_no_nation">No nation called “%1$s”.</string>
+    <string name="lookup_no_nation_hint">NationStates names are exact. Check the spelling, and include every word of the name.</string>
+    <string name="section_explore">Explore</string>
+
+    <!-- Issues -->
+    <string name="title_issues">Issues</string>
+    <string name="subtitle_issues">Decide what your nation does next</string>
+    <string name="issue_number">Issue #%1$d</string>
+    <string name="issues_empty">No issues right now.</string>
+    <string name="issues_empty_hint">NationStates will send your nation a new one shortly.</string>
+    <string name="issues_options_header">Choose a course of action</string>
+    <string name="issue_option_selected">Selected</string>
+    <string name="action_dismiss_issue">Dismiss this issue</string>
+    <string name="issue_dismiss_explainer">No legislation is enacted, and the issue does not come back.</string>
+    <string name="action_dismiss_confirm">Dismiss without acting</string>
+    <string name="title_issue_result">The result</string>
+    <string name="talking_point_heading">The Talking Point</string>
+    <string name="recent_headlines_heading">Recent Headlines</string>
+    <string name="trends_heading">Recent Trends</string>
+    <string name="newspaper_price">1 %1$s</string>
+    <string name="census_unknown_scale">Scale %1$d</string>
+    <string name="action_done">Done</string>
+    <string name="issue_answer_failed">That didn\'t go through</string>
+    <string name="action_enact_this">Enact this legislation</string>
+    <string name="action_close">Close</string>
+
+    <!-- World Assembly -->
+    <string name="title_wa">World Assembly</string>
+    <string name="subtitle_wa">Resolutions at vote</string>
+    <string name="council_general_assembly">General Assembly</string>
+    <string name="council_security_council">Security Council</string>
+    <string name="section_at_vote">At vote</string>
+    <string name="label_proposed_by">Proposed by</string>
+    <string name="votes_for">%1$s for</string>
+    <string name="votes_against">%1$s against</string>
+    <string name="label_wa_members">Member nations</string>
+    <string name="label_wa_delegates">Delegates</string>
+    <string name="wa_no_resolution">Nothing at vote right now.</string>
+    <string name="wa_no_resolution_hint">A new resolution reaches the floor once the last one finishes.</string>
+
+    <!-- Nation -->
+    <string name="nation_full_title">The %1$s of %2$s</string>
+    <string name="nation_motto">“%1$s”</string>
+    <string name="label_region">Region</string>
+    <string name="label_category">Classification</string>
+    <string name="label_population">Population</string>
+    <string name="value_population_millions">%1$s million</string>
+    <string name="value_population_billions">%1$s billion</string>
+    <string name="label_wa_status">World Assembly</string>
+    <string name="label_influence">Regional influence</string>
+    <string name="label_people">People</string>
+    <string name="label_currency">Currency</string>
+    <string name="label_animal">National animal</string>
+    <string name="description_flag">National flag</string>
+
+    <!-- Region -->
+    <string name="title_region">Region</string>
+    <string name="label_num_nations">Nations</string>
+    <string name="value_nations">%1$s</string>
+    <string name="label_delegate">Delegate</string>
+    <string name="value_delegate">%1$s (%2$d votes)</string>
+    <string name="label_founder">Founder</string>
+    <string name="value_none">None</string>
+    <string name="description_region_flag">Regional flag</string>
+    <string name="section_factbook">World Factbook Entry</string>
+    <string name="section_message_board">Message board</string>
+    <string name="subtitle_message_board">Recent posts in this region</string>
+
+    <!-- Regional message board -->
+    <string name="title_rmb">%1$s RMB</string>
+    <plurals name="rmb_likes">
+        <item quantity="one">%1$s like</item>
+        <item quantity="other">%1$s likes</item>
+    </plurals>
+    <string name="rmb_edited_suffix"> · edited</string>
+    <string name="rmb_from_embassy">From the embassy in %1$s</string>
+    <string name="rmb_suppressed">A moderator or regional officer removed this post.</string>
+    <string name="rmb_deleted">The author deleted this post.</string>
+    <string name="rmb_empty">No posts yet.</string>
+    <string name="rmb_empty_hint">Nobody has written on this board.</string>
+
+    <!-- Sign in -->
+    <string name="title_sign_in">Sign in</string>
+    <string name="label_password">Password</string>
+    <string name="action_sign_in">Sign in</string>
+    <string name="action_sign_out">Sign out</string>
+    <string name="action_sign_in_again">Sign in again</string>
+    <string name="sign_in_privacy_note">Your password is sent once to nationstates.net and never stored. Stately keeps only the login token NationStates issues in return.</string>
+
+    <!-- Failures. One per StatelyError; nothing may reach the user without one. -->
+    <string name="error_no_connection">Couldn\'t reach NationStates. Check your connection.</string>
+    <string name="error_unauthorized">Your session has expired. Sign in again.</string>
+    <string name="error_invalid_login">Wrong nation name or password.</string>
+    <string name="error_not_found">NationStates has no record of that.</string>
+    <string name="error_rate_limited">Too many requests. Stately will wait before trying NationStates again.</string>
+    <string name="error_login_conflict">You signed in a moment ago. Wait a few seconds and try again.</string>
+    <string name="error_server">NationStates returned an error.</string>
+    <string name="error_malformed">NationStates sent something Stately couldn\'t read.</string>
+    <string name="action_retry">Try again</string>
+</resources>
