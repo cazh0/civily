@@ -35,5 +35,16 @@ object Percent {
         )
     }
 
+    /**
+     * An unsigned percentage, with a decimal only when it carries information.
+     *
+     * The API reports shares to two places — a budget line of `20.9`, a black market of `0.42`,
+     * an income tax of `87.0`. "87.0%" spends a character claiming precision the trailing zero
+     * does not add, and "0%" would hide a black market entirely, so the decimals are kept where
+     * they say something and dropped where they do not.
+     */
+    fun rounded(value: Double): String =
+        String.format(Locale.US, "%.2f", value).trimEnd('0').trimEnd('.')
+
     private const val SCALE = 10.0
 }

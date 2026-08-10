@@ -47,4 +47,29 @@ class PercentTest {
     fun `large movements survive`() {
         assertEquals("+511.2%", Percent.change(511.16).text)
     }
+
+    // ------------------------------------------------- shares, which carry no sign
+
+    @Test
+    fun `a trailing zero is dropped because it claims precision it does not add`() {
+        // An income tax rate arrives as "87.0"; a budget line as "20.9".
+        assertEquals("87", Percent.rounded(87.0))
+        assertEquals("20.9", Percent.rounded(20.9))
+        assertEquals("100", Percent.rounded(100.0))
+        assertEquals("10", Percent.rounded(10.0))
+    }
+
+    @Test
+    fun `two places are kept where they are the whole value`() {
+        // A black market of 0.42% must not round away to nothing.
+        assertEquals("0.42", Percent.rounded(0.42))
+        assertEquals("92.16", Percent.rounded(92.16))
+        // The API reports a leading percentile fractionally at the top of a scale.
+        assertEquals("0.09", Percent.rounded(0.09))
+    }
+
+    @Test
+    fun `zero is zero rather than an empty string`() {
+        assertEquals("0", Percent.rounded(0.0))
+    }
 }

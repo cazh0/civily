@@ -11,4 +11,7 @@ import java.util.Locale
  */
 object Numbers {
     fun grouped(value: Int): String = NumberFormat.getIntegerInstance(Locale.US).format(value)
+
+    /** The same, for figures that run past `Int` — a nation's economy does. */
+    fun grouped(value: Long): String = NumberFormat.getIntegerInstance(Locale.US).format(value)
 }

@@ -5,7 +5,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import dev.cazh0.civily.core.result.LoadState
 import dev.cazh0.civily.core.result.launchLoad
-import dev.cazh0.civily.data.nation.NationDto
+import dev.cazh0.civily.data.nation.Nation
 import dev.cazh0.civily.data.nation.NationRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,8 +23,8 @@ class NationViewModel(
     private val nationId: String,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<LoadState<NationDto>>(LoadState.Loading)
-    val state: StateFlow<LoadState<NationDto>> = _state.asStateFlow()
+    private val _state = MutableStateFlow<LoadState<Nation>>(LoadState.Loading)
+    val state: StateFlow<LoadState<Nation>> = _state.asStateFlow()
 
     init {
         refresh()

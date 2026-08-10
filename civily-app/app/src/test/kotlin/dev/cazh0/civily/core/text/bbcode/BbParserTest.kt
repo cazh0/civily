@@ -298,4 +298,88 @@ class BbParserTest {
 
         assertTrue(span.style.bold)
     }
+
+    // ------------------------------------------------------------ happenings
+
+    @Test
+    fun `a happening links the nations and regions it names`() {
+        val spans = spansOf(
+            BbParser.parseHappening(
+                "@@testlandia@@ lodged a message on the %%testregionia%% Regional Message Board.",
+            ),
+        )
+
+        val nation = spans.filterIsInstance<BbSpan.Link>().first()
+        assertEquals(BbTarget.Nation("testlandia"), nation.target)
+        assertEquals("Testlandia", nation.text)
+
+        val region = spans.filterIsInstance<BbSpan.Link>().last()
+        assertEquals(BbTarget.Region("testregionia"), region.target)
+        assertEquals("Testregionia", region.text)
+    }
+
+    @Test
+    fun `a multi-word id keeps its underscores out of the display name`() {
+        val link = spansOf(BbParser.parseHappening("%%the_north_pacific%% updated."))
+            .filterIsInstance<BbSpan.Link>()
+            .single()
+
+        assertEquals(BbTarget.Region("the_north_pacific"), link.target)
+        assertEquals("The North Pacific", link.text)
+    }
+
+    @Test
+    fun `the whole sentence survives around the links`() {
+        assertEquals(
+            "Following new legislation in Testlandia, cheese is banned.",
+            textOf(
+                BbParser.parseHappening(
+                    "Following new legislation in @@testlandia@@, cheese is banned.",
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `an unpartnered delimiter is text, not a link`() {
+        // The feed writes percentages: "ranked in the Top 10% of the world". A lone delimiter
+        // must not swallow the rest of the line looking for a partner.
+        val text = "@@testlandia@@ was ranked in the Top 10% of the world for Most Pacifist."
+
+        assertEquals(
+            "Testlandia was ranked in the Top 10% of the world for Most Pacifist.",
+            textOf(BbParser.parseHappening(text)),
+        )
+    }
+
+    @Test
+    fun `a delimiter wrapped around prose is not an id`() {
+        assertEquals("100%% of the time", textOf(BbParser.parseHappening("100%% of the time")))
+    }
+
+    @Test
+    fun `happenings delimiters are not read in ordinary markup`() {
+        // A factbook may contain either sequence for its own reasons, and this parser is the
+        // only thing standing between an author's per-cent signs and a broken sentence.
+        assertEquals("100%%", textOf(BbParser.parse("100%%")))
+        assertEquals("@@nowhere@@", textOf(BbParser.parse("@@nowhere@@")))
+    }
+
+    @Test
+    fun `a happening still reads its entities and its markup`() {
+        assertEquals(
+            "Testlandia voted against the World Assembly Resolution \"Bodily Autonomy\".",
+            textOf(
+                BbParser.parseHappening(
+                    "@@testlandia@@ voted against the World Assembly Resolution " +
+                        "&quot;Bodily Autonomy&quot;.",
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `an empty happening yields no blocks`() {
+        assertEquals(emptyList<BbBlock>(), BbParser.parseHappening(""))
+    }
 }

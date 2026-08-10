@@ -84,4 +84,29 @@ object Dimens {
 
     /** Space reserved for a list marker, wide enough that "10." does not wrap. */
     val BulletGutter = 28.dp
+
+    /**
+     * One fact in a grid.
+     *
+     * Why a larger radius than a card at a smaller size: a tile is read as one of a set, and a
+     * radius that stays 12dp as the box shrinks makes the set read as table cells. Rounder and
+     * smaller keeps them a row of objects.
+     */
+    val TileCornerRadius = 20.dp
+    val TilePadding = 14.dp
+
+    /** Gap between tiles, across and down. Tighter than [ItemSpacing]: a grid is one object. */
+    val GridSpacing = 8.dp
+
+    /** Gap between one happening and the next. The feed's only separator is space. */
+    val HappeningSpacing = 18.dp
+
+    /** The dot that anchors a happening's timestamp. */
+    val TimelineDotSize = 6.dp
+
+    /** One share of a whole, drawn as a bar. Thin on purpose: the label is the content. */
+    val BarHeight = 8.dp
+
+    /** The artwork strip at the head of an enacted policy. Rift banners are wide. */
+    val PolicyBannerHeight = 88.dp
 }

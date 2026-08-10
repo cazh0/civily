@@ -1,9 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Civily</string>
-    <string name="title_nation">Nation</string>
 
     <!-- Common -->
+    <!-- How long ago, in words. `RelativeTime.compact` is the short form and needs no plural. -->
+    <string name="elapsed_now">Just now</string>
+    <plurals name="elapsed_minutes">
+        <item quantity="one">%1$d minute ago</item>
+        <item quantity="other">%1$d minutes ago</item>
+    </plurals>
+    <plurals name="elapsed_hours">
+        <item quantity="one">%1$d hour ago</item>
+        <item quantity="other">%1$d hours ago</item>
+    </plurals>
+    <plurals name="elapsed_days">
+        <item quantity="one">%1$d day ago</item>
+        <item quantity="other">%1$d days ago</item>
+    </plurals>
+    <plurals name="elapsed_weeks">
+        <item quantity="one">%1$d week ago</item>
+        <item quantity="other">%1$d weeks ago</item>
+    </plurals>
+    <plurals name="elapsed_years">
+        <item quantity="one">%1$d year ago</item>
+        <item quantity="other">%1$d years ago</item>
+    </plurals>
     <string name="action_back">Back</string>
     <string name="action_clear">Clear</string>
     <string name="action_reveal">Reveal</string>
@@ -24,11 +45,9 @@
     <!-- Issues -->
     <string name="title_issues">Issues</string>
     <string name="subtitle_issues">Decide what your nation does next</string>
-    <string name="issue_number">Issue #%1$d</string>
     <string name="issues_empty">No issues right now.</string>
     <string name="issues_empty_hint">NationStates will send your nation a new one shortly.</string>
     <string name="issues_options_header">Choose a course of action</string>
-    <string name="issue_option_selected">Selected</string>
     <string name="action_dismiss_issue">Dismiss this issue</string>
     <string name="issue_dismiss_explainer">No legislation is enacted, and the issue does not come back.</string>
     <string name="action_dismiss_confirm">Dismiss without acting</string>
@@ -65,15 +84,88 @@
     <string name="label_population">Population</string>
     <string name="value_population_millions">%1$s million</string>
     <string name="value_population_billions">%1$s billion</string>
+    <string name="value_million">%1$s million</string>
+    <string name="value_billion">%1$s billion</string>
+    <string name="value_trillion">%1$s trillion</string>
+    <string name="value_percent">%1$s%%</string>
+    <string name="value_rank">#%1$s</string>
+    <string name="value_percentile">Top %1$s%%</string>
     <string name="label_wa_status">World Assembly</string>
     <string name="label_influence">Regional influence</string>
-    <string name="label_people">People</string>
     <string name="label_currency">Currency</string>
     <string name="label_animal">National animal</string>
+    <string name="label_capital">Capital</string>
+    <string name="label_leader">Leader</string>
+    <string name="label_religion">Religion</string>
+    <string name="label_civil_rights">Civil rights</string>
+    <string name="label_economy_rating">Economy</string>
+    <string name="label_political_freedom">Political freedom</string>
+    <string name="label_endorsements">Endorsements</string>
+    <string name="label_issues_answered">Issues answered</string>
+    <string name="label_demonym">Demonym</string>
+    <string name="value_demonym">%1$s (plural %2$s)</string>
+    <string name="label_govt_priority">Budget priority</string>
+    <string name="label_tax">Income tax</string>
+    <string name="label_gdp">Gross domestic product</string>
+    <string name="label_average_income">Average income</string>
+    <!-- Not "10%%": these are read with no format arguments, so the escape would print twice. -->
+    <string name="label_poorest">Poorest tenth</string>
+    <string name="label_richest">Richest tenth</string>
+    <string name="label_major_industry">Major industry</string>
+    <string name="label_founded">Founded</string>
+    <string name="label_last_active">Last active</string>
+    <!-- What the game calls a nation older than its own record. -->
+    <string name="value_antiquity">Antiquity</string>
     <string name="description_flag">National flag</string>
 
+    <!-- Nation tabs. The set and the order are the game's own nation page. -->
+    <string name="tab_overview">Overview</string>
+    <string name="tab_policies">Policies</string>
+    <string name="tab_people">People</string>
+    <string name="tab_government">Government</string>
+    <string name="tab_economy">Economy</string>
+    <string name="tab_rankings">Rankings</string>
+    <string name="tab_happenings">Happenings</string>
+
+    <string name="section_at_a_glance">At a glance</string>
+    <string name="section_freedoms">Freedoms</string>
+    <string name="section_government">Government</string>
+    <string name="section_economy">Economy</string>
+    <string name="section_other">Other</string>
+    <string name="section_expenditures">Expenditures</string>
+    <string name="section_sectors">Sectors</string>
+    <string name="section_mortality">Mortality</string>
+    <string name="section_nation_summary">Summary</string>
+    <string name="policies_empty">No policies enacted yet.</string>
+    <string name="rankings_empty">No World Census placings yet.</string>
+
+    <!-- Government departments. The game's own vocabulary, in plain English. -->
+    <string name="department_administration">Administration</string>
+    <string name="department_defence">Defence</string>
+    <string name="department_education">Education</string>
+    <string name="department_environment">Environment</string>
+    <string name="department_healthcare">Healthcare</string>
+    <string name="department_industry">Industry</string>
+    <string name="department_international_aid">International aid</string>
+    <string name="department_law_and_order">Law and order</string>
+    <string name="department_public_transport">Public transport</string>
+    <string name="department_social_policy">Social policy</string>
+    <string name="department_spirituality">Spirituality</string>
+    <string name="department_welfare">Welfare</string>
+
+    <string name="sector_government">Government</string>
+    <string name="sector_state_owned">State-owned</string>
+    <string name="sector_private">Private industry</string>
+    <string name="sector_black_market">Black market</string>
+
+    <!-- The summary's composed sentences. The game's own prose is printed as it arrives. -->
+    <string name="nation_summary_admired">The %1$s of %2$s is %3$s and remarkable for its %4$s.</string>
+    <string name="nation_summary_notable">The %1$s of %2$s is remarkable for its %3$s.</string>
+    <string name="nation_summary_people">Its population of %1$s %2$s is %3$s.</string>
+    <string name="nation_summary_animal">%1$s\'s national animal is the %2$s, which %3$s, and its national religion is %4$s.</string>
+    <string name="nation_happenings_empty">Nothing has happened here yet.</string>
+
     <!-- Region -->
-    <string name="title_region">Region</string>
     <string name="label_num_nations">Nations</string>
     <string name="value_nations">%1$s</string>
     <string name="label_delegate">Delegate</string>

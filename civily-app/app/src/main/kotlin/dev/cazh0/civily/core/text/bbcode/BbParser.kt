@@ -22,7 +22,24 @@ object BbParser {
 
     fun parse(source: String): List<BbBlock> {
         if (source.isEmpty()) return emptyList()
-        return Reader(tokenize(source)).readBlocks()
+        return Reader(tokenize(source, happenings = false)).readBlocks()
+    }
+
+    /**
+     * The same parser, reading one line of the happenings feed.
+     *
+     * Happenings are a second dialect of the same content: no BBCode, but nations and regions
+     * arrive delimited — `@@testlandia@@ lodged a message on the %%testregionia%% Regional
+     * Message Board.` They become the same links `[nation]` and `[region]` produce, so a
+     * happening renders through the one renderer and reaches the screen with no markup in it.
+     *
+     * Why a separate entry point rather than always recognising the delimiters: a factbook is
+     * allowed to contain `%%`, and turning an author's per-cent signs into a region link is
+     * how you lose half a sentence. The dialect is recognised only where the API speaks it.
+     */
+    fun parseHappening(source: String): List<BbBlock> {
+        if (source.isEmpty()) return emptyList()
+        return Reader(tokenize(source, happenings = true)).readBlocks()
     }
 
     // ---------------------------------------------------------------- tokens
@@ -62,7 +79,11 @@ object BbParser {
         "sub" to "sub",
     )
 
-    private fun tokenize(source: String): List<Token> {
+    /** `@@nation@@` and `%%region%%`, the happenings feed's two delimiters. */
+    private const val NATION_DELIMITER = "@@"
+    private const val REGION_DELIMITER = "%%"
+
+    private fun tokenize(source: String, happenings: Boolean): List<Token> {
         val tokens = mutableListOf<Token>()
         val literal = StringBuilder()
         var i = 0
@@ -78,6 +99,18 @@ object BbParser {
         }
 
         while (i < source.length) {
+            val delimited = if (happenings) delimitedAt(source, i) else null
+            if (delimited != null) {
+                flushLiteral()
+                // Written as the tag it is equivalent to, so the reader below has one case to
+                // handle for both dialects — including turning the id into a display name.
+                tokens += Token.Open(delimited.tag, null)
+                tokens += Token.Text(delimited.id)
+                tokens += Token.Close(delimited.tag)
+                i = delimited.end
+                continue
+            }
+
             val bracket = if (source[i] == '[') TAG.matchAt(source, i) else null
             if (bracket != null) {
                 flushLiteral()
@@ -119,6 +152,30 @@ object BbParser {
         }
         flushLiteral()
         return tokens
+    }
+
+    private class Delimited(val tag: String, val id: String, val end: Int)
+
+    /**
+     * The delimited nation or region starting at [start], or null when there isn't one.
+     *
+     * A delimiter with no partner is not a delimiter, and neither is one wrapped around
+     * anything but an id: "Top 10%%" and a stray `@@` stay exactly as the API wrote them
+     * rather than swallowing the rest of the line.
+     */
+    private fun delimitedAt(source: String, start: Int): Delimited? {
+        val (tag, delimiter) = when {
+            source.startsWith(NATION_DELIMITER, start) -> "nation" to NATION_DELIMITER
+            source.startsWith(REGION_DELIMITER, start) -> "region" to REGION_DELIMITER
+            else -> return null
+        }
+        val idStart = start + delimiter.length
+        val close = source.indexOf(delimiter, idStart)
+        if (close < 0) return null
+
+        val id = source.substring(idStart, close)
+        if (id.isEmpty() || id.any { it.isWhitespace() }) return null
+        return Delimited(tag, id, close + delimiter.length)
     }
 
     // ---------------------------------------------------------------- parsing

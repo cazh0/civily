@@ -1,37 +1,60 @@
 package dev.cazh0.civily.core.text
 
 /**
- * How long ago something happened, in the compact form a message list wants.
+ * How long ago something happened.
  *
- * Why compact rather than "3 hours ago": every post in a board carries one of these, and the
- * long form pushes the author's name off the line on a narrow screen. "3h" is the convention
- * readers already know from every other feed.
+ * Two renderings, one ladder. [compact] is what a message list wants — every post in a board
+ * carries one, and "3 hours ago" pushes the author's name off the line on a narrow screen, so
+ * "3h" is the convention readers already know from every other feed. [elapsed] is the same gap
+ * left unformatted, for the places that have a whole line to spend on it: a happening reads as
+ * prose, and "3h" beside a sentence reads as a stray token.
+ *
+ * Why [elapsed] returns a count and a unit rather than words: the words are plural-sensitive
+ * ("1 hour ago", "3 hours ago") and plurals live in the resource layer. Returning the two
+ * numbers a plural string needs keeps this object free of `Context` — which is what keeps it
+ * testable without a framework.
  *
  * Why no timezone or locale: everything here is a difference between two instants, so there
- * is nothing to convert and nothing that changes with where the device is. That also makes it
- * testable without a framework.
+ * is nothing to convert and nothing that changes with where the device is.
  */
 object RelativeTime {
 
+    /** The coarsest unit that still describes a gap. [Now] carries no count. */
+    enum class Grain { Now, Minutes, Hours, Days, Weeks, Years }
+
+    data class Elapsed(val count: Int, val grain: Grain)
+
     fun compact(epochSeconds: Long, nowMs: Long): String {
-        val elapsed = nowMs / MILLIS_PER_SECOND - epochSeconds
+        val (count, grain) = elapsed(epochSeconds, nowMs)
+        return when (grain) {
+            Grain.Now -> NOW
+            Grain.Minutes -> "${count}m"
+            Grain.Hours -> "${count}h"
+            Grain.Days -> "${count}d"
+            Grain.Weeks -> "${count}w"
+            Grain.Years -> "${count}y"
+        }
+    }
+
+    fun elapsed(epochSeconds: Long, nowMs: Long): Elapsed {
+        val seconds = nowMs / MILLIS_PER_SECOND - epochSeconds
 
         // A clock that is a little behind the server is normal, and "-2s ago" is not a thing.
-        if (elapsed < SECONDS_PER_MINUTE) return NOW
+        if (seconds < SECONDS_PER_MINUTE) return Elapsed(0, Grain.Now)
 
-        val minutes = elapsed / SECONDS_PER_MINUTE
-        if (minutes < MINUTES_PER_HOUR) return "${minutes}m"
+        val minutes = seconds / SECONDS_PER_MINUTE
+        if (minutes < MINUTES_PER_HOUR) return Elapsed(minutes.toInt(), Grain.Minutes)
 
         val hours = minutes / MINUTES_PER_HOUR
-        if (hours < HOURS_PER_DAY) return "${hours}h"
+        if (hours < HOURS_PER_DAY) return Elapsed(hours.toInt(), Grain.Hours)
 
         val days = hours / HOURS_PER_DAY
-        if (days < DAYS_PER_WEEK) return "${days}d"
+        if (days < DAYS_PER_WEEK) return Elapsed(days.toInt(), Grain.Days)
 
         val weeks = days / DAYS_PER_WEEK
-        if (weeks < WEEKS_PER_YEAR) return "${weeks}w"
+        if (weeks < WEEKS_PER_YEAR) return Elapsed(weeks.toInt(), Grain.Weeks)
 
-        return "${days / DAYS_PER_YEAR}y"
+        return Elapsed((days / DAYS_PER_YEAR).toInt(), Grain.Years)
     }
 
     private const val NOW = "now"

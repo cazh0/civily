@@ -88,6 +88,7 @@ fun CivilyNavHost(navController: NavHostController = rememberNavController()) {
             val nav = navActions(navController, entry)
             NationScreen(
                 nationId = entry.requireArg(Routes.ARG_NATION_ID),
+                onOpenNation = nav.openNation,
                 onOpenRegion = nav.openRegion,
                 onSignIn = nav.openSignIn,
                 onBack = nav.back,

@@ -70,13 +70,15 @@ Nothing measures these today.
 
 - `Stately/`: network callbacks check `isAdded()` and that the activity isn't finishing before touching UI — this code has a history of fragment-state crashes.
 - `civily-app/`: request results land in a ViewModel-owned `StateFlow`, collected with `collectAsStateWithLifecycle`. No callback may hold a view. This is what closes the crash class above; a screen that reintroduces a view-holding callback is the defect.
+- Only the destination the user is looking at may navigate. A popped screen stays composed — and keeps taking taps — for the length of its exit transition, so a tap arriving a frame late is delivered by a screen that has already left the back stack; acting on it pushes a destination whose parent is gone. In `civily-app/` every navigation goes through `NavActions`, which drops the event unless its `NavBackStackEntry` is still the current one. The test is the entry, not its lifecycle: `RESUMED` waits out the arrival transition as well, which makes the permission a function of animation length. A screen wiring `navController` straight into a callback is the defect.
 - Catching is allowed only at parse/IO boundaries, and must both log **and** surface a visible failure state. Silent failure = defect. In `civily-app/` those boundaries are `NsClient.execute` and `decodeNsXml` — add no third.
 - No static references to Activity/View Context.
 - A rejected session request drops the session. `X-Autologin` is valid until the nation's password changes and an expired PIN falls back to it, so a 401/403 on an authenticated request means the token is dead for good. Keeping it would leave the app showing a signed-in nation whose every request fails.
 - Authenticate with `X-Pin` wherever a session exists. `X-Password` and `X-Autologin` each perform a *login*, and a login cancels the previous session — including the user's own browser tab. Two logins in quick succession return 409. Background polling in particular must never re-login per poll.
 - Unit tests mandatory on parsing, rate limiting, and BBCode/HTML.
   - `Stately/` — `dto/*`, `DashHelper`, `SparkleHelper`, `MuffinsHelper`. None exist.
-  - `civily-app/` — `RateLimiterTest`, `NationDtoTest`, `RegionDtoTest`, `AutologinTokenTest`, `PercentCodecTest`, `NsIdTest`, `PopulationTest`, `AssemblyDtoTest`, `BbParserTest`, `BbColorTest`, `HtmlEntitiesTest`, `RelativeTimeTest`, `RmbDtoTest`, `IssueDtoTest`, `NsTextTest`, `InitialsTest`, `NewspaperTest`, `IssueResultDtoTest`, `PercentTest`, `AccountsTest` exist (164 tests). Every new DTO ships a parser test including a missing-element case.
+  - `civily-app/` — `RateLimiterTest`, `NationDtoTest`, `RegionDtoTest`, `AutologinTokenTest`, `PercentCodecTest`, `NsIdTest`, `PopulationTest`, `AssemblyDtoTest`, `BbParserTest`, `BbColorTest`, `HtmlEntitiesTest`, `RelativeTimeTest`, `RmbDtoTest`, `IssueDtoTest`, `NsTextTest`, `InitialsTest`, `NewspaperTest`, `IssueResultDtoTest`, `PercentTest`, `AccountsTest`, `FlagAmbienceTest`, `FreedomRatingTest`, `MagnitudeTest` exist
+    (202 tests). Every new DTO ships a parser test including a missing-element case.
 - One PR, one concern.
 
 ## 6. Scope boundaries

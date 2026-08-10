@@ -16,7 +16,8 @@ app/src/main/kotlin/dev/cazh0/civily/
 │   ├── session/     Session · Accounts · SessionStore (the only copy of credentials)
 │   ├── result/      Outcome · CivilyError          (the only way failure travels)
 │   │                LoadState · launchLoad          (the only shape a read screen has)
-│   ├── text/        NsId · Numbers · Population · RelativeTime
+│   ├── text/        NsId · Numbers · Population · Magnitude · Percent · RelativeTime
+│   │                FreedomRating                  (which ratings are good news)
 │   │                HtmlEntities · NsText                (decoding what the API really sends)
 │   │   └── bbcode/  BbParser · BbTree · BbColor     (NationStates markup, parsed not regexed)
 │   ├── AppGraph     every long-lived object, hand-wired
@@ -48,10 +49,11 @@ app/src/main/kotlin/dev/cazh0/civily/
 ```
 
 `data/` holds two kinds of type. A `…Dto` is the wire shape, annotated for XML. A plain type
-beside it — `Region`, `Assembly` — is the screen shape, and the repository maps between them.
-The mapper exists where there is real work to do: parsing BBCode, and turning the API's `"0"`
-sentinel into a null. Where there is no such work, `NationDto` goes to the screen directly
-rather than through a mapper that only copies fields.
+beside it — `Region`, `Assembly`, `Nation` — is the screen shape, and the repository maps between
+them. The mapper exists where there is real work to do: decoding entities, parsing BBCode, and
+turning the API's `"0"` sentinel into a null. Where there is no such work the DTO goes to the
+screen directly rather than through a mapper that only copies fields — which is why sign-in and
+nation search still read `NationDto`, and only the nation screen gets a `Nation`.
 
 `LoadStateContent` is the three-case `when`; `LoadStateScaffold` is that plus a top bar. A
 screen that owns its own chrome — the World Assembly's tabs — uses the former so the chrome
@@ -182,6 +184,83 @@ reversing it buries every headline under the paper beneath it.
 The aftermath screen has no front page at its head. The headlines *are* the newspapers, so
 printing one above them said the same thing twice.
 
+**A nation has seven subjects, so it has seven tabs.** Overview, Policies, People, Government,
+Economy, Rankings, Happenings — the set and the order of the game's own nation page, which is
+what the legacy client mirrors too. A reader who knows NationStates knows where to look before
+they have looked. Splitting them is what lets each subject be answered properly: the government's
+paragraph next to the government's budget, rather than forty facts and four paragraphs in one
+column that nobody reaches the end of.
+
+The bar is pinned under the top app bar rather than scrolling with the content, because it is the
+only way between subjects and a reader four screens into the Rankings has to be able to leave
+without scrolling back up. Each pane owns its own scroll: two of them are real lists — ninety
+census scales, twenty policy banners — and those have to be lazy, which one outer scroll would
+make impossible, and a shared scroll position across seven unrelated pages is wrong anyway. The
+selected tab is held above the load state, so a pull-to-refresh, a rotation or a failed retry all
+come back to the tab the reader was on.
+
+**A nation's facts are a grid, not a stack of cards.** Short parallel values in full-width cards
+is one screen of scrolling per four words, with the eye crossing the whole display for each. Side
+by side they are one object taken in at a glance. `FactGrid` packs them by hand rather than with
+`LazyVerticalGrid`, because it sits in a scrolling column and a lazy grid nested in a scroll of
+the same axis has no bounded height; nothing is gained by laziness when a nation has a fixed dozen
+facts. Each row is measured to its tallest tile so a wrapped value does not step the row, an
+absent shard drops its tile before packing so the grid closes up rather than showing a hole, and a
+fact that runs long — the population, a player's own national animal — takes a row to itself.
+
+Grids are titled and grouped rather than run together: they are separate questions, and a header
+over each turns a wall into an index. Freedoms sit three across because they are one comparison,
+and wrapping the third onto its own line would invite reading it as a different kind of fact. The
+region tile is the only door in the grid, so it is the only tile with a caret and the link colour
+— a control that does nothing must not look like a control.
+
+**The prose is the game's, not ours.** `GOVTDESC`, `INDUSTRYDESC` and `CRIME` are finished
+paragraphs and are printed as they arrive — each at the head of the tab it is about, which is
+what makes the Government tab's chart legible without a caption. Three sentences are composed,
+from the shards the site itself composes them from: what the nation is admired and remarkable for
+(`ADMIRABLE`, `NOTABLE`), the temperament of its people (`SENSIBILITIES`, `DEMONYM2PLURAL`,
+`POPULATION`), and its animal and religion (`ANIMAL`, `ANIMALTRAIT`, `RELIGION`). Each appears
+only when every shard it needs came back, because half a sentence is worse than none. The wording
+changes between refreshes and that is the game's own behaviour: `NOTABLE` and `ADMIRABLE` return
+a rotating pick from the full `notables`/`admirables` lists.
+
+Everything in it goes through `BbParser` even though the game writes it: that is the rule for
+anything rendering NationStates content, and it is what guarantees no reader sees a tag the day
+the game starts dressing these fields.
+
+**Shares of a whole are sorted bars, not a pie.** Three of them appear on this screen — where the
+government spends, what the economy is made of, what people die of — and every one is really a
+question about *order*, which a pie answers by making the reader compare angles and hunt a legend.
+The fill is the share of a hundred rather than of the largest bar, so a sector holding 92% looks
+like it holds nearly all of it; normalising to the biggest bar would draw every chart the same
+shape and say nothing. A department funded at zero is dropped rather than drawn, because eleven
+empty bars cost a screenful and say nothing either.
+
+The bars carry no total in the nation's own money. The API publishes the *split* of the budget,
+not its size; the legacy client multiplies GDP by the government's share of the economy and
+labels the result "Total", which is a different quantity wearing the budget's name. That share is
+a real figure and it is on the Economy tab, where it belongs.
+
+**Rankings stay in the game's scale order.** Ninety rows, not sorted by rank: the reader is
+usually looking for one particular scale, and a list that reorders itself per nation is a list you
+have to read rather than scan. The percentile is the pill because "Top 3%" means something without
+knowing how many nations exist. Units sit under the *name* rather than under the score — the
+game's units are jokes at full length, "Krugman-Greenspan Business Outlook Index", and the left
+column is the only one with room for one.
+
+**Happenings are a chronology, not a list of cards.** A dot, a timestamp in words, and the line
+itself. `@@nation@@` and `%%region%%` are the feed's own delimiters, so `BbParser.parseHappening`
+reads them as the `[nation]` and `[region]` tags they mean — one parser, one renderer, no markup
+reaching a reader. They are recognised only in that mode, because a factbook is allowed to
+contain `%%` and turning an author's per-cent signs into a region link loses half their sentence.
+
+The nation's own name appears in nearly every line of its own feed and is deliberately *not* a
+link there: a link that pushes the screen the reader is already on is a back press they now owe.
+Time reads as "3 hours ago" rather than the board's "3h" — a happening is a sentence, and a
+compact token beside one reads as debris. `RelativeTime` hands back a count and a unit rather
+than words, because the plural belongs in the resource layer and this object may not hold a
+`Context`.
+
 **Moved statistics are the game's Recent Trends strip, not a table.** Name in the direction's
 colour, unit beneath, arrow and percentage — read at a glance, detail on inspection. Eight of
 them: one decision nudges thirty-odd scales and the rest are rounding errors. The site puts a
@@ -194,6 +273,27 @@ meaning rather than style. Each has a light *and* a dark tone from Material 3's 
 any device in either theme. A single fixed colour is always failing one of the two. Down uses
 M3's baseline error tones; up uses green at the same tones, as Material's own guidance does
 for a success colour. Everything else on a trend follows the user's theme.
+
+Those same two carry *every* good/bad judgement, a moved statistic and a freedom rating alike,
+so green means one thing everywhere; a second pair for a second feature would be a second
+vocabulary to learn. A tile that carries one is washed with its accent at M3's 12% state-layer
+opacity, composited onto the surface it would otherwise have had rather than drawn translucent
+— that keeps it opaque, so a judged tile does not read a different lightness from the plain
+tile beside it, and it adds no colour value to keep in step with the palette.
+
+**A freedom rating is coloured by its word, never by its score, and the legacy app has this
+wrong.** Civil Rights, Economy and Political Freedom are census scales whose scores rise
+monotonically — but the words do not. Swept across the full rank range of all three against the
+live API: the top of every ladder turns against the nation. A maximum civil-rights score is
+"Frightening", a maximum political-freedom score is "Corrupted", and a runaway economy is
+"Frightening" too, with "Excessive" and "Widely Abused" on the rungs below them. Stately colours
+these cards on a red-to-green ramp indexed by `score / 7`, which paints every one of those bright
+green — the worst outcomes in the game shown as the best possible news. `FreedomRating` reads the
+word instead, which is why Civily asks for no score here at all.
+
+Its table is only what that sweep actually returned. A rung it does not recognise is
+`Middling` and takes no colour, so NationStates adding one costs a tile its tint and can never
+tint one the wrong way — the same discipline `HtmlEntities` uses for an entity it does not know.
 
 **A list of things is not a list of cards.** Wrapping every post on a message board in its own
 outlined card gives fifty items identical weight and turns a conversation into a spreadsheet.
@@ -356,6 +456,24 @@ These are tracked, not hidden (spec §2 R1). Nothing here is stubbed to look lik
 - **The front page has no second photo.** The design places a portrait at x=460; the API gives
   one image per issue, so that space is left as paper rather than filled with something
   invented.
+- **The summary has no size adjective.** The site opens with "is a massive, efficient nation";
+  Civily opens with "is efficient and remarkable for…". `efficient` is the `admirable` shard,
+  but no public shard carries the population-size word — every one in the API's list was requested
+  against a live nation to check, `nstats` and `legislation` included. Inventing a ladder of
+  population thresholds would be a guess printed as fact, so the adjective is absent instead.
+- **The nation grid is phone-first.** Column counts are fixed at two, and three for freedoms.
+  There is no tablet or landscape breakpoint, so a wide screen gets wide tiles rather than more
+  of them.
+- **The nation screen shows no World Assembly badges and no resolution votes.** `wabadges`,
+  `gavote` and `scvote` are documented shards and the legacy client's Overview card carries all
+  three, but every nation sampled returned `<WABADGES></WABADGES>` and empty votes, so there is no
+  real response to build a parser test against and nothing was guessed at.
+- **Rankings are a readout, not a door.** Each row shows the score, the world rank and the
+  percentile; there is no census history or trend screen behind it. The legacy client opens a
+  chart, which needs `mode=history` and a plotting surface — neither exists here yet.
+- **Nothing on this screen knows about Z-Day.** The `zombie` shard is live for one day a year and
+  the legacy client grows a whole card stack for it. Out of season there is no response to build
+  against.
 - **A few census scales are named "Unknown".** That name comes from the legacy app's list,
   which had gaps of its own. They render honestly rather than being hidden, and ids past the
   end of the list fall back to "Scale N".
