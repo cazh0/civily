@@ -1,3 +1,8 @@
+> This repository now holds two apps. **Civily** (`civily-app/`) is the active Kotlin and
+> Compose client — see [`civily-app/README.md`](civily-app/README.md) and
+> [`CIVILY-SPEC.md`](CIVILY-SPEC.md). **Stately** (`Stately/`), documented below, is the Java
+> app still on the stores; it is a frozen reference until Civily reaches parity.
+
 Stately
 =======
 
