@@ -31,8 +31,10 @@ data class IssueDto(
     val id: Int = 0,
     @XmlElement(true) @XmlSerialName("TITLE", "", "") val title: String = "",
     @XmlElement(true) @XmlSerialName("TEXT", "", "") val text: String = "",
-    /** Banner image id. The artwork lives at `/images/banners/{PIC1}.jpg`. */
-    @XmlElement(true) @XmlSerialName("PIC1", "", "") val bannerId: String = "",
+    /** Newspaper image id. The artwork lives at `/images/newspaper/{PIC1}-1.jpg`. */
+    @XmlElement(true) @XmlSerialName("PIC1", "", "") val primaryImageId: String = "",
+    /** Newspaper image id. The artwork lives at `/images/newspaper/{PIC2}-2.jpg`. */
+    @XmlElement(true) @XmlSerialName("PIC2", "", "") val secondaryImageId: String = "",
     val options: List<OptionDto> = emptyList(),
 )
 

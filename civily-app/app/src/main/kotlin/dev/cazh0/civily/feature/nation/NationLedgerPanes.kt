@@ -1,8 +1,6 @@
 package dev.cazh0.civily.feature.nation
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -11,7 +9,7 @@ import dev.cazh0.civily.core.text.Numbers
 import dev.cazh0.civily.core.text.Percent
 import dev.cazh0.civily.data.nation.Nation
 import dev.cazh0.civily.ui.component.SectionHeader
-import dev.cazh0.civily.ui.theme.Dimens
+import dev.cazh0.civily.ui.theme.ChartColors
 
 /**
  * The two panes that are a paragraph and a chart: where the money comes from, and where it goes.
@@ -28,44 +26,55 @@ fun NationGovernmentPane(
     onOpenRegion: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(Dimens.SectionSpacing),
-    ) {
-        ProseSection(
-            titleRes = R.string.section_nation_summary,
-            blocks = nation.government.description,
-            onOpenNation = onOpenNation,
-            onOpenRegion = onOpenRegion,
-        )
+    NationPane(modifier) {
+        item(contentType = PaneContent.Prose) {
+            ProseSection(
+                titleRes = R.string.section_nation_summary,
+                blocks = nation.government.description,
+                onOpenNation = onOpenNation,
+                onOpenRegion = onOpenRegion,
+            )
+        }
 
-        FactSection(
-            titleRes = R.string.section_government,
-            facts = listOf(
-                Fact(stringResource(R.string.label_govt_priority), nation.government.priority),
-                Fact(
-                    label = stringResource(R.string.label_tax),
-                    value = stringResource(
-                        R.string.value_percent,
-                        Percent.rounded(nation.government.taxPercent),
+        item(contentType = PaneContent.Facts) {
+            FactSection(
+                titleRes = R.string.section_government,
+                facts = listOf(
+                    Fact(stringResource(R.string.label_govt_priority), nation.government.priority),
+                    Fact(
+                        label = stringResource(R.string.label_tax),
+                        value = stringResource(
+                            R.string.value_percent,
+                            Percent.rounded(nation.government.taxPercent),
+                        ),
                     ),
                 ),
-            ),
-            columns = PAIRED,
-        )
+                columns = PAIRED,
+            )
+        }
 
         // Why percentages and no total in the nation's own money: the API publishes the split of
         // the budget, not its size. The legacy client multiplies GDP by the government's share of
         // the economy and labels the result "Total", which is a different quantity wearing the
         // budget's name. The share of the economy is a real figure and it is on the Economy tab.
         if (nation.government.budget.isNotEmpty()) {
-            Column {
-                SectionHeader(stringResource(R.string.section_expenditures))
-                ShareBars(
-                    nation.government.budget.map { spend ->
-                        Share(spend.department.words(), spend.percent)
-                    },
-                )
+            item(contentType = PaneContent.Chart) {
+                Column(modifier = SectionGap) {
+                    SectionHeader(stringResource(R.string.section_expenditures))
+                    DonutChart(
+                        // A department's colour is its own, taken from its place in the enum
+                        // rather than from its place in this nation's budget — so Education is
+                        // the same colour on every nation's chart, which is the whole use of a
+                        // colour that carries no label.
+                        nation.government.budget.map { spend ->
+                            Slice(
+                                label = spend.department.words(),
+                                percent = spend.percent,
+                                color = ChartColors.slice(spend.department.ordinal),
+                            )
+                        },
+                    )
+                }
             }
         }
     }
@@ -80,42 +89,53 @@ fun NationEconomyPane(
 ) {
     val economy = nation.economy
 
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(Dimens.SectionSpacing),
-    ) {
-        ProseSection(
-            titleRes = R.string.section_nation_summary,
-            blocks = economy.description,
-            onOpenNation = onOpenNation,
-            onOpenRegion = onOpenRegion,
-        )
+    NationPane(modifier) {
+        item(contentType = PaneContent.Prose) {
+            ProseSection(
+                titleRes = R.string.section_nation_summary,
+                blocks = economy.description,
+                onOpenNation = onOpenNation,
+                onOpenRegion = onOpenRegion,
+            )
+        }
 
-        FactSection(
-            titleRes = R.string.section_economy,
-            // The currency sits with the figures rather than in a corner of the Overview,
-            // because every number in this grid is denominated in it and none of them say so.
-            facts = listOf(
-                Fact(stringResource(R.string.label_currency), nation.currency),
-                Fact(
-                    label = stringResource(R.string.label_gdp),
-                    value = economy.gdp.takeIf { it > 0 }?.let { magnitudeWords(it) }.orEmpty(),
+        item(contentType = PaneContent.Facts) {
+            FactSection(
+                titleRes = R.string.section_economy,
+                // The currency sits with the figures rather than in a corner of the Overview,
+                // because every number in this grid is denominated in it and none of them say so.
+                facts = listOf(
+                    Fact(stringResource(R.string.label_currency), nation.currency),
+                    Fact(
+                        label = stringResource(R.string.label_gdp),
+                        value = economy.gdp.takeIf { it > 0 }?.let { magnitudeWords(it) }.orEmpty(),
+                    ),
+                    Fact(stringResource(R.string.label_major_industry), economy.majorIndustry),
+                    Fact(
+                        label = stringResource(R.string.label_average_income),
+                        value = economy.averageIncome.money(),
+                    ),
+                    Fact(stringResource(R.string.label_poorest), economy.poorestIncome.money()),
+                    Fact(stringResource(R.string.label_richest), economy.richestIncome.money()),
                 ),
-                Fact(stringResource(R.string.label_major_industry), economy.majorIndustry),
-                Fact(
-                    label = stringResource(R.string.label_average_income),
-                    value = economy.averageIncome.money(),
-                ),
-                Fact(stringResource(R.string.label_poorest), economy.poorestIncome.money()),
-                Fact(stringResource(R.string.label_richest), economy.richestIncome.money()),
-            ),
-            columns = PAIRED,
-        )
+                columns = PAIRED,
+            )
+        }
 
         if (economy.sectors.isNotEmpty()) {
-            Column {
-                SectionHeader(stringResource(R.string.section_sectors))
-                ShareBars(economy.sectors.map { Share(it.kind.words(), it.percent) })
+            item(contentType = PaneContent.Chart) {
+                Column(modifier = SectionGap) {
+                    SectionHeader(stringResource(R.string.section_sectors))
+                    DonutChart(
+                        economy.sectors.map { sector ->
+                            Slice(
+                                label = sector.kind.words(),
+                                percent = sector.percent,
+                                color = ChartColors.sector(sector.kind.ordinal),
+                            )
+                        },
+                    )
+                }
             }
         }
     }

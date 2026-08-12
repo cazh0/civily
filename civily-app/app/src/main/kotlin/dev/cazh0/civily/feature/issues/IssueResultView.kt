@@ -41,7 +41,6 @@ fun IssueResultView(
     edition: Newspaper.Edition,
     price: String?,
     flagUrl: String?,
-    bannerUrl: String?,
     imageLoader: ImageLoader,
     onDone: () -> Unit,
     modifier: Modifier = Modifier,
@@ -57,9 +56,8 @@ fun IssueResultView(
         if (result.description.isNotBlank()) {
             item { Heading(stringResource(R.string.talking_point_heading)) }
             item {
-                // The API's DESC is a sentence fragment in the game's voice — no leading
-                // capital, no stop, because the site prints it inside a longer sentence.
-                // Standing alone under a heading, it needs to be a sentence.
+                // The API's legacy result text is a sentence fragment, while the site aftermath
+                // is already a sentence. Normalising here keeps both sources presentable.
                 Text(
                     text = result.description.asSentence(),
                     style = MaterialTheme.typography.bodyLarge,
@@ -72,11 +70,12 @@ fun IssueResultView(
             item { Heading(stringResource(R.string.recent_headlines_heading)) }
             item {
                 NewspaperStack(
-                    headlines = result.headlines,
+                    headlines = result.headlines.map { it.text },
                     masthead = masthead,
                     edition = edition,
                     price = price,
                     flagUrl = flagUrl,
+                    imageUrlsByHeadline = result.headlines.map { it.imageUrls },
                     imageLoader = imageLoader,
                 )
             }

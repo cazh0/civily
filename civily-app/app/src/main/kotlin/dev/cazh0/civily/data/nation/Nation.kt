@@ -79,7 +79,7 @@ data class Nation(
 data class People(
     /** The game's finished paragraph about crime. */
     val crime: List<BbBlock>,
-    /** Largest share first. */
+    /** In the API's order, which is the order the game's own chart draws them in. */
     val causesOfDeath: List<Cause>,
 )
 
@@ -89,7 +89,10 @@ data class Government(
     val taxPercent: Double,
     /** The game's finished paragraph about the government. */
     val description: List<BbBlock>,
-    /** Largest share first. A department funded at zero is not listed. */
+    /**
+     * In [Department] order, which is what makes a department's colour its own. A department
+     * funded at zero is not listed.
+     */
     val budget: List<Spend>,
 )
 
@@ -101,7 +104,7 @@ data class Economy(
     val majorIndustry: String,
     /** The game's finished paragraph about the economy. */
     val description: List<BbBlock>,
-    /** Largest share first. A sector at zero is not listed. */
+    /** In [Sector.Kind] order, for the same reason. A sector at zero is not listed. */
     val sectors: List<Sector>,
 )
 

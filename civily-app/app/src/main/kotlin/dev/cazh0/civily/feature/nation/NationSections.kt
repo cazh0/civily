@@ -2,6 +2,7 @@ package dev.cazh0.civily.feature.nation
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -11,10 +12,21 @@ import dev.cazh0.civily.core.text.bbcode.BbBlock
 import dev.cazh0.civily.data.nation.Nation
 import dev.cazh0.civily.ui.component.RichText
 import dev.cazh0.civily.ui.component.SectionHeader
+import dev.cazh0.civily.ui.theme.Dimens
 
 /**
  * The two blocks more than one pane builds: a titled grid of facts, and the freedom trio.
  */
+
+/**
+ * The space one block of a pane leaves under itself.
+ *
+ * Why the gap belongs to the block and not to the pane that arranges them: a block with nothing
+ * to show draws nothing, and the list it sits in cannot tell the difference between that and a
+ * block that is merely short — it would space an empty one exactly as it spaces a full one. A
+ * gap the block carries goes away when the block does.
+ */
+internal val SectionGap = Modifier.padding(bottom = Dimens.SectionSpacing)
 
 /**
  * A titled grid, which disappears entirely when the API sent none of its facts — a header over
@@ -25,7 +37,7 @@ fun FactSection(
     @StringRes titleRes: Int,
     facts: List<Fact>,
     columns: Int,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = SectionGap,
 ) {
     if (facts.none { it.value.isNotEmpty() }) return
 
@@ -48,7 +60,7 @@ fun ProseSection(
     blocks: List<BbBlock>,
     onOpenNation: (String) -> Unit,
     onOpenRegion: (String) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = SectionGap,
 ) {
     if (blocks.isEmpty()) return
 
@@ -65,7 +77,7 @@ fun ProseSection(
  * invites the reader to treat it as a different kind of fact.
  */
 @Composable
-fun FreedomSection(nation: Nation, modifier: Modifier = Modifier) {
+fun FreedomSection(nation: Nation, modifier: Modifier = SectionGap) {
     FactSection(
         titleRes = R.string.section_freedoms,
         // The only facts on this screen that are good or bad news rather than simply true, so

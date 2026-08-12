@@ -33,6 +33,7 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import dev.cazh0.civily.R
 import dev.cazh0.civily.core.text.Newspaper
+import dev.cazh0.civily.ui.theme.Newsprint
 import dev.cazh0.civily.ui.theme.NewsprintHeadlineInk
 import dev.cazh0.civily.ui.theme.NewsprintInk
 import dev.cazh0.civily.ui.theme.NewsprintRule
@@ -99,7 +100,7 @@ fun NewspaperFrontPage(
     style: NewspaperStyle = NewspaperStyle.FrontPage,
     price: String? = null,
     flagUrl: String? = null,
-    bannerUrl: String? = null,
+    imageUrls: List<String> = emptyList(),
     imageLoader: ImageLoader? = null,
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
@@ -220,29 +221,71 @@ fun NewspaperFrontPage(
                 )
             }
 
+            val band = px(style.body)
             Box(
                 Modifier
                     .fillMaxWidth()
-                    .height(px(style.body)),
+                    .height(band),
             ) {
+                // Under the strip, not over it: the strip's windows are holes, and its torn
+                // edges are what gives a photo printed on newsprint its border.
+                NewspaperPhoto(
+                    url = imageUrls.getOrNull(0),
+                    imageLoader = imageLoader,
+                    x = w * PHOTO1_X,
+                    y = band * PHOTO_Y,
+                    width = w * PHOTO1_W,
+                    height = band * PHOTO_H,
+                )
+                NewspaperPhoto(
+                    url = imageUrls.getOrNull(1),
+                    imageLoader = imageLoader,
+                    x = w * PHOTO2_X,
+                    y = band * PHOTO_Y,
+                    width = w * PHOTO2_W,
+                    height = band * PHOTO_H,
+                )
                 Image(
                     painter = painterResource(R.drawable.newspaper_edge_bottom),
                     contentDescription = null,
                     contentScale = ContentScale.FillBounds,
                     modifier = Modifier.fillMaxSize(),
                 )
-                if (bannerUrl != null && imageLoader != null) {
-                    AsyncImage(
-                        model = bannerUrl,
-                        imageLoader = imageLoader,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .offset(x = px(MARGIN), y = px(PHOTO_Y))
-                            .size(width = px(PHOTO_W), height = px(PHOTO_H)),
-                    )
-                }
             }
+        }
+    }
+}
+
+/**
+ * One photograph, in one of the windows cut out of the body strip.
+ *
+ * Why paper is laid down first: those windows are holes, so an empty one shows the screen
+ * straight through the page. Newsprint is what is behind a photograph on a real front page,
+ * and it is what the window should show while one loads — or when the source has none to give.
+ */
+@Composable
+private fun NewspaperPhoto(
+    url: String?,
+    imageLoader: ImageLoader?,
+    x: Dp,
+    y: Dp,
+    width: Dp,
+    height: Dp,
+) {
+    Box(
+        Modifier
+            .offset(x = x, y = y)
+            .size(width = width, height = height)
+            .background(Newsprint),
+    ) {
+        if (url != null && imageLoader != null) {
+            AsyncImage(
+                model = url,
+                imageLoader = imageLoader,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+            )
         }
     }
 }
@@ -370,9 +413,27 @@ private const val HEADLINE_W = 522.73f / 594f
 
 /** The frame sets the headline 0.62 units below the top of its band, on a 480-unit sheet. */
 private const val HEADLINE_Y = 0.62f / 480f
-private const val PHOTO_Y = (137.64f - 135.97f) / 594f
-private const val PHOTO_W = 333.88f / 594f
-private const val PHOTO_H = 95.63f / 594f
+
+/**
+ * The two windows cut out of `newspaper_edge_bottom`, measured off the strip's own 745×140.
+ *
+ * Why the strip and not the frames: the strip is what decides where the paper is missing, and
+ * it is stretched to whatever height the style's body band is — 111.61/594 on the front page,
+ * 128/480 stacked, a fifth taller. Sizing a photo from the page width, as the frames' numbers
+ * do, registers it with the windows at one of those heights and misses at the other.
+ *
+ * So x and width follow the width; y and height follow the band. Each rect is bled a unit past
+ * its window on every side, so rounding to whole pixels cannot leave a seam of bare screen;
+ * the overhang lands on opaque newsprint.
+ */
+private const val STRIP_W = 745f
+private const val STRIP_H = 140f
+private const val PHOTO1_X = 37f / STRIP_W
+private const val PHOTO1_W = 413f / STRIP_W
+private const val PHOTO2_X = 578f / STRIP_W
+private const val PHOTO2_W = 106f / STRIP_W
+private const val PHOTO_Y = 2f / STRIP_H
+private const val PHOTO_H = 117f / STRIP_H
 
 private const val MASTHEAD_SIZE = 21f / 594f
 private const val HEADLINE_SIZE = 26f / 594f

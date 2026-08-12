@@ -30,10 +30,14 @@ internal val White = Color(0xFFFFFFFF)
 internal val Black = Color(0xFF000000)
 
 /**
- * Newsprint. Fixed in both themes — the one surface that does not follow the wallpaper, because
- * a newspaper that did would stop reading as a newspaper, which is the entire point of it.
+ * Newsprint, for the photo windows cut out of `dpaper5`. Fixed in both themes — the one surface
+ * that does not follow the wallpaper, because a newspaper that did would stop reading as a
+ * newspaper, which is the entire point of it.
+ *
+ * Sampled from the strip's own paper along the edges of those windows, so a blank one abuts the
+ * printed page without a seam.
  */
-internal val Newsprint = Color(0xFFEDE8DB)
+internal val Newsprint = Color(0xFFD6D3C7)
 
 /** Ink values taken from the supplied SVG, not eyeballed. */
 internal val NewsprintInk = Color(0xFF333333)
@@ -61,6 +65,53 @@ internal val TrendUpLight = Color(0xFF146C2E)
 internal val TrendUpDark = Color(0xFF6DD58C)
 internal val TrendDownLight = Color(0xFFB3261E)
 internal val TrendDownDark = Color(0xFFF2B8B5)
+
+/**
+ * Slice colours for the three shares-of-a-whole charts, and the four economic sectors.
+ *
+ * Why fixed rather than theme-derived, the same argument as [AvatarPalette]: a slice is
+ * identified by its colour and nothing else — the chart draws no labels on it — so twelve of
+ * them have to be told apart at a glance, and a palette derived from a wallpaper cannot promise
+ * twelve distinguishable hues, let alone the same twelve tomorrow.
+ *
+ * These are the values the desktop site and the legacy client both use, so a player who knows
+ * the game's own charts recognises Civily's. [ChartPalette] is indexed and cycles; a government
+ * department and an economic sector each take their colour from their position in their own enum,
+ * so a department keeps its colour from one nation to the next.
+ */
+internal val ChartPalette = listOf(
+    Color(0xFF2196F3),
+    Color(0xFFF44336),
+    Color(0xFF9C27B0),
+    Color(0xFF4CAF50),
+    Color(0xFF4DD0E1),
+    Color(0xFF795548),
+    Color(0xFF00695C),
+    Color(0xFF283593),
+    Color(0xFFFDD835),
+    Color(0xFFFF9800),
+    Color(0xFFEC407A),
+    Color(0xFFAED581),
+    Color(0xFF607D8B),
+    Color(0xFF03A9F4),
+    Color(0xFF6D4C41),
+    Color(0xFF7E57C2),
+    Color(0xFFFFEB3B),
+    Color(0xFFAD1457),
+    Color(0xFFE57373),
+    Color(0xFF4DB6AC),
+    Color(0xFF37474F),
+    Color(0xFF512DA8),
+    Color(0xFF1B5E20),
+)
+
+/** The economy's four sectors, which the game gives their own four colours. */
+internal val SectorPalette = listOf(
+    Color(0xFF2196F3),
+    Color(0xFFFFC107),
+    Color(0xFFF44336),
+    Color(0xFF455A64),
+)
 
 /**
  * Avatar backgrounds, picked deterministically from a nation's id.

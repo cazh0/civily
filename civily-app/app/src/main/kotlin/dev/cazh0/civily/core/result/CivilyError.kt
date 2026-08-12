@@ -51,4 +51,11 @@ sealed class CivilyError(@StringRes val messageRes: Int) {
 
     /** The response arrived but did not parse. [detail] is for the log, never for the user. */
     data class Malformed(val detail: String) : CivilyError(R.string.error_malformed)
+
+    /**
+     * An irreversible issue answer request was sent, but the resulting page did not come back
+     * in the shape needed to render it. The app must not claim the legislation failed.
+     */
+    data class IssueResultUnknown(val detail: String) :
+        CivilyError(R.string.error_issue_result_unknown)
 }

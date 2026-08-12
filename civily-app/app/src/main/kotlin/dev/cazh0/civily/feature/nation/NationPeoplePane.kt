@@ -2,16 +2,17 @@ package dev.cazh0.civily.feature.nation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import dev.cazh0.civily.R
+import dev.cazh0.civily.data.nation.Cause
 import dev.cazh0.civily.data.nation.Nation
 import dev.cazh0.civily.ui.component.RichText
 import dev.cazh0.civily.ui.component.SectionHeader
+import dev.cazh0.civily.ui.theme.ChartColors
 import dev.cazh0.civily.ui.theme.Dimens
 
 /**
@@ -33,45 +34,71 @@ fun NationPeoplePane(
     onOpenRegion: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val opening = listOfNotNull(nation.reputationSentence(), nation.peopleSentence())
-        .joinToString(separator = " ")
-    val closing = nation.animalSentence()
     val crime = nation.people.crime
 
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(Dimens.SectionSpacing),
-    ) {
-        if (opening.isNotEmpty() || crime.isNotEmpty() || closing != null) {
-            Column {
-                SectionHeader(stringResource(R.string.section_nation_summary))
-                Column(verticalArrangement = Arrangement.spacedBy(Dimens.ItemSpacing)) {
-                    if (opening.isNotEmpty()) {
-                        Text(text = opening, style = MaterialTheme.typography.bodyLarge)
+    NationPane(modifier) {
+        item(contentType = PaneContent.Prose) {
+            val opening = listOfNotNull(nation.reputationSentence(), nation.peopleSentence())
+                .joinToString(separator = " ")
+            val closing = nation.animalSentence()
+
+            if (opening.isNotEmpty() || crime.isNotEmpty() || closing != null) {
+                Column(modifier = SectionGap) {
+                    SectionHeader(stringResource(R.string.section_nation_summary))
+                    Column(verticalArrangement = Arrangement.spacedBy(Dimens.ItemSpacing)) {
+                        if (opening.isNotEmpty()) {
+                            Text(text = opening, style = MaterialTheme.typography.bodyLarge)
+                        }
+                        // Guarded rather than left to render nothing: an empty RichText is a
+                        // zero-height child that the arrangement still spaces on both sides,
+                        // which opens a gap in the middle of the paragraph.
+                        if (crime.isNotEmpty()) {
+                            RichText(
+                                blocks = crime,
+                                onOpenNation = onOpenNation,
+                                onOpenRegion = onOpenRegion,
+                            )
+                        }
+                        closing?.let { Text(text = it, style = MaterialTheme.typography.bodyLarge) }
                     }
-                    // Guarded rather than left to render nothing: an empty RichText is a
-                    // zero-height child that the arrangement still spaces on both sides, which
-                    // opens a gap in the middle of the paragraph.
-                    if (crime.isNotEmpty()) {
-                        RichText(
-                            blocks = crime,
-                            onOpenNation = onOpenNation,
-                            onOpenRegion = onOpenRegion,
-                        )
-                    }
-                    closing?.let { Text(text = it, style = MaterialTheme.typography.bodyLarge) }
                 }
             }
         }
 
         if (nation.people.causesOfDeath.isNotEmpty()) {
-            Column {
-                SectionHeader(stringResource(R.string.section_mortality))
-                ShareBars(nation.people.causesOfDeath.map { Share(it.name, it.percent) })
+            item(contentType = PaneContent.Chart) {
+                Column(modifier = SectionGap) {
+                    SectionHeader(stringResource(R.string.section_mortality))
+                    DonutChart(
+                        nation.people.causesOfDeath.mapIndexed { index, cause ->
+                            Slice(
+                                label = cause.label(nation.animal),
+                                percent = cause.percent,
+                                color = ChartColors.slice(index),
+                            )
+                        },
+                    )
+                }
             }
         }
     }
 }
+
+/**
+ * A cause of death, named for this nation's own animal where the API is generic.
+ *
+ * The API reports every mauling as "Animal Attack" no matter what the nation's animal is, so the
+ * one cause of death a player chose for themselves is the one the chart would not name. The site
+ * and the legacy client both substitute it; the animal is the player's own words, so it arrives
+ * lower-case and stays that way.
+ */
+@Composable
+private fun Cause.label(animal: String): String =
+    if (name == ANIMAL_ATTACK && animal.isNotEmpty()) {
+        stringResource(R.string.cause_animal_attack, animal)
+    } else {
+        name
+    }
 
 /** "The Hive Mind of Testlandia is environmentally stunning and remarkable for its …" */
 @Composable
@@ -95,6 +122,9 @@ private fun Nation.peopleSentence(): String? {
         sensibilities,
     )
 }
+
+/** The API's own generic name for a mauling, whatever the nation's animal actually is. */
+private const val ANIMAL_ATTACK = "Animal Attack"
 
 /** "Testlandia's national animal is the nautilus, which …, and its national religion is …" */
 @Composable

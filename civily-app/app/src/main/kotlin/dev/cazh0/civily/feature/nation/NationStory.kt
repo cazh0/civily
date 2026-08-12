@@ -5,9 +5,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -46,16 +46,19 @@ fun NationHappeningsPane(
             text = stringResource(R.string.nation_happenings_empty),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = modifier,
+            modifier = modifier.padding(Dimens.ScreenPadding),
         )
         return
     }
 
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(Dimens.HappeningSpacing),
-    ) {
-        happenings.forEach { happening ->
+    NationPane(modifier) {
+        // Every line here is parsed markup rendered as an annotated string, which is the most
+        // expensive thing on this screen per row. Lazily, the tab costs the handful of lines the
+        // reader can see; eagerly it cost all fifteen before the first one appeared.
+        //
+        // The feed is fixed once loaded — nothing is inserted, removed or reordered — so the
+        // index is a stable identity and no key is needed to keep the list honest.
+        items(items = happenings, contentType = { PaneContent.Happening }) { happening ->
             HappeningRow(happening, now, onOpenNation, onOpenRegion)
         }
     }
@@ -68,7 +71,12 @@ private fun HappeningRow(
     onOpenNation: (String) -> Unit,
     onOpenRegion: (String) -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(Dimens.TextSpacing)) {
+    // The gap under the line rather than an arrangement on the list, for the same reason the
+    // panes' section gaps are carried by their sections: it belongs to the thing it separates.
+    Column(
+        modifier = Modifier.padding(bottom = Dimens.HappeningSpacing),
+        verticalArrangement = Arrangement.spacedBy(Dimens.TextSpacing),
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Dimens.GridSpacing),

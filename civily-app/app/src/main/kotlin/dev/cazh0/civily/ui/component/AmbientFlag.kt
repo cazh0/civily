@@ -3,15 +3,16 @@ package dev.cazh0.civily.ui.component
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
@@ -22,7 +23,9 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import dev.cazh0.civily.ui.theme.FlagAmbience
+import dev.cazh0.civily.ui.theme.Motion
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -60,17 +63,17 @@ fun AmbientFlag(
     }
 
     // Keyed on the url so switching nations never shows the previous flag's plate.
-    var decoded by remember(flagUrl) { mutableStateOf<Bitmap?>(null) }
     var ambience by remember(flagUrl) { mutableStateOf(surface) }
+    val scope = rememberCoroutineScope()
 
-    LaunchedEffect(decoded, surface) {
-        val bitmap = decoded ?: return@LaunchedEffect
-        // Sampling is arithmetic over a few hundred pixels, but it is still reading an image,
-        // and spec §3 puts that off the main thread wherever it happens.
-        ambience = withContext(Dispatchers.Default) { FlagAmbience.of(bitmap.grid(), surface) }
-    }
-
-    val plate by animateColorAsState(targetValue = ambience, label = "flag ambience")
+    val plate by animateColorAsState(
+        targetValue = ambience,
+        // A tween rather than the default spring: a spring settles over an unbounded number of
+        // frames chasing a difference nobody can see, and this animation is decoration on a
+        // picture that has already arrived.
+        animationSpec = tween(Motion.PlateMillis),
+        label = "flag ambience",
+    )
 
     Surface(shape = shape, color = plate, modifier = modifier) {
         AsyncImage(
@@ -78,8 +81,21 @@ fun AmbientFlag(
             imageLoader = imageLoader,
             contentDescription = contentDescription,
             contentScale = contentScale,
+            // Why the bitmap is sampled here and not held in state: keeping it would pin a full
+            // decoded image in the heap for as long as the screen exists, on top of the copy
+            // Coil's own cache is already holding — and this composable needs one colour out of
+            // it, once. Sampling is arithmetic over a few hundred pixels, but it is still
+            // reading an image, so it goes to a background dispatcher (spec §3); the reference
+            // dies with the coroutine.
             onSuccess = { state ->
-                decoded = (state.result.drawable as? BitmapDrawable)?.bitmap
+                val bitmap = (state.result.drawable as? BitmapDrawable)?.bitmap
+                if (bitmap != null) {
+                    scope.launch {
+                        ambience = withContext(Dispatchers.Default) {
+                            FlagAmbience.of(bitmap.grid(), surface)
+                        }
+                    }
+                }
             },
             modifier = Modifier
                 .fillMaxSize()

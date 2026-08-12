@@ -62,7 +62,7 @@ fun NationPoliciesPane(
     ) {
         groups.forEachIndexed { index, group ->
             if (group.category.isNotEmpty()) {
-                item(key = "category-$index") {
+                item(key = "category-$index", contentType = PaneContent.Header) {
                     SectionHeader(
                         text = group.category,
                         // Breathing room above every heading but the first, so the groups read
@@ -73,7 +73,11 @@ fun NationPoliciesPane(
                     )
                 }
             }
-            items(items = group.policies, key = { it.name }) { policy ->
+            items(
+                items = group.policies,
+                key = { it.name },
+                contentType = { PaneContent.Policy },
+            ) { policy ->
                 PolicyCard(policy, imageLoader)
             }
         }

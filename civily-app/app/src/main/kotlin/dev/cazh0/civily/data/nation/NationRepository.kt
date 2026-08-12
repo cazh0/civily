@@ -82,9 +82,9 @@ class NationRepository(private val client: NsClient) {
             // rule is that anything rendering NationStates content goes through BbParser, and
             // that is what guarantees no reader sees a tag the day the game dresses these.
             crime = BbParser.parse(crime),
-            causesOfDeath = deaths.causes
-                .map { Cause(text(it.type), it.percent) }
-                .sortedByDescending { it.percent },
+            // In the API's order, which is the order the game's own chart draws them in. A slice
+            // takes its colour from its position, so reordering would recolour the chart.
+            causesOfDeath = deaths.causes.map { Cause(text(it.type), it.percent) },
         ),
         government = Government(
             priority = text(govtPriority),
@@ -122,9 +122,12 @@ class NationRepository(private val client: NsClient) {
 
     /**
      * Why zeroes are dropped rather than drawn: eleven of the twelve departments read 0.0 on a
-     * single-issue nation, and a chart of empty bars says nothing while costing a screenful.
-     * Why sorted: the question a budget answers is what this government cares about, and that
-     * is the order that answers it.
+     * single-issue nation, and a slice of nothing is a colour in a legend for no reason.
+     *
+     * Why *not* sorted by size: the chart names no wedge, so a department is identified by its
+     * colour alone, and its colour comes from its position in [Department]. Sorting would give
+     * Education a different colour on every nation and make the legend the only way to read the
+     * chart. Fixed order is also the order the game's own chart uses.
      */
     private fun GovtDto.toBudget(): List<Spend> = listOf(
         Spend(Department.Administration, administration),
@@ -139,14 +142,15 @@ class NationRepository(private val client: NsClient) {
         Spend(Department.SocialPolicy, socialEquality),
         Spend(Department.Spirituality, spirituality),
         Spend(Department.Welfare, welfare),
-    ).filter { it.percent > 0 }.sortedByDescending { it.percent }
+    ).filter { it.percent > 0 }
 
+    /** Fixed order for the same reason as [toBudget]: each sector's colour is its own. */
     private fun SectorsDto.toSectors(): List<Sector> = listOf(
         Sector(Sector.Kind.Government, government),
         Sector(Sector.Kind.StateOwned, stateOwned),
         Sector(Sector.Kind.PrivateIndustry, privateIndustry),
         Sector(Sector.Kind.BlackMarket, blackMarket),
-    ).filter { it.percent > 0 }.sortedByDescending { it.percent }
+    ).filter { it.percent > 0 }
 
     private fun EventDto.toHappening(selfId: String) = Happening(
         atEpochSeconds = timestamp,

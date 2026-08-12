@@ -9,6 +9,9 @@ Rules of engagement are `../CIVILY-SPEC.md`. Feature surface is `../README.md`.
 
 ## Layout
 
+Two Gradle modules. `:app` is the app; `:benchmark` is a `com.android.test` module that ships
+nothing, drives `:app` from outside its own process, and is described under "Measuring it".
+
 ```
 app/src/main/kotlin/dev/cazh0/civily/
 ├── core/            everything with no feature knowledge
@@ -41,7 +44,8 @@ app/src/main/kotlin/dev/cazh0/civily/
 │   └── wa/
 ├── nav/             Routes + NavHost
 └── ui/
-    ├── theme/       Color · Dimens · Theme          (the only colours and sizes)
+    ├── theme/       Color · ChartColors · Dimens · Motion · Theme
+    │                                                (the only colours, sizes and durations)
     │                FlagAmbience                    (a plate mixed from a flag)
     └── component/   LoadStateScaffold · LoadStateContent · RichText
                      AmbientFlag · FlagHero · LinkRow · FactCard · NationAvatar
@@ -161,14 +165,45 @@ them as mdpi and scales them by device density. Paper is painted behind them bec
 transparent where the sheet tears.
 
 The masthead is dressed from the same request as the issues themselves: `capital` names the
-paper, `flag` flies on it, `currency` is the cover price. Answering prints the next morning's
-edition — `c=issue` returns `HEADLINES` written for exactly that.
+paper, `flag` flies on it, `currency` is the cover price. Answering prefers the site's own
+tokenised enact form, whose response carries the talking point, trend changes, exact headlines
+and `legislation-papers` cutout image URLs printed on the newspaper stack. If fetching or
+parsing that form fails before anything irreversible is submitted, Civily falls back to the
+documented `c=issue` command rather than breaking the issue feature; once the site form has
+been posted, any missing result is reported as unknown and the list refreshes.
+
+**In practice that preference never takes.** `/page=show_dilemma/` answers 403 with the site's
+Border Patrol page — "Enable JavaScript and cookies to continue" — which is a bot check, not a
+session problem: an anonymous request from a desktop gets the same page. Every enactment
+therefore spends one request finding that out and then goes through `c=issue`. Nothing in the
+app tries to satisfy that check, and nothing should: the cutouts are worth a lot less than
+being a client that walks past a wall the game put up on purpose. See the gap list.
 
 The page has no background of its own. The strips carry their own paper *and* their own torn
 edges, so anything solid behind them turns the page back into a rectangle and throws away the
 tear. The body's gap is left open for the same reason — `dpaper5` is only a quarter opaque
-because the site composites photographs into it, and that space belongs to artwork the API
-does not supply yet.
+because the site composites photographs into it. The photographs go *under* the strip, through
+the two windows cut out of it, so the newsprint's own torn edges frame them.
+
+Those windows are measured off `dpaper5` itself — 37..450 and 578..684 of its 745, 2..119 of
+its 140 — and not off the Figma frames, because the strip is stretched to whatever height the
+style's body band is and only the strip knows where it is missing. So a photo's x and width
+follow the page width while its y and height follow the band; sized from the width alone they
+register with the windows on the front page and miss them by a fifth in the stack.
+
+Each window is floored with newsprint before the photograph goes in, in the tone sampled from
+the strip's paper along that window's own edge. A window is a hole: without the floor an empty
+one shows the screen through the page, which reads as damage rather than as a front page whose
+photograph has not arrived — or, on the aftermath, was never offered.
+
+What goes in them is `PIC1` and `PIC2` from the issue shard, which are artwork ids that address
+`/images/newspaper/{id}-1.jpg` and `-2.jpg`. The aftermath page is different: it prints the
+whole path, the names are its own — `i16-1.jpg` on one paper, `y108-1.jpg` on the next, and
+different again on the next issue — so every `dpaperpic` `src` is carried through exactly as
+written and resolved against nationstates.net. Rebuilding one from a stem is how a working link
+becomes a 404 the first time the game picks a name that does not fit the pattern. A paper is
+read by document order, not by `dpaperpic1`/`dpaperpic2`, and one that prints no photograph
+still prints its headline.
 
 `NewspaperStyle` holds the only thing the two supplied frames disagree on: band heights.
 `FrontPage` is `Newspaper.svg`; `Stacked` is `recentHeadlines.svg`, which gives the headline
@@ -180,6 +215,12 @@ of a percent, so it is written once.
 of those wide, which is what leaves room for each to sit somewhere different. Sheets draw
 first to last so each lands on top of the one before: that ordering is the whole illusion, and
 reversing it buries every headline under the paper beneath it.
+
+The pile runs to the foot of its last sheet, rotated corner included — the frame's one number
+not transcribed, because the frame stops 65 units short and cuts the bottom paper through its
+photographs. Every sheet above is covered from the headline down by the next one, so those are
+the only photographs the pile ever shows, and half of them were being cropped away; the block
+is 13% taller for it.
 
 The aftermath screen has no front page at its head. The headlines *are* the newspapers, so
 printing one above them said the same thing twice.
@@ -228,15 +269,31 @@ Everything in it goes through `BbParser` even though the game writes it: that is
 anything rendering NationStates content, and it is what guarantees no reader sees a tag the day
 the game starts dressing these fields.
 
-**Shares of a whole are sorted bars, not a pie.** Three of them appear on this screen — where the
-government spends, what the economy is made of, what people die of — and every one is really a
-question about *order*, which a pie answers by making the reader compare angles and hunt a legend.
-The fill is the share of a hundred rather than of the largest bar, so a sector holding 92% looks
-like it holds nearly all of it; normalising to the biggest bar would draw every chart the same
-shape and say nothing. A department funded at zero is dropped rather than drawn, because eleven
-empty bars cost a screenful and say nothing either.
+**Shares of a whole are the game's own ring.** Three of them appear on this screen — where the
+government spends, what the economy is made of, what people die of — and all three are drawn the
+way the desktop site draws them, which the legacy client also mirrors: a ring with a hole six
+tenths of the radius, a fainter band of the same slices just inside it, no labels on the wedges,
+and a wrapped legend of colour dots underneath. Those proportions are the legacy client's own
+(`holeRadius = 60`, `transparentCircleRadius = 65`), and matching them is what makes a player who
+knows the game recognise this screen. `DonutChart` draws it on a `Canvas` — three arcs and two
+circles — because a charting library for that would cost every build and buy nothing (spec §3).
 
-The bars carry no total in the nation's own money. The API publishes the *split* of the budget,
+Slices are **not** sorted by size, and that is the point: the wedges carry no labels, so a slice
+is identified by its colour alone, and its colour comes from its position in `Department` or
+`Sector.Kind`. Education is the same blue-violet on every nation's chart. Sorting would recolour
+the chart per nation and make the legend the only way to read it. A department funded at zero is
+dropped rather than drawn — eleven wedges of nothing are eleven colours in a legend for no reason.
+
+One departure from the game, and it adds rather than changes: the legend carries each slice's
+percentage. The site and the legacy client hide those behind tapping a wedge, which leaves a chart
+whose numbers cannot be read at all — and the numbers are why the chart is here.
+
+The API reports every mauling as `Animal Attack` whatever the nation's animal is, so the one cause
+of death a player chose for themselves is the one the chart would not name. It is relabelled with
+the animal, as the site does. The animal is the player's own words, so it arrives lower-case and
+stays that way.
+
+The chart carries no total in the nation's own money. The API publishes the *split* of the budget,
 not its size; the legacy client multiplies GDP by the government's share of the economy and
 labels the result "Total", which is a different quantity wearing the budget's name. That share is
 a real figure and it is on the Economy tab, where it belongs.
@@ -437,6 +494,128 @@ The daemon JVM is pinned to 21 in `gradle/gradle-daemon-jvm.properties`. The And
 Plugin rejects newer JVMs, so without the pin the build depends on whatever JDK is on PATH.
 Gradle downloads a matching JDK if the machine has none.
 
+**Judge the feel of the app on a release build, not a debug one.** Measured on a physical device,
+scrolling and switching every tab of the nation screen:
+
+| | cold start | worst frame (99th) | missed vsyncs | slow UI-thread frames |
+|---|---|---|---|---|
+| `assembleDebug` | ~700ms | 38ms | 4 | 6 |
+| `assembleRelease` | ~190ms | 11ms | 0 | 0 |
+
+Same code. The debug build has no R8, runs its Compose lambdas uninlined, and gets no AOT pass,
+so it drops frames the shipped app does not — the release build never misses a vsync and its worst
+frame is inside the 16.7ms budget. A slow debug build is not a performance defect to chase; it is
+the reason release timings are the only ones worth quoting.
+
+## Measuring it
+
+`:benchmark` is a `com.android.test` module that drives the app from outside its own process, the
+way the system does. It ships nothing. It exists to answer spec §4 with numbers instead of
+opinions, and to record the Baseline Profile the app carries.
+
+```bash
+./gradlew :app:generateReleaseBaselineProfile
+```
+
+```bash
+./gradlew :benchmark:connectedBenchmarkAndroidTest
+```
+
+The first walks `CivilyJourney` — search a nation, open it, read all seven tabs, come back — and
+writes what ran to `app/src/release/generated/baselineProfiles/`. That output is **checked in**: it
+is a build input, and a build whose result depends on a phone being plugged in is not a build.
+Regenerate it when the journey changes, not on every build.
+
+The second measures. `StartupBenchmark` runs cold start twice over, once with the profile and once
+with no ahead-of-time compilation at all, because one number on its own says nothing about what the
+profile is worth.
+
+Measured on a Pixel 8 Pro, `benchmarkRelease` (R8 on, profile installed), ten iterations each:
+
+| | cold start, median | range |
+|---|---|---|
+| with the Baseline Profile | **283ms** | 265–316ms |
+| no AOT compilation at all | 297ms | 278–321ms |
+
+Both are well inside §4's 1.5s. The profile is worth about 5% here and that is the honest figure
+for *this* device: a Pixel 8 Pro JITs its way out of most of the problem. The profile matters in
+proportion to how slow the CPU is, which is exactly the device this app is not developed on.
+
+Frames, measured with the platform's own counters over an identical scripted gesture set — twelve
+flings of the Overview and eight of the ninety-row Rankings list, about 1,170 frames each, both
+builds minified:
+
+| | 50th | 90th | 95th | 99th | janky frames |
+|---|---|---|---|---|---|
+| before this pass | 5ms | 9ms | 14ms | 17ms | 6.3% |
+| after | 5ms | 9ms | **9ms** | 16ms | **3.0%** |
+
+The tail is the whole story: the median frame was never the problem, and the 95th percentile
+halving from 14ms to 9ms is the difference between a scroll that hitches and one that does not.
+At 120Hz the budget is 8.3ms, which the 90th percentile is still sitting on — so this is better,
+not finished.
+
+## What keeps it fast
+
+Spec §4 sets the numbers. These are the rules that hold them, and each of them is a rule because
+breaking it is invisible in review and obvious on a phone.
+
+**Anything that scrolls is a lazy list.** Not just the long ones. The top app bar collapses as
+the reader scrolls, so the content below it is measured against a new height on every frame of
+the gesture — with an eager column that is the whole page re-measured per frame, and with a lazy
+one it is the handful of items on screen. Laziness is also what stops a tab costing the part of
+itself nobody scrolled to: the nation's seven panes, the region screen, the World Assembly
+chamber and every feed are items, and prose goes through `richTextItems` so a factbook is a run
+of paragraphs rather than one indivisible block.
+
+**A block carries the gap under itself.** `SectionGap`, not the list's `verticalArrangement`. A
+section with nothing to show draws nothing, and a lazy list spaces a zero-height item exactly as
+it spaces a full one — an arrangement would leave a section's worth of blank page wherever the
+API sent no data.
+
+**Nothing is derived twice.** An annotated string is remembered against the block it came from,
+the ninety census names are read once for the list rather than once per row, an id becomes a
+name once per screen rather than once per recomposition, and `NumberFormat` is built once per
+thread rather than once per number. None of this is micro-optimisation: each was work being done
+per frame for an answer that had not changed.
+
+**Intrinsic measurement is asked for, never stumbled into.** It measures a subtree an extra time,
+so it is used only where a row genuinely has to know its tallest child — `FactGrid`. A quote's
+stripe used to force one over arbitrarily deep nested quotes to be told a height it could have
+been drawn at instead; it is drawn now. The two-pass custom layout that would replace intrinsics
+outright is not available: Compose throws if a child is measured twice in one pass, and its own
+error message names intrinsics as the supported answer.
+
+**A transition is over before it is noticed.** navigation-compose fades for 700ms in each
+direction by default, which is most of a second of watching a screen that finished composing
+before the animation started. `Motion` holds the replacements — 110ms in, 80ms out — and every
+duration in the app lives there for the same reason colours live in `Color` and sizes in
+`Dimens`.
+
+**The image caches are sized for flags, not for a photo library.** Coil's defaults are a quarter
+of the heap and up to 250MB of disk; this app holds a hero flag and a screenful of thumbnails, so
+it takes a tenth of the heap and 16MB of disk, and half that memory on a device that reports
+itself low on RAM. Cache headers are deliberately ignored — they expire flags in hours, and a
+flag changes when a player redraws one. Where Coil can halve the bytes per pixel it is allowed to
+on low-RAM devices only; it applies that to JPEGs alone, which have no transparency to lose.
+
+**Nothing reads a file on the main thread.** `SharedPreferences` opens and parses an XML document
+on first touch, and the first thing to ask for the session store is the composition of the first
+screen — so `CivilyApp` starts that read on an IO dispatcher as the process comes up. `by lazy`
+is synchronised, so nothing can see a half-built store and nothing reads the file twice.
+
+**A decoded bitmap does not outlive the colour taken from it.** `AmbientFlag` needs one average
+colour out of the flag; holding the bitmap in state to get it pinned a full-size image in the
+heap for as long as the screen existed, on top of the copy Coil's own cache already holds.
+
+**The app ships a Baseline Profile, and it is recorded rather than written.** Android compiles the
+methods it names ahead of time at install, so the code that draws the first screen is native before
+it is reached instead of being interpreted while the user watches — which for a Compose app is
+mostly the Compose runtime itself. `:benchmark` records it by walking the app; `profileinstaller`
+puts it into ART's store on the versions of Android where the platform does not. A profile is only
+worth its accuracy, so nothing about it is hand-written: a guessed list of hot classes is a guess
+shipped as fact, and it would spend install-time compilation on code nobody runs.
+
 ## Known gaps
 
 These are tracked, not hidden (spec §2 R1). Nothing here is stubbed to look like it works.
@@ -449,13 +628,21 @@ These are tracked, not hidden (spec §2 R1). Nothing here is stubbed to look lik
   pill, because the pill invited a press that could never work. The legacy client liked posts
   through `/page=ajax3/…`, an undocumented HTML endpoint that spec §3 rules out; adding it is a
   decision to take knowingly, not a gap to quietly fill.
+- **The aftermath newspapers carry no photographs.** The `legislation-papers` block names one
+  cutout per window, per paper, with names that change every issue — the parser reads them and
+  the stack has the windows to print them in. It never gets the chance: `/page=show_dilemma/`
+  is behind NationStates' Border Patrol check, which wants JavaScript and cookies and answers
+  403 to anything else, so answering falls through to `c=issue` — and that command's
+  `<HEADLINE>` is bare text, no attributes, checked against a live enactment rather than
+  assumed. `<ISSUE>` in the issues shard does carry `PIC1`/`PIC2`, which is why the front page
+  has photographs and the aftermath does not. Getting past a bot check is not a gap to fill; it is a thing this client
+  declines to do. The windows print as blank newsprint, which is why the parser and the
+  geometry are kept working and tested against a captured page rather than deleted — the day
+  the game offers the artwork through the API, one mapper is the whole job.
 - **The newspaper does not respond to font scale.** Its type is sized from the component's
   width rather than in `sp`, because a masthead that reflowed at 200% font scale would stop
   being a masthead. Every other screen in the app scales normally. Long names shrink to fit
   rather than wrapping or clipping.
-- **The front page has no second photo.** The design places a portrait at x=460; the API gives
-  one image per issue, so that space is left as paper rather than filled with something
-  invented.
 - **The summary has no size adjective.** The site opens with "is a massive, efficient nation";
   Civily opens with "is efficient and remarkable for…". `efficient` is the `admirable` shard,
   but no public shard carries the population-size word — every one in the API's list was requested
@@ -477,9 +664,9 @@ These are tracked, not hidden (spec §2 R1). Nothing here is stubbed to look lik
 - **A few census scales are named "Unknown".** That name comes from the legacy app's list,
   which had gaps of its own. They render honestly rather than being hidden, and ids past the
   end of the list fall back to "Scale N".
-- **The result shows `DESC`, `RANKINGS` and `HEADLINES` only.** `c=issue` can also return
-  `RECLASSIFICATIONS`, `NEW_POLICIES` and `REMOVED_POLICIES`; the two answers captured so far
-  carried none of them, so there is no real sample to build against and nothing was guessed.
+- **The result still skips policy and reclassification changes.** `c=issue` can return
+  `RECLASSIFICATIONS`, `NEW_POLICIES` and `REMOVED_POLICIES`; the captured answers carried none
+  of them, so there is no real sample to build against and nothing was guessed.
 - **The RMB is read-only, and unpaged.** Fifty most recent posts, no posting, no liking, no
   older pages. Posting is a two-step Private Command.
 - **No WA voting.** Also a two-step Private Command (`mode=prepare` → token → `mode=execute`),
@@ -489,17 +676,29 @@ These are tracked, not hidden (spec §2 R1). Nothing here is stubbed to look lik
   parts — `AccountsTest` covers every rule about which nations are stored and which is active,
   but not the reading and writing of them. Both need a `Context`, which means Robolectric or
   extracting an interface.
-- **Nothing measures §4.** No Macrobenchmark module and no Baseline Profile yet. Compose cold
-  start is materially worse without a profile, so this blocks any claim of meeting the
-  cold-start target.
+- **Frame durations come back from the benchmark as a frame *count* and nothing else.** On the
+  device this was written against, `FrameTimingMetric` reports `frameCount` but neither
+  `frameDurationCpuMs` nor `frameOverrunMs` — the same class of gap as the launch-detection one
+  that forced `androidx.benchmark` up to 1.4.1, and 1.5.0-beta01 does not build here at all
+  (`Could not stat file .../app/provider(?)`). Until a version parses this platform's traces, the
+  frame figures in the table above come from `dumpsys gfxinfo`, which is the platform's own
+  counter rather than a per-frame breakdown. `NationScrollBenchmark` still runs the journey and
+  still catches a regression that changes how many frames it takes.
+- **Nothing runs any of this automatically.** Both the profile and the measurements need a phone
+  on the end of a cable and a person to type the command. There is no CI, so nothing fails when a
+  change makes the app slower — the numbers in this file are a record, not a guard.
+- **The APK grew by 120KB** to carry the profile machinery: ~110KB of `profileinstaller` and ~10KB
+  of profile. That is a real cost against spec §4's "no larger than previous version", taken
+  knowingly for the cold-start figures above.
 - **The ambient plate is one colour, not a blur.** YouTube's ambient mode scales and blurs the
   image itself; `Modifier.blur` needs API 31, and minSdk is 21. A flat plate mixed from the
   flag's colours is the part of that effect which works everywhere.
 - **One theme.** The legacy app ships five, and there is no in-app light/dark override.
 - **The sign-in screen has not been restyled** to match the home screen's card language.
-- **No skeleton loaders and no screen transitions.** Loading is a spinner; navigation uses the
-  library defaults.
+- **No skeleton loaders.** Loading is a spinner. Screen transitions are a short cross-fade and
+  nothing more — no shared element, no direction, no depth.
 - **No accessibility pass.** Touch targets and `contentDescription` coverage were written
   carefully but never audited with TalkBack, and large font scales are untested.
-- **Nothing measures §4** — see above. Cold start is unmeasured and Compose needs a Baseline
-  Profile before any claim is made about it.
+- **Cold start and frames are measured; the other three §4 rows are not.** Nothing checks
+  transition time, main-thread block length, or APK size, and see the CI gap above for why none
+  of it is enforced.

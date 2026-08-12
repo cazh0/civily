@@ -104,8 +104,16 @@ object Dimens {
     /** The dot that anchors a happening's timestamp. */
     val TimelineDotSize = 6.dp
 
-    /** One share of a whole, drawn as a bar. Thin on purpose: the label is the content. */
-    val BarHeight = 8.dp
+    /**
+     * The shares-of-a-whole ring.
+     *
+     * A cap rather than a fixed size: it fills the column on a phone, which is what the game's
+     * own chart does, and stops growing on a tablet where a half-metre doughnut would be absurd.
+     */
+    val DonutDiameter = 300.dp
+
+    /** The colour dot beside a legend label. */
+    val LegendDotSize = 10.dp
 
     /** The artwork strip at the head of an enacted policy. Rift banners are wide. */
     val PolicyBannerHeight = 88.dp

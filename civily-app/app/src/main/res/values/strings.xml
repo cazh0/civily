@@ -59,6 +59,7 @@
     <string name="census_unknown_scale">Scale %1$d</string>
     <string name="action_done">Done</string>
     <string name="issue_answer_failed">That didn\'t go through</string>
+    <string name="issue_answer_unknown">Result unknown</string>
     <string name="action_enact_this">Enact this legislation</string>
     <string name="action_close">Close</string>
 
@@ -135,6 +136,8 @@
     <string name="section_expenditures">Expenditures</string>
     <string name="section_sectors">Sectors</string>
     <string name="section_mortality">Mortality</string>
+    <!-- The API calls every mauling "Animal Attack"; the nation's own animal is the point. -->
+    <string name="cause_animal_attack">%1$s Attack</string>
     <string name="section_nation_summary">Summary</string>
     <string name="policies_empty">No policies enacted yet.</string>
     <string name="rankings_empty">No World Census placings yet.</string>
@@ -218,5 +221,6 @@
     <string name="error_login_conflict">You signed in a moment ago. Wait a few seconds and try again.</string>
     <string name="error_server">NationStates returned an error.</string>
     <string name="error_malformed">NationStates sent something Civily couldn\'t read.</string>
+    <string name="error_issue_result_unknown">Civily sent the legislation request, but couldn\'t confirm the result. Issues will refresh to show the nation\'s current state.</string>
     <string name="action_retry">Try again</string>
 </resources>

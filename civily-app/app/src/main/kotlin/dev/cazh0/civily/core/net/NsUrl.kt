@@ -2,6 +2,8 @@ package dev.cazh0.civily.core.net
 
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import java.util.Locale
 
 /**
  * The single place any NationStates URL is built.
@@ -48,8 +50,64 @@ object NsUrl {
         }
     }
 
-    /** Artwork served alongside issues and policies, addressed by the id the API returns. */
+    /** Rift banner artwork, addressed by the id the API returns for banners and policies. */
     fun banner(bannerId: String): String = "$BASE/images/banners/$bannerId.jpg"
+
+    /**
+     * Issue newspaper artwork from the API, which names it by artwork id alone: `PIC1` of `i16`
+     * in slot 1 is `/images/newspaper/i16-1.jpg`.
+     *
+     * This is for the API only. The site's own pages give the whole path and it is not a
+     * pattern — see [siteImage].
+     */
+    fun newspaperImage(artworkId: String, slot: Int): String {
+        val id = artworkId
+            .trim()
+            .substringAfterLast('/')
+            .removeSuffix(".jpg")
+            .removeSuffix("-$slot")
+        return "$BASE/images/newspaper/$id-$slot.jpg"
+    }
+
+    /**
+     * An image one of the site's own pages points at, kept exactly as the page wrote it.
+     *
+     * The aftermath page names every cutout for itself — `i16-1.jpg` on one paper, `y108-1.jpg`
+     * on the next, different names on the next issue — so the `src` is the only address that is
+     * certain to exist. Rebuilding one from a stem is how a working link becomes a 404 the first
+     * time the game picks a name that does not fit the pattern.
+     */
+    fun siteImage(src: String): String? = onSite(src)
+
+    /** The site's issue page; its enact form carries the CSRF token the site requires. */
+    fun dilemma(issueId: Int): HttpUrl =
+        "$BASE/page=show_dilemma/dilemma=$issueId".toHttpUrl()
+
+    /** A NationStates-relative form action from one of the site's own pages. */
+    fun siteAction(action: String): HttpUrl? = onSite(action)?.toHttpUrlOrNull()
+
+    /**
+     * A reference written by one of the site's own pages, resolved against the site.
+     *
+     * Null when it leads anywhere else. Page HTML is not ours: a reference that names another
+     * host, or drops to plain HTTP, is not something the app follows because a page said so.
+     */
+    private fun onSite(reference: String): String? {
+        val normalized = reference.trim()
+        val lower = normalized.lowercase(Locale.US)
+        return when {
+            normalized.isBlank() -> null
+            lower.startsWith("http://") -> null
+            lower.startsWith("$BASE/") -> normalized
+            lower.startsWith("https://$DOMAIN/") ->
+                "$BASE/${normalized.substring("https://$DOMAIN/".length)}"
+            lower.startsWith("https://") -> null
+            // Protocol-relative: the host is whatever follows, which need not be this one.
+            normalized.startsWith("//") -> null
+            normalized.startsWith("/") -> "$BASE$normalized"
+            else -> "$BASE/$normalized"
+        }
+    }
 
     /**
      * The bare endpoint for a Private Command.

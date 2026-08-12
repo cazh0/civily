@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -42,18 +41,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
 import dev.cazh0.civily.R
 import dev.cazh0.civily.core.graph
+import dev.cazh0.civily.core.result.CivilyError
 import dev.cazh0.civily.core.result.LoadState
 import dev.cazh0.civily.core.text.Newspaper
 import dev.cazh0.civily.core.text.bbcode.BbBlock
-import dev.cazh0.civily.data.issues.Issue
 import dev.cazh0.civily.data.issues.IssueOption
 import dev.cazh0.civily.data.issues.IssuesPage
 import dev.cazh0.civily.data.issues.IssuesRepository
@@ -90,12 +87,6 @@ fun IssueDetailScreen(
 
     val page = (state as? LoadState.Ready)?.value
     val issue = page?.issues?.firstOrNull { it.id == issueId }
-
-    // Answering removes the issue from the nation, so by the time the result renders the
-    // issue — and its artwork — is gone. Held here so the next morning's paper still has a
-    // photograph on it.
-    var artwork by remember(issueId) { mutableStateOf<String?>(null) }
-    if (issue?.bannerUrl != null) artwork = issue.bannerUrl
 
     // Why the screen does not simply close on success: the consequence is the point of
     // answering. It takes the screen over until the reader has finished with it.
@@ -139,7 +130,6 @@ fun IssueDetailScreen(
                 edition = Newspaper.edition(issueId),
                 price = page?.coverPrice(),
                 flagUrl = page?.flagUrl?.takeIf { it.isNotBlank() },
-                bannerUrl = artwork,
                 imageLoader = graph.imageLoader,
                 onDone = {
                     viewModel.dismissAnswerState()
@@ -175,7 +165,7 @@ fun IssueDetailScreen(
                     headline = issue.title,
                     price = page.coverPrice(),
                     flagUrl = page.flagUrl.takeIf { it.isNotBlank() },
-                    bannerUrl = issue.bannerUrl,
+                    imageUrls = issue.imageUrls,
                     imageLoader = graph.imageLoader,
                 )
             }
@@ -231,12 +221,22 @@ fun IssueDetailScreen(
     }
 
     (answer as? AnswerState.Failed)?.let { failure ->
+        val resultUnknown = failure.error is CivilyError.IssueResultUnknown
+        val title = if (resultUnknown) {
+            R.string.issue_answer_unknown
+        } else {
+            R.string.issue_answer_failed
+        }
+        val closeFailure = {
+            viewModel.dismissAnswerState()
+            if (resultUnknown || failure.error.needsSignIn) onBack()
+        }
         AlertDialog(
-            onDismissRequest = viewModel::dismissAnswerState,
-            title = { Text(stringResource(R.string.issue_answer_failed)) },
+            onDismissRequest = closeFailure,
+            title = { Text(stringResource(title)) },
             text = { Text(stringResource(failure.error.messageRes)) },
             confirmButton = {
-                TextButton(onClick = viewModel::dismissAnswerState) {
+                TextButton(onClick = closeFailure) {
                     Text(stringResource(R.string.action_close))
                 }
             },

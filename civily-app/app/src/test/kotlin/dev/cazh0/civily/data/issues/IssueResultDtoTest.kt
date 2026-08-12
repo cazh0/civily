@@ -8,8 +8,8 @@ import org.junit.Test
 /**
  * Spec §5 makes coverage of parsing mandatory.
  *
- * This sample is a real `c=issue` response, trimmed — captured by actually enacting
- * legislation, because the command cannot be rehearsed and the shape was not documented.
+ * This sample is a real `c=issue` response, trimmed. It carries result text and rankings; the
+ * exact newspaper image ids come from the separate aftermath HTML parser.
  */
 class IssueResultDtoTest {
 
@@ -23,8 +23,10 @@ class IssueResultDtoTest {
         <RANK id="79"><SCORE>244700000000.00</SCORE><CHANGE>11900000000.00</CHANGE><PCHANGE>5.111684</PCHANGE></RANK>
         </RANKINGS>
         <HEADLINES>
-        <HEADLINE>Avant-Garde Gallery Popular Yet Confusing</HEADLINE>
-        <HEADLINE>12-Page Health Liftout Inside</HEADLINE>
+        <HEADLINE>Public Transport Has Ecstasiae On The Move</HEADLINE>
+        <HEADLINE>Car Sales Fall, But Never Better Time To Buy, Says Yard</HEADLINE>
+        <HEADLINE>Environment Groups Applaud Government Initiative</HEADLINE>
+        <HEADLINE>Lower Taxes Put Spring In Step, Money In Pocket</HEADLINE>
         </HEADLINES>
         </ISSUE>
         </NATION>
@@ -55,10 +57,15 @@ class IssueResultDtoTest {
     @Test
     fun `carries the headlines in order`() {
         val headlines = NsXml.decodeFromString(IssueResultPageDto.serializer(), live)
-            .issue.headlines.headlines.map { it.text }
+            .issue.headlines.headlines.map { it.displayText }
 
         assertEquals(
-            listOf("Avant-Garde Gallery Popular Yet Confusing", "12-Page Health Liftout Inside"),
+            listOf(
+                "Public Transport Has Ecstasiae On The Move",
+                "Car Sales Fall, But Never Better Time To Buy, Says Yard",
+                "Environment Groups Applaud Government Initiative",
+                "Lower Taxes Put Spring In Step, Money In Pocket",
+            ),
             headlines,
         )
     }

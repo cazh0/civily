@@ -12,6 +12,9 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.rotate
 import coil.ImageLoader
 import dev.cazh0.civily.core.text.Newspaper
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * A pile of front pages, one per headline, transcribed from `recentHeadlines.svg`.
@@ -33,20 +36,24 @@ fun NewspaperStack(
     modifier: Modifier = Modifier,
     price: String? = null,
     flagUrl: String? = null,
+    imageUrlsByHeadline: List<List<String>> = emptyList(),
     imageLoader: ImageLoader? = null,
 ) {
     if (headlines.isEmpty()) return
 
     BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
         val canvas = maxWidth
-        val lastTop = topOf(headlines.lastIndex)
+        val last = headlines.lastIndex
+        val sheet = SHEET_WIDTH * NewspaperStyle.Stacked.aspect
 
         Box(
             Modifier
                 .fillMaxWidth()
-                // The frame crops the final sheet rather than letting the pile run on; the
-                // same crop keeps the block from ending in a stretch of bare paper.
-                .height(canvas * (lastTop + VISIBLE_TAIL))
+                // Down to the foot of the last sheet, its rotated corner included. The frame
+                // stops 65 units short of that, which cuts the bottom paper through its
+                // photographs — and those are the only photographs the pile ever shows, every
+                // sheet above it being covered from the headline down by the next one.
+                .height(canvas * (topOf(last) + sheet + cornerDrop(last, sheet)))
                 .clipToBounds(),
         ) {
             headlines.forEachIndexed { index, headline ->
@@ -57,6 +64,7 @@ fun NewspaperStack(
                     style = NewspaperStyle.Stacked,
                     price = price,
                     flagUrl = flagUrl,
+                    imageUrls = imageUrlsByHeadline.getOrNull(index).orEmpty(),
                     imageLoader = imageLoader,
                     modifier = Modifier
                         .offset(x = canvas * leftOf(index), y = canvas * topOf(index))
@@ -82,14 +90,23 @@ private fun leftOf(index: Int): Float = LEFTS[index % LEFTS.size]
 private fun angleOf(index: Int): Float =
     ANGLE_STEP * (index + 1) * if (index % 2 == 0) -1f else 1f
 
+/**
+ * How far a sheet's lowest corner falls past the foot of its own box once it is turned.
+ *
+ * `rotate` turns what is drawn, not what is laid out, so the box the pile is measured against
+ * knows nothing about the angle. Without this the clip takes the corner off the last paper.
+ */
+private fun cornerDrop(index: Int, sheetHeight: Float): Float {
+    val radians = Math.toRadians(abs(angleOf(index)).toDouble())
+    return (SHEET_WIDTH / 2f) * sin(radians).toFloat() -
+        (sheetHeight / 2f) * (1f - cos(radians).toFloat())
+}
+
 private const val CANVAS = 517.86f
 private const val SHEET_WIDTH = 480f / CANVAS
 
 private val TOPS = listOf(5.86f / CANVAS, 134.89f / CANVAS, 287.37f / CANVAS, 404.67f / CANVAS)
 private val LEFTS = listOf(13.11f / CANVAS, 38f / CANVAS, 0f, 29.33f / CANVAS)
 private const val AVERAGE_STEP = ((404.67f - 5.86f) / 3f) / CANVAS
-
-/** How much of the last sheet the frame leaves showing: 605.68 − 404.67 of its canvas. */
-private const val VISIBLE_TAIL = 201.01f / CANVAS
 
 private const val ANGLE_STEP = 0.7f

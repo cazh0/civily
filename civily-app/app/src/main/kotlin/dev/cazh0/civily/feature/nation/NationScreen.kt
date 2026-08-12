@@ -2,11 +2,10 @@ package dev.cazh0.civily.feature.nation
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -70,18 +69,22 @@ fun NationScreen(
     // failed retry all come back to the tab the user was reading.
     var selected by rememberSaveable { mutableIntStateOf(0) }
 
-    // One instant for the whole feed, read once per load rather than per recomposition: two
-    // happenings a frame apart must not disagree about what "3 hours ago" means.
-    val now = remember(state) { System.currentTimeMillis() }
-
     LoadStateScaffold(
-        title = NsId.toName(nationId),
+        // Why remembered: the title is derived from the route argument, which cannot change
+        // while this screen exists, so re-deriving it on every recomposition is pure waste.
+        title = remember(nationId) { NsId.toName(nationId) },
         state = state,
         onRetry = viewModel::refresh,
         onSignIn = onSignIn,
         onBack = onBack,
         modifier = modifier,
     ) { nation ->
+        // One instant for the whole feed, read once per load rather than per recomposition: two
+        // happenings a frame apart must not disagree about what "3 hours ago" means. Keyed on
+        // the nation rather than on the load state, because a data class holding ninety
+        // rankings is an expensive thing to compare and the instance is what actually changes.
+        val now = remember(nation) { System.currentTimeMillis() }
+
         NationContent(
             nation = nation,
             now = now,
@@ -100,10 +103,16 @@ fun NationScreen(
  * Why the bar does not scroll away with the content: it is the only way between subjects, and a
  * reader four screens down the Rankings has to be able to leave without scrolling back up.
  *
- * Why each pane owns its own scroll rather than one scroll around the lot: two of them are real
- * lists — ninety census scales, twenty policy banners — and those have to be lazy. A shared outer
- * scroll would give a nested lazy list no bounded height to lay out in, and would also carry one
- * scroll position across seven unrelated pages.
+ * Why each pane owns its own scroll rather than one scroll around the lot: every pane is a lazy
+ * list, and a lazy list nested in a scroll of the same axis has no bounded height to lay out in.
+ * A shared scroll would also carry one position across seven unrelated pages.
+ *
+ * Why every pane is lazy and not just the two long ones: the top app bar collapses as the reader
+ * scrolls, which changes the height the content is measured against on every frame of the
+ * gesture. With an eager column that is a re-measure of the whole page per frame; with a lazy
+ * one it is a re-measure of what is on screen, and a page that is opened but not scrolled to the
+ * bottom never composes the part nobody looked at. That is the difference between a tab that
+ * appears and a tab that arrives.
  */
 @Composable
 private fun NationContent(
@@ -117,20 +126,20 @@ private fun NationContent(
     modifier: Modifier = Modifier,
 ) {
     val tabs = NationTab.entries
-    val tab = tabs[selected.coerceIn(tabs.indices)]
+    val index = selected.coerceIn(tabs.indices)
 
     Column(modifier = modifier.fillMaxSize()) {
         ScrollableTabRow(
-            selectedTabIndex = tabs.indexOf(tab),
+            selectedTabIndex = index,
             // The default edge padding is a 52dp indent that leaves the first tab looking
             // half-scrolled. Aligning it with the screen's own margin is what makes the row read
             // as part of the page.
             edgePadding = Dimens.ScreenPadding,
         ) {
-            tabs.forEach { entry ->
+            tabs.forEachIndexed { position, entry ->
                 Tab(
-                    selected = entry == tab,
-                    onClick = { onSelect(tabs.indexOf(entry)) },
+                    selected = position == index,
+                    onClick = { onSelect(position) },
                     text = {
                         Text(
                             text = stringResource(entry.labelRes),
@@ -142,45 +151,69 @@ private fun NationContent(
             }
         }
 
-        when (tab) {
-            NationTab.Overview -> Scrolling {
-                NationOverviewPane(nation, now, imageLoader, onOpenRegion)
-            }
+        when (tabs[index]) {
+            NationTab.Overview -> NationOverviewPane(nation, now, imageLoader, onOpenRegion)
 
-            // Already a lazy list, and it does its own padding: wrapping it in a scroll would
-            // give it no bounded height.
             NationTab.Policies -> NationPoliciesPane(nation.policies, imageLoader)
 
-            NationTab.People -> Scrolling {
-                NationPeoplePane(nation, onOpenNation, onOpenRegion)
-            }
+            NationTab.People -> NationPeoplePane(nation, onOpenNation, onOpenRegion)
 
-            NationTab.Government -> Scrolling {
-                NationGovernmentPane(nation, onOpenNation, onOpenRegion)
-            }
+            NationTab.Government -> NationGovernmentPane(nation, onOpenNation, onOpenRegion)
 
-            NationTab.Economy -> Scrolling {
-                NationEconomyPane(nation, onOpenNation, onOpenRegion)
-            }
+            NationTab.Economy -> NationEconomyPane(nation, onOpenNation, onOpenRegion)
 
             NationTab.Rankings -> NationRankingsPane(nation.rankings)
 
-            NationTab.Happenings -> Scrolling {
+            NationTab.Happenings ->
                 NationHappeningsPane(nation.happenings, now, onOpenNation, onOpenRegion)
-            }
         }
     }
 }
 
-/** The frame the five prose-and-grid panes share: one scroll, one screen margin. */
+/**
+ * The frame the prose-and-grid panes share: one lazy list and one screen margin.
+ *
+ * Why the margin is [LazyColumn]'s own `contentPadding` rather than a `Modifier.padding` around
+ * it: a modifier insets the scrolling viewport, so an item leaving the top would be clipped a
+ * margin early and the list would overscroll against an edge that is not the screen's. As
+ * content padding the list fills the pane and only its items are inset.
+ *
+ * Why the gap between blocks is [SectionGap] on each block rather than an arrangement on the
+ * list: a section with nothing in it draws nothing, and a lazy list spaces a zero-height item
+ * exactly as it spaces a full one — which would leave a section's worth of blank page where the
+ * API happened to send no data. A gap carried by the block disappears with the block.
+ */
 @Composable
-private fun Scrolling(content: @Composable () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(Dimens.ScreenPadding),
-    ) {
-        content()
-    }
+internal fun NationPane(
+    modifier: Modifier = Modifier,
+    content: LazyListScope.() -> Unit,
+) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        // No bottom margin of its own: the last block's own gap is the foot of the page.
+        contentPadding = PaddingValues(
+            start = Dimens.ScreenPadding,
+            top = Dimens.ScreenPadding,
+            end = Dimens.ScreenPadding,
+        ),
+        content = content,
+    )
+}
+
+/**
+ * What a pane's items are, for the list's own reuse pool.
+ *
+ * A lazy list can only reuse a scrapped item's layout nodes for an item of the same type, and
+ * these panes are a handful of one-off blocks and one long run of identical ones. Naming them is
+ * what lets the run of happenings recycle among themselves instead of against the chart above.
+ */
+internal object PaneContent {
+    const val Identity = "identity"
+    const val Facts = "facts"
+    const val Prose = "prose"
+    const val Chart = "chart"
+    const val Happening = "happening"
+    const val Ranking = "ranking"
+    const val Policy = "policy"
+    const val Header = "header"
 }

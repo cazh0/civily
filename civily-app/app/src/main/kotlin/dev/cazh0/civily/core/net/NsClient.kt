@@ -47,6 +47,15 @@ class NsClient(
             builder = Request.Builder().url(withUserClick(url, userClick)).get(),
             headers = sessionHeaders(),
             adoptCredentials = true,
+            invalidateSessionOnAuthFailure = true,
+        ).map { it.body }
+
+    suspend fun getSitePage(url: HttpUrl): Outcome<String> =
+        execute(
+            builder = Request.Builder().url(url).get(),
+            headers = siteHeaders(referer = null),
+            adoptCredentials = true,
+            invalidateSessionOnAuthFailure = false,
         ).map { it.body }
 
     suspend fun post(
@@ -61,6 +70,23 @@ class NsClient(
             builder = Request.Builder().url(withUserClick(url, userClick)).post(body),
             headers = sessionHeaders(),
             adoptCredentials = true,
+            invalidateSessionOnAuthFailure = true,
+        ).map { it.body }
+    }
+
+    suspend fun postSiteForm(
+        url: HttpUrl,
+        form: Map<String, String>,
+        referer: HttpUrl,
+    ): Outcome<String> {
+        val body = FormBody.Builder().apply {
+            form.forEach { (key, value) -> add(key, value) }
+        }.build()
+        return execute(
+            builder = Request.Builder().url(url).post(body),
+            headers = siteHeaders(referer = referer),
+            adoptCredentials = true,
+            invalidateSessionOnAuthFailure = false,
         ).map { it.body }
     }
 
@@ -82,6 +108,7 @@ class NsClient(
             builder = Request.Builder().url(url).get(),
             headers = signInHeaders(password),
             adoptCredentials = false,
+            invalidateSessionOnAuthFailure = true,
         )
 
         return when {
@@ -107,6 +134,7 @@ class NsClient(
         builder: Request.Builder,
         headers: Headers,
         adoptCredentials: Boolean,
+        invalidateSessionOnAuthFailure: Boolean,
     ): Outcome<RawResponse> = withContext(Dispatchers.IO) {
         limiter.acquire()
         val request = builder.headers(headers).build()
@@ -119,6 +147,10 @@ class NsClient(
                     resetInSeconds = response.header(HEADER_RATE_LIMIT_RESET)?.toIntOrNull(),
                 )
                 if (adoptCredentials) adopt(raw)
+
+                if (!response.isSuccessful) {
+                    Log.w(TAG, "Request to ${request.url.encodedPath} returned HTTP ${response.code}")
+                }
 
                 when {
                     response.isSuccessful -> Outcome.Success(
@@ -133,11 +165,20 @@ class NsClient(
                         // it would leave the app showing a signed-in nation whose every
                         // request fails, with no way for the user to tell why.
                         //
+                        // Site form pages can also answer 403 for page/form reasons after an
+                        // API request just succeeded. Those calls pass
+                        // `invalidateSessionOnAuthFailure = false`, so they surface as server
+                        // failures without destroying a known-good session.
+                        //
                         // Only the rejected nation goes. Any other account the user has stored
                         // holds a separate session and is unaffected.
-                        val active = session.current
-                        if (adoptCredentials && active != null) session.forget(active.nationId)
-                        Outcome.Failure(CivilyError.Unauthorized)
+                        if (invalidateSessionOnAuthFailure) {
+                            val active = session.current
+                            if (adoptCredentials && active != null) session.forget(active.nationId)
+                            Outcome.Failure(CivilyError.Unauthorized)
+                        } else {
+                            Outcome.Failure(CivilyError.Server(response.code))
+                        }
                     }
 
                     response.code == HTTP_NOT_FOUND -> Outcome.Failure(CivilyError.NotFound)
@@ -210,6 +251,21 @@ class NsClient(
         return builder.build()
     }
 
+    private fun siteHeaders(referer: HttpUrl?): Headers {
+        val builder = sessionHeaders().newBuilder()
+            .add(HEADER_ACCEPT, ACCEPT_HTML)
+
+        if (referer != null) {
+            // Why: the site enact endpoint is a browser form guarded by a CSRF token. Browser
+            // submissions carry same-origin context as well as the hidden token; without it the
+            // server can reject the POST before returning the aftermath page.
+            builder
+                .add(HEADER_ORIGIN, ORIGIN)
+                .add(HEADER_REFERER, referer.toString())
+        }
+        return builder.build()
+    }
+
     private fun signInHeaders(password: String): Headers = Headers.Builder()
         .add(HEADER_USER_AGENT, UserAgent.of(appVersion, null))
         .add(HEADER_PASSWORD, password)
@@ -239,12 +295,17 @@ class NsClient(
         const val HEADER_PIN = "X-Pin"
         const val HEADER_PASSWORD = "X-Password"
         const val HEADER_AUTOLOGIN = "X-Autologin"
+        const val HEADER_ACCEPT = "Accept"
+        const val HEADER_ORIGIN = "Origin"
+        const val HEADER_REFERER = "Referer"
         const val HEADER_RATE_LIMIT_LIMIT = "RateLimit-Limit"
         const val HEADER_RATE_LIMIT_REMAINING = "RateLimit-Remaining"
         const val HEADER_RATE_LIMIT_RESET = "RateLimit-Reset"
         const val HEADER_RETRY_AFTER = "Retry-After"
 
         const val PARAM_USER_CLICK = "userclick"
+        const val ACCEPT_HTML = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+        const val ORIGIN = "https://www.nationstates.net"
 
         const val HTTP_UNAUTHORIZED = 401
         const val HTTP_FORBIDDEN = 403

@@ -3,6 +3,7 @@ package dev.cazh0.civily.data.issues
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
+import nl.adaptivity.xmlutil.serialization.XmlValue
 
 /**
  * What `c=issue` returns once legislation is enacted.
@@ -55,8 +56,18 @@ data class HeadlinesDto(
     val headlines: List<HeadlineDto> = emptyList(),
 )
 
+/**
+ * A headline, and nothing else.
+ *
+ * No artwork: unlike `<ISSUE>` in the issues shard, which carries `PIC1` and `PIC2`, a
+ * `<HEADLINE>` from `c=issue` is bare text — checked against a live enactment, not assumed.
+ * The site's aftermath page is the only place the game names those cutouts, and Civily cannot
+ * reach it; `README.md` records why.
+ */
 @Serializable
 @XmlSerialName("HEADLINE", "", "")
 data class HeadlineDto(
-    @nl.adaptivity.xmlutil.serialization.XmlValue(true) val text: String = "",
-)
+    @XmlValue(true) val text: String = "",
+) {
+    val displayText: String get() = text.trim()
+}

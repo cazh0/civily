@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Nothing is declared here. The module has no components of its own: it is an instrumentation
+    APK that drives dev.cazh0.civily from outside, and everything it needs comes from the
+    Macrobenchmark runtime's own manifest.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" />

@@ -21,8 +21,8 @@ import kotlinx.coroutines.launch
  * Where an answer has got to.
  *
  * Answering is the app's first irreversible action, so it needs states the list never did:
- * one that disables the options while the request is in flight, and one that reports a
- * failure without pretending the issue was decided.
+ * one that disables the options while the request is in flight, and one that reports which
+ * side of the irreversible boundary failed.
  */
 sealed interface AnswerState {
     data object Idle : AnswerState
@@ -67,7 +67,10 @@ class IssuesViewModel(private val repository: IssuesRepository) : ViewModel() {
                     refresh()
                     AnswerState.Done(result)
                 },
-                onFailure = { error -> AnswerState.Failed(error) },
+                onFailure = { error ->
+                    refresh()
+                    AnswerState.Failed(error)
+                },
             )
         }
     }

@@ -1,5 +1,6 @@
 package dev.cazh0.civily.data.issues
 
+import dev.cazh0.civily.core.net.NsUrl
 import dev.cazh0.civily.data.NsXml
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -22,6 +23,8 @@ class IssueDtoTest {
             <ISSUE id="111">
                 <TITLE>Bin There, Done That</TITLE>
                 <TEXT>Rubbish is piling up.</TEXT>
+                <PIC1>b21</PIC1>
+                <PIC2>g1</PIC2>
                 <OPTION id="0">Collect it weekly.</OPTION>
                 <OPTION id="1">Let the market sort it out.</OPTION>
             </ISSUE>
@@ -42,6 +45,16 @@ class IssueDtoTest {
         assertEquals(111, first.id)
         assertEquals("Bin There, Done That", first.title)
         assertEquals("Rubbish is piling up.", first.text)
+        assertEquals("b21", first.primaryImageId)
+        assertEquals("g1", first.secondaryImageId)
+        assertEquals(
+            "https://www.nationstates.net/images/newspaper/g1-2.jpg",
+            NsUrl.newspaperImage(first.secondaryImageId, 2),
+        )
+        assertEquals(
+            "https://www.nationstates.net/images/newspaper/g1-2.jpg",
+            NsUrl.newspaperImage("/images/newspaper/g1-2.jpg", 2),
+        )
         assertEquals(listOf(0, 1), first.options.map { it.id })
         assertEquals("Collect it weekly.", first.options[0].text)
         assertEquals(222, issues[1].id)

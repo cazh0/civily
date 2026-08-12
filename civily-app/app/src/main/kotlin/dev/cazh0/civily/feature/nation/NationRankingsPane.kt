@@ -46,6 +46,9 @@ fun NationRankingsPane(rankings: List<Ranking>, modifier: Modifier = Modifier) {
         return
     }
 
+    // Why hoisted out of the rows: `stringArrayResource` reads and allocates the whole array on
+    // every call, and there are ninety scales in each of these two. Read once for the list, not
+    // once per row that scrolls into view.
     val scaleNames = stringArrayResource(R.array.census_scales)
     val scaleUnits = stringArrayResource(R.array.census_units)
 
@@ -53,7 +56,13 @@ fun NationRankingsPane(rankings: List<Ranking>, modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(Dimens.ScreenPadding),
     ) {
-        items(items = rankings, key = { it.scaleId }) { ranking ->
+        items(
+            items = rankings,
+            key = { it.scaleId },
+            // Ninety rows of one shape: naming the type is what lets the list reuse the layout
+            // nodes of a row that scrolled off for the row scrolling on.
+            contentType = { PaneContent.Ranking },
+        ) { ranking ->
             RankingRow(
                 // A scale past the end of the list is named for its id rather than hidden. The
                 // list came from the legacy app and has gaps of its own; the honest failure is

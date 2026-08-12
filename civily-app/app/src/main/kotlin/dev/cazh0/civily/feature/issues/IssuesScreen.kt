@@ -63,7 +63,13 @@ fun IssuesScreen(
                 contentPadding = PaddingValues(Dimens.ScreenPadding),
                 verticalArrangement = Arrangement.spacedBy(Dimens.ItemSpacing),
             ) {
-                items(items = page.issues, key = { it.id }) { issue ->
+                items(
+                    items = page.issues,
+                    key = { it.id },
+                    // One shape per row, so the list can reuse a front page's layout nodes for
+                    // the next front page rather than building them again.
+                    contentType = { FRONT_PAGE },
+                ) { issue ->
                     IssueHeadlineCard(
                         issue = issue,
                         page = page,
@@ -94,10 +100,13 @@ private fun IssueHeadlineCard(
         price = page.currency.takeIf { it.isNotBlank() }
             ?.let { stringResource(R.string.newspaper_price, it.uppercase(Locale.US)) },
         flagUrl = page.flagUrl.takeIf { it.isNotBlank() },
-        bannerUrl = issue.bannerUrl,
+        imageUrls = issue.imageUrls,
         imageLoader = imageLoader,
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
     )
 }
+
+/** The list holds one shape, and this names it for the reuse pool. */
+private const val FRONT_PAGE = "front-page"

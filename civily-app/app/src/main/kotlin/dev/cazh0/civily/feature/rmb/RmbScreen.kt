@@ -59,18 +59,19 @@ fun RmbScreen(
     )
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    // One clock for the whole list. Reading it per post would make "9h" and "9h" disagree
-    // halfway down the screen.
-    val now = remember(state) { System.currentTimeMillis() }
-
     LoadStateScaffold(
-        title = stringResource(R.string.title_rmb, NsId.toName(regionId)),
+        title = stringResource(R.string.title_rmb, remember(regionId) { NsId.toName(regionId) }),
         state = state,
         onRetry = viewModel::refresh,
         onSignIn = onSignIn,
         onBack = onBack,
         modifier = modifier,
     ) { posts ->
+        // One clock for the whole list. Reading it per post would make "9h" and "9h" disagree
+        // halfway down the screen. Keyed on the posts rather than on the load state, so the
+        // comparison is against the list instance and not a structural walk of fifty posts.
+        val now = remember(posts) { System.currentTimeMillis() }
+
         if (posts.isEmpty()) {
             EmptyState(
                 title = stringResource(R.string.rmb_empty),
@@ -86,7 +87,13 @@ fun RmbScreen(
                     bottom = Dimens.SectionSpacing,
                 ),
             ) {
-                itemsIndexed(items = posts, key = { _, post -> post.id }) { index, post ->
+                itemsIndexed(
+                    items = posts,
+                    key = { _, post -> post.id },
+                    // Fifty rows of one shape: naming the type lets the list reuse the layout
+                    // nodes of a post that scrolled off for the post scrolling on.
+                    contentType = { _, _ -> POST },
+                ) { index, post ->
                     // Why consecutive posts by one author lose their header: a board is a
                     // conversation, and repeating a name and avatar every two lines turns a
                     // reply into a stranger.
@@ -226,3 +233,6 @@ private fun RemovedNote(visibility: RmbPost.Visibility) {
             .padding(top = Dimens.PostSpacing),
     )
 }
+
+/** The list's reuse pool has one shape in it, and this names it. */
+private const val POST = "post"

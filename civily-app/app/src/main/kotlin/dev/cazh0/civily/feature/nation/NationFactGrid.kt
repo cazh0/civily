@@ -64,7 +64,13 @@ enum class Emphasis { None, Good, Bad }
  * here is on screen at once anyway — a nation has a fixed dozen facts, not a feed of them — so
  * laziness would cost complexity and buy nothing.
  *
- * A row is measured to its tallest tile so wrapped values do not step the row's baseline.
+ * A row is measured to its tallest tile so wrapped values do not step the row's baseline, and
+ * `IntrinsicSize.Min` is how that is asked for rather than an oversight. The cheaper-looking
+ * alternative — a custom `Layout` that measures each tile once, takes the tallest, and measures
+ * the short ones again at that height — is not available: Compose throws on the second call
+ * ("measure() may not be called multiple times on the same Measurable") and names intrinsics as
+ * the supported way to ask a child how big it wants to be. The cost is one extra pass over a row
+ * of two tiles, and it is paid when the row is laid out rather than per frame.
  */
 @Composable
 fun FactGrid(

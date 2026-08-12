@@ -18,8 +18,8 @@ data class Issue(
     val id: Int,
     val title: String,
     val text: List<BbBlock>,
-    /** Full URL of the issue's artwork, or null when it has none. */
-    val bannerUrl: String?,
+    /** Full URLs of the newspaper artwork, in the API's PIC1/PIC2 order. */
+    val imageUrls: List<String>,
     val options: List<IssueOption>,
 )
 
@@ -32,14 +32,18 @@ data class Issue(
 data class IssueResult(
     val description: String,
     val rankings: List<CensusChange>,
-    val headlines: List<String>,
+    val headlines: List<IssueResultHeadline>,
+)
+
+data class IssueResultHeadline(
+    val text: String,
+    val imageUrls: List<String>,
 )
 
 data class CensusChange(
     /** Indexes `R.array.census_scales`; the screen turns it into a name. */
     val scaleId: Int,
-    val score: Double,
-    val change: Double,
+    /** Signed percent movement from the issue result. */
     val percentChange: Double,
 )
 

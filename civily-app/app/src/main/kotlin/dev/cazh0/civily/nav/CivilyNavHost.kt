@@ -1,5 +1,9 @@
 package dev.cazh0.civily.nav
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -22,6 +26,7 @@ import dev.cazh0.civily.feature.region.RegionScreen
 import dev.cazh0.civily.feature.rmb.RmbScreen
 import dev.cazh0.civily.feature.signin.SignInScreen
 import dev.cazh0.civily.feature.wa.WaScreen
+import dev.cazh0.civily.ui.theme.Motion
 
 /**
  * Every destination in the app, and the only place route strings are written.
@@ -54,9 +59,27 @@ object Routes {
     fun rmb(regionId: String) = "rmb/$regionId"
 }
 
+/**
+ * Why the transitions are stated rather than left to the library: navigation-compose fades for
+ * **700ms** by default, in and out, on every push and every pop. The destination is composed
+ * before the fade starts, so all seven tenths of a second are spent watching two screens that
+ * have already finished their work — a back press reads as the app deciding whether to obey.
+ * [Motion] holds the replacements; a fade is kept because it is the one transition that costs a
+ * single alpha layer rather than a per-frame relayout.
+ */
+private val screenEnter = fadeIn(tween(Motion.ScreenEnterMillis, easing = LinearEasing))
+private val screenExit = fadeOut(tween(Motion.ScreenExitMillis, easing = LinearEasing))
+
 @Composable
 fun CivilyNavHost(navController: NavHostController = rememberNavController()) {
-    NavHost(navController = navController, startDestination = Routes.LOOKUP) {
+    NavHost(
+        navController = navController,
+        startDestination = Routes.LOOKUP,
+        enterTransition = { screenEnter },
+        exitTransition = { screenExit },
+        popEnterTransition = { screenEnter },
+        popExitTransition = { screenExit },
+    ) {
         composable(Routes.LOOKUP) { entry ->
             val nav = navActions(navController, entry)
             LookupScreen(

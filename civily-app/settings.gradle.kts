@@ -25,3 +25,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "Civily"
 include(":app")
+
+// Why a second module and not a source set in :app — a Macrobenchmark drives the app from
+// outside its own process, the way the system does. It has to be a `com.android.test` project
+// to be built and installed as a separate APK; there is no way to express that inside :app.
+// Nothing ships from here: it produces the profile text that :app carries, and measurements.
+include(":benchmark")

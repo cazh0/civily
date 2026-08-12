@@ -1,5 +1,6 @@
 package dev.cazh0.civily.data.issues
 
+import android.util.Log
 import dev.cazh0.civily.core.net.NsClient
 import dev.cazh0.civily.core.net.NsUrl
 import dev.cazh0.civily.core.result.Outcome
@@ -44,9 +45,10 @@ class IssuesRepository(
     /**
      * Enacts [optionId] on [issueId], or dismisses the issue when [optionId] is [DISMISS].
      *
-     * Why this is one request and not the two-step prepare/execute every other Private Command
-     * needs: the API documents `issue` as the sole exception. Sending a `mode=prepare` here
-     * would be wrong, not merely redundant.
+     * Enacting uses the site's own tokenised form instead of the API command because the POST
+     * response is the only response that carries the exact `legislation-papers` newspaper stack.
+     * If that page fails before submission, the documented API command is the stable fallback.
+     * Dismissal stays on the API command because it has no aftermath page to render.
      *
      * **This cannot be undone.** The caller is responsible for confirming with the user first.
      */
@@ -55,39 +57,132 @@ class IssuesRepository(
             val nationId = session.current?.nationId
                 ?: return@withContext Outcome.Failure(CivilyError.Unauthorized)
 
-            client.post(
-                url = NsUrl.command(),
-                form = mapOf(
-                    "nation" to nationId,
-                    "c" to "issue",
-                    "issue" to issueId.toString(),
-                    "option" to optionId.toString(),
-                ),
-            )
-                .flatMap { body -> decodeNsXml<IssueResultPageDto>(RESULT_TAG, body) }
-                .map { page -> page.issue.toResult() }
+            if (optionId != DISMISS) {
+                return@withContext answerViaSiteOrApi(nationId, issueId, optionId)
+            }
+
+            answerViaApi(nationId, issueId, optionId)
         }
+
+    private suspend fun answerViaSiteOrApi(
+        nationId: String,
+        issueId: Int,
+        optionId: Int,
+    ): Outcome<IssueResult> {
+        val dilemmaUrl = NsUrl.dilemma(issueId)
+        val form = when (val page = client.getSitePage(dilemmaUrl)) {
+            is Outcome.Success -> IssueHtmlParser.parseEnactForm(
+                html = page.value,
+                nationId = nationId,
+                issueId = issueId,
+                optionId = optionId,
+            ).loggedIssueHtmlFailure("issue enact form")
+
+            is Outcome.Failure -> {
+                Log.w(TAG, "issue page fetch failed before submission: ${page.error.detailName()}")
+                return answerViaApi(nationId, issueId, optionId)
+            }
+        }
+
+        val enactForm = when (form) {
+            is Outcome.Success -> form.value
+            is Outcome.Failure -> {
+                Log.w(TAG, "falling back to API issue command: ${form.error.detailName()}")
+                return answerViaApi(nationId, issueId, optionId)
+            }
+        }
+
+        val actionUrl = NsUrl.siteAction(enactForm.action)
+            ?: run {
+                Log.w(TAG, "falling back to API issue command: issue enact form action invalid")
+                return answerViaApi(nationId, issueId, optionId)
+            }
+
+        return when (val posted = client.postSiteForm(
+            url = actionUrl,
+            form = enactForm.fields,
+            referer = dilemmaUrl,
+        )) {
+            is Outcome.Success -> IssueHtmlParser.parseResult(posted.value)
+                .loggedIssueHtmlFailure("issue result")
+                .submittedResult()
+
+            is Outcome.Failure -> submittedUnknown(posted.error)
+        }
+    }
+
+    private suspend fun answerViaApi(
+        nationId: String,
+        issueId: Int,
+        optionId: Int,
+    ): Outcome<IssueResult> =
+        client.post(
+            url = NsUrl.command(),
+            form = mapOf(
+                "nation" to nationId,
+                "c" to "issue",
+                "issue" to issueId.toString(),
+                "option" to optionId.toString(),
+            ),
+        )
+            .flatMap { body -> decodeNsXml<IssueResultPageDto>(RESULT_TAG, body) }
+            .map { page -> page.issue.toResult() }
 
     private fun IssueResultDto.toResult() = IssueResult(
         description = description,
         rankings = rankings.ranks.map {
             CensusChange(
                 scaleId = it.id,
-                score = it.score,
-                change = it.change,
                 percentChange = it.percentChange,
             )
         },
-        headlines = headlines.headlines.map { it.text }.filter { it.isNotBlank() },
+        headlines = headlines.headlines.mapNotNull { it.toHeadline() },
     )
+
+    /** No artwork: `c=issue` gives the headline as bare text. See [HeadlineDto]. */
+    private fun HeadlineDto.toHeadline(): IssueResultHeadline? =
+        displayText.takeIf { it.isNotBlank() }
+            ?.let { IssueResultHeadline(text = it, imageUrls = emptyList()) }
 
     private fun IssueDto.toIssue() = Issue(
         id = id,
         title = title,
         text = BbParser.parse(text),
-        bannerUrl = bannerId.takeIf { it.isNotEmpty() }?.let(NsUrl::banner),
+        imageUrls = listOfNotNull(
+            primaryImageId.takeIf { it.isNotEmpty() }?.let { NsUrl.newspaperImage(it, 1) },
+            secondaryImageId.takeIf { it.isNotEmpty() }?.let { NsUrl.newspaperImage(it, 2) },
+        ),
         options = options.map { IssueOption(id = it.id, text = BbParser.parse(it.text)) },
     )
+
+    private fun Outcome<IssueResult>.submittedResult(): Outcome<IssueResult> = when (this) {
+        is Outcome.Success -> this
+        is Outcome.Failure -> submittedUnknown(error)
+    }
+
+    private fun <T> Outcome<T>.loggedIssueHtmlFailure(section: String): Outcome<T> {
+        if (this is Outcome.Failure) {
+            Log.w(TAG, "$section did not parse: ${error.detailName()}")
+        }
+        return this
+    }
+
+    private fun submittedUnknown(error: CivilyError): Outcome.Failure {
+        Log.w(TAG, "Submitted issue result unknown: ${error.detailName()}")
+        return Outcome.Failure(CivilyError.IssueResultUnknown(error.detailName()))
+    }
+
+    private fun CivilyError.detailName(): String = when (this) {
+        is CivilyError.Malformed -> detail
+        is CivilyError.Server -> "server $code"
+        is CivilyError.IssueResultUnknown -> detail
+        CivilyError.InvalidLogin -> "invalid login"
+        CivilyError.LoginConflict -> "login conflict"
+        CivilyError.NoConnection -> "no connection"
+        CivilyError.NotFound -> "not found"
+        CivilyError.RateLimited -> "rate limited"
+        CivilyError.Unauthorized -> "unauthorized"
+    }
 
     companion object {
         /** The API's sentinel for "dismiss without acting". */

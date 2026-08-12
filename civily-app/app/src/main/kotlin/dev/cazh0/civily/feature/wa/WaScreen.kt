@@ -2,12 +2,13 @@ package dev.cazh0.civily.feature.wa
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
@@ -42,7 +43,7 @@ import dev.cazh0.civily.data.wa.Council
 import dev.cazh0.civily.data.wa.Resolution
 import dev.cazh0.civily.ui.component.FactCard
 import dev.cazh0.civily.ui.component.LoadStateContent
-import dev.cazh0.civily.ui.component.RichText
+import dev.cazh0.civily.ui.component.richTextItems
 import dev.cazh0.civily.ui.theme.Dimens
 
 private val COUNCILS = listOf(Council.GeneralAssembly, Council.SecurityCouncil)
@@ -134,44 +135,50 @@ private fun CouncilContent(
     onOpenRegion: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(Dimens.ScreenPadding),
+    val resolution = assembly.resolution
+
+    // Why lazy: a resolution's text is the longest single piece of prose the app renders — a
+    // General Assembly proposal runs to dozens of clauses — and every one of them would be laid
+    // out before the title appeared.
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(Dimens.ScreenPadding),
         verticalArrangement = Arrangement.spacedBy(Dimens.ItemSpacing),
     ) {
-        val resolution = assembly.resolution
         if (resolution == null) {
             // Why a neutral card and not an error: between votes the chamber is genuinely
             // empty for hours at a time. That is the World Assembly working normally.
-            NoResolutionCard()
+            item(contentType = "empty") { NoResolutionCard() }
         } else {
-            ResolutionCard(resolution)
+            item(contentType = "resolution") { ResolutionCard(resolution) }
             if (resolution.proposedBy.isNotEmpty()) {
-                FactCard(
-                    labelRes = R.string.label_proposed_by,
-                    value = NsId.toName(resolution.proposedBy),
-                    onClick = { onOpenNation(resolution.proposedBy) },
-                )
+                item(contentType = "fact") {
+                    FactCard(
+                        labelRes = R.string.label_proposed_by,
+                        value = NsId.toName(resolution.proposedBy),
+                        onClick = { onOpenNation(resolution.proposedBy) },
+                    )
+                }
             }
-            if (resolution.body.isNotEmpty()) {
-                RichText(
-                    blocks = resolution.body,
-                    onOpenNation = onOpenNation,
-                    onOpenRegion = onOpenRegion,
-                )
-            }
+            richTextItems(
+                blocks = resolution.body,
+                onOpenNation = onOpenNation,
+                onOpenRegion = onOpenRegion,
+            )
         }
 
-        FactCard(
-            labelRes = R.string.label_wa_members,
-            value = Numbers.grouped(assembly.memberCount),
-        )
-        FactCard(
-            labelRes = R.string.label_wa_delegates,
-            value = Numbers.grouped(assembly.delegateCount),
-        )
+        item(contentType = "fact") {
+            FactCard(
+                labelRes = R.string.label_wa_members,
+                value = Numbers.grouped(assembly.memberCount),
+            )
+        }
+        item(contentType = "fact") {
+            FactCard(
+                labelRes = R.string.label_wa_delegates,
+                value = Numbers.grouped(assembly.delegateCount),
+            )
+        }
     }
 }
 
