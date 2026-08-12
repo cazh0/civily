@@ -19,7 +19,8 @@ app/src/main/kotlin/dev/cazh0/civily/
 │   ├── session/     Session · Accounts · SessionStore (the only copy of credentials)
 │   ├── result/      Outcome · CivilyError          (the only way failure travels)
 │   │                LoadState · launchLoad          (the only shape a read screen has)
-│   ├── text/        NsId · Numbers · Population · Magnitude · Percent · RelativeTime
+│   ├── text/        NsId · Numbers · Population · Magnitude · Percent
+│   │                RelativeTime · Countdown            (a gap behind, a gap ahead)
 │   │                FreedomRating                  (which ratings are good news)
 │   │                HtmlEntities · NsText                (decoding what the API really sends)
 │   │   └── bbcode/  BbParser · BbTree · BbColor     (NationStates markup, parsed not regexed)
@@ -50,6 +51,7 @@ app/src/main/kotlin/dev/cazh0/civily/
     └── component/   LoadStateScaffold · LoadStateContent · RichText
                      AmbientFlag · FlagHero · LinkRow · FactCard · NationAvatar
                      Pill · SectionHeader · LoadingState · EmptyState · ErrorState
+                     Countdown                       (the only thing that ticks)
 ```
 
 `data/` holds two kinds of type. A `…Dto` is the wire shape, annotated for XML. A plain type
@@ -153,6 +155,63 @@ background dispatcher, so a repository that decodes after it returns would decod
 caller's thread. Every repository method therefore wraps its body in
 `withContext(Dispatchers.Default)`, and BBCode is parsed there too — never inside a composable,
 which runs on every recomposition.
+
+**The Issues button carries its answer.** A row labelled "Issues" and nothing else asks the
+reader to open a screen to find out whether it was worth opening — every time, including the
+several times a day there is nothing there. So it says: a count when decisions are waiting, and
+when none are, how long until the next one. Either way the press is a decision already made
+rather than a check that has to be performed.
+
+The count is the badge everyone already reads, from every notification on the device. Zero
+draws *nothing* — not a grey nought, not an empty ring. A badge is a claim that something needs
+dealing with, and one that persists at zero makes that claim every time the reader looks at the
+screen, which is how a person learns to stop seeing it. It is `primary`, not the `error` colour
+Material's own `Badge` defaults to: red in this app means something is wrong, and an issue
+waiting is the thing the player opened the app for. Colouring good news as damage is the mistake
+the freedom ratings already caught the legacy client making.
+
+**It stands in the chevron's place, and the row has nothing else on it.** The badge and the
+arrow occupy one slot and cross over inside it, so no gap can open between two marks that were
+never both there, and nothing in the row moves as the count comes and goes. A count already says
+there is somewhere to go; an arrow beside it is the same sentence twice, at the one end of the
+row where a reader is looking for a single answer. There is no leading icon either. The rows
+around this one lead with a flag because a flag is the thing being identified — a glyph invented
+to fill that space would only be decoration wearing a flag's clothes.
+
+It costs a request of its own, `unread`+`nextissuetime`, rather than being read off the issues
+themselves. That is a count and an instant against every issue's prose and five options each,
+for a row on the front screen that is reloaded every time the reader lands on it — including
+the moment they come back from answering something, which is the one moment the old number is
+guaranteed wrong. Both shards are documented and the legacy client reads `unread` for exactly
+this. Nothing is shown while the answer is unknown, and a row still holding the previous
+nation's numbers a moment after a switch shows nothing either: the count is stamped with the
+nation it belongs to, because switching costs no request and would otherwise leave one nation's
+issues sitting under another nation's name. A count that *failed* to load says so in the row's
+own grey — spec §5 has no silent failures in it, and a digit that quietly stopped updating when
+the device left the network is exactly that.
+
+**The wait is the empty state, and it runs.** A nation between issues is not an error and not a
+dead end, and the game says precisely when the next one lands, so the screen says it too: the
+nation is gloriously issue-free, and under that a clock. It counts in seconds because this is
+the one screen with nothing else on it and a countdown that moves once a minute reads as a
+screenshot; the button on the front screen counts in minutes for the opposite reason. The
+figures are tabular — Roboto's proportional digits are different widths, so a plain `Text`
+counting down re-measures itself on nearly every tick and nudges the block around it — and the
+hours field is written even at zero, so crossing an hour does not move the digits under the
+reader's eye.
+
+Both clocks stop dead while the screen is off. A composition survives the app going to the
+background and a `delay` loop inside one goes on waking the process to write a value nobody can
+see, so `rememberCountdown` reads the lifecycle as state and simply does not exist while the
+screen is stopped. It wakes on the boundary at which the *displayed* value changes rather than
+every second from whenever the composition happened to start, which is one state write per
+visible change and no repeated or skipped digits.
+
+And the wait ends by itself. The screen counting down is the screen that notices, so the moment
+the clock runs out the list reloads under the reader — no pull, no stale "issue-free" over a
+nation that has three. It cannot become a poll: the effect is keyed on the instant being waited
+for, so a reload handing back the same instant does not restart it, and a later one is a new
+wait that restarts it exactly once.
 
 **Issues are newspapers, and so are their consequences.** `NewspaperFrontPage` is a direct
 transcription of the supplied Figma frame: every coordinate is a fraction of the component's
@@ -603,6 +662,11 @@ on low-RAM devices only; it applies that to JPEGs alone, which have no transpare
 on first touch, and the first thing to ask for the session store is the composition of the first
 screen — so `CivilyApp` starts that read on an IO dispatcher as the process comes up. `by lazy`
 is synchronised, so nothing can see a half-built store and nothing reads the file twice.
+
+**Nothing ticks that is not being looked at.** The two countdowns are the only clocks in the
+app, and both are gated on the lifecycle and wake on the boundary where their own display
+changes — not on a fixed interval, and not at all while the screen is off. See "The wait is the
+empty state" above for why each of those is a rule rather than a nicety.
 
 **A decoded bitmap does not outlive the colour taken from it.** `AmbientFlag` needs one average
 colour out of the flag; holding the bitmap in state to get it pinned a full-size image in the

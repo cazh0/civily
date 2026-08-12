@@ -3,6 +3,7 @@ package dev.cazh0.civily.ui.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -36,9 +37,18 @@ fun LoadingState(modifier: Modifier = Modifier) {
  *
  * Deliberately not [ErrorState]: an empty message board is not a failure, and dressing it as
  * one tells the user something is broken when nothing is.
+ *
+ * @param footer for the emptiness that is going to end by itself. An issues screen knows when
+ *   the next issue lands, and telling the reader is the difference between "nothing here" and
+ *   "nothing here yet". Nothing by default, which is the honest answer everywhere else.
  */
 @Composable
-fun EmptyState(title: String, body: String, modifier: Modifier = Modifier) {
+fun EmptyState(
+    title: String,
+    body: String,
+    modifier: Modifier = Modifier,
+    footer: @Composable ColumnScope.() -> Unit = {},
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -57,6 +67,7 @@ fun EmptyState(title: String, body: String, modifier: Modifier = Modifier) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
+        footer()
     }
 }
 

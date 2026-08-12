@@ -38,9 +38,35 @@ class IssuesRepository(
                     flagUrl = page.flagUrl,
                     currency = page.currency,
                     issues = page.issues.issues.map { it.toIssue() },
+                    nextIssueTime = page.nextIssueTime.orNoNextIssue(),
                 )
             }
     }
+
+    /**
+     * The two numbers the Issues button shows, without the payload behind it.
+     *
+     * Separate from [load] rather than derived from it because the button is on the front
+     * screen and the issues themselves are not: asking for `issues` there would fetch every
+     * issue's prose and options to render a digit.
+     */
+    suspend fun badge(): Outcome<IssueBadge> = withContext(Dispatchers.Default) {
+        val active = session.current
+            ?: return@withContext Outcome.Failure(CivilyError.Unauthorized)
+
+        client.get(NsUrl.api(NsUrl.Target.Nation(active.nationId), BADGE_SHARDS))
+            .flatMap { body -> decodeNsXml<IssueBadgeDto>(BADGE_TAG, body) }
+            .map { dto ->
+                IssueBadge(
+                    nationId = active.nationId,
+                    dueCount = dto.unread.issues,
+                    nextIssueTime = dto.nextIssueTime.orNoNextIssue(),
+                )
+            }
+    }
+
+    /** `NEXTISSUETIME` is absent for a nation with none scheduled, which decodes to zero. */
+    private fun Long.orNoNextIssue(): Long? = takeIf { it > 0 }
 
     /**
      * Enacts [optionId] on [issueId], or dismisses the issue when [optionId] is [DISMISS].
@@ -190,11 +216,17 @@ class IssuesRepository(
 
         private const val TAG = "Issues"
         private const val RESULT_TAG = "IssueResult"
+        private const val BADGE_TAG = "IssueBadge"
         /**
-         * The three extras ride along free — one request either way — and between them they
-         * dress the masthead: the capital names the paper, the flag flies on it and the
-         * currency is the cover price.
+         * The four extras ride along free — one request either way. Three of them dress the
+         * masthead: the capital names the paper, the flag flies on it and the currency is the
+         * cover price. `nextissuetime` is what the screen counts down to when there is nothing
+         * on the desk.
          */
-        private val SHARDS = listOf("issues", "capital", "flag", "currency")
+        private val SHARDS =
+            listOf("issues", "capital", "flag", "currency", "nextissuetime")
+
+        /** A count and an instant. See [badge]. */
+        private val BADGE_SHARDS = listOf("unread", "nextissuetime")
     }
 }

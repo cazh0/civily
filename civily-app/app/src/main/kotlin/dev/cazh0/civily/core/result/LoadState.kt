@@ -2,6 +2,7 @@ package dev.cazh0.civily.core.result
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -34,11 +35,15 @@ sealed interface LoadState<out T> {
  * features, but the ViewModels are not — nation will grow issue answering, region will grow
  * message posting. Sharing the mechanic keeps the duplication out without welding the
  * features together (spec §2 R2a).
+ *
+ * Returns the [Job] so a ViewModel with more than one reason to reload can tell whether it is
+ * already doing so. The state cannot answer that: it is written from inside the coroutine, so
+ * two callers in one frame both read the state from before either of them started.
  */
 fun <T> ViewModel.launchLoad(
     into: MutableStateFlow<LoadState<T>>,
     load: suspend () -> Outcome<T>,
-) {
+): Job =
     viewModelScope.launch {
         // Why the first load and a refresh differ: a first load has nothing to show, so the
         // spinner is the screen. A refresh has content, so the spinner belongs beside it.
@@ -51,4 +56,3 @@ fun <T> ViewModel.launchLoad(
             onFailure = { error -> LoadState.Failed(error) },
         )
     }
-}

@@ -1,0 +1,8 @@
+# Baseline Profiles are generated on a device and committed on purpose: `assembleRelease` reads
+# them from this path, so a build machine needs no phone attached. They are also 43k lines of
+# method signatures, which buries every hand-written change in the same commit.
+#
+# So they stay tracked and stop being read as prose: GitHub collapses them in diffs and leaves
+# them out of the repository's language statistics, and git prints "Binary files differ" rather
+# than the whole profile. Regenerate with `./gradlew :app:generateReleaseBaselineProfile`.
+civily-app/app/src/*/generated/baselineProfiles/*.txt linguist-generated=true -diff

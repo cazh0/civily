@@ -78,12 +78,33 @@ class IssueDtoTest {
     }
 
     @Test
-    fun `a nation with no issues parses to an empty list`() {
+    fun `a nation with no issues parses to an empty list, and no next issue`() {
         val page = NsXml.decodeFromString(
             IssuesPageDto.serializer(),
             """<NATION id="testlandia"><ISSUES></ISSUES></NATION>""",
         )
 
         assertEquals(emptyList<IssueDto>(), page.issues.issues)
+        assertEquals(0L, page.nextIssueTime)
+    }
+
+    @Test
+    fun `the next issue's instant rides along with the issues`() {
+        // The empty screen counts down to this, so it has to survive the same request that
+        // carries the newspaper's masthead.
+        val page = NsXml.decodeFromString(
+            IssuesPageDto.serializer(),
+            """
+            <NATION id="testlandia">
+            <ISSUES></ISSUES>
+            <CAPITAL>Free Land</CAPITAL>
+            <CURRENCY>Kro-bro-ulk</CURRENCY>
+            <NEXTISSUETIME>1755000000</NEXTISSUETIME>
+            </NATION>
+            """.trimIndent(),
+        )
+
+        assertEquals(1755000000L, page.nextIssueTime)
+        assertEquals("Free Land", page.capital)
     }
 }

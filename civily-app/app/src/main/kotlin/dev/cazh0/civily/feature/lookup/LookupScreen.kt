@@ -40,12 +40,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.ImageLoader
 import dev.cazh0.civily.R
 import dev.cazh0.civily.core.graph
 import dev.cazh0.civily.feature.accounts.AccountsSection
+import dev.cazh0.civily.feature.issues.IssueBadgeViewModel
 import dev.cazh0.civily.ui.component.LinkRow
 import dev.cazh0.civily.ui.component.SectionHeader
 import dev.cazh0.civily.ui.theme.Dimens
@@ -73,6 +75,21 @@ fun LookupScreen(
         factory = LookupViewModel.factory(graph.nationRepository),
     )
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    val issueBadgeViewModel: IssueBadgeViewModel = viewModel(
+        factory = IssueBadgeViewModel.factory(graph.issuesRepository),
+    )
+    val issues by issueBadgeViewModel.state.collectAsStateWithLifecycle()
+
+    // Why on resume and not once: this screen is where the reader lands after answering an
+    // issue, and a count that still says three after they signed the third one is worse than no
+    // count at all. Keyed on the active nation as well, so a switch — which costs no request of
+    // its own — asks for the new nation's numbers rather than leaving the old nation's on screen.
+    val activeId = accounts.activeId
+    LifecycleResumeEffect(activeId) {
+        if (activeId != null) issueBadgeViewModel.refresh()
+        onPauseOrDispose { }
+    }
 
     var typedName by rememberSaveable { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
@@ -103,9 +120,11 @@ fun LookupScreen(
         ) {
             AccountsSection(
                 accounts = accounts,
+                issues = issues,
                 imageLoader = graph.imageLoader,
                 onOpenNation = onOpenNation,
                 onOpenIssues = onOpenIssues,
+                onNextIssueDue = issueBadgeViewModel::refresh,
                 onSwitch = graph.sessionStore::switchTo,
                 onForget = graph.sessionStore::forget,
                 onAddNation = onSignIn,

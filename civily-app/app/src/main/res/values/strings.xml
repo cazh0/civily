@@ -25,6 +25,18 @@
         <item quantity="one">%1$d year ago</item>
         <item quantity="other">%1$d years ago</item>
     </plurals>
+
+    <!--
+      How long until, in figures. Two renderings of one `Countdown`: the compact form for a line
+      with a phrase of room, the clock for a screen whose subject is the wait. No plurals — every
+      form here is a unit abbreviation or a fixed-shape clock, neither of which inflects.
+    -->
+    <string name="countdown_days">%1$dd %2$dh</string>
+    <string name="countdown_hours">%1$dh %2$dm</string>
+    <string name="countdown_minutes">%1$dm</string>
+    <string name="countdown_moments">moments</string>
+    <string name="countdown_clock">%1$d:%2$02d:%3$02d</string>
+    <string name="countdown_clock_days">%1$dd %2$d:%3$02d:%4$02d</string>
     <string name="action_back">Back</string>
     <string name="action_clear">Clear</string>
     <string name="action_reveal">Reveal</string>
@@ -46,7 +58,13 @@
     <string name="title_issues">Issues</string>
     <string name="subtitle_issues">Decide what your nation does next</string>
     <string name="issues_empty">No issues right now.</string>
-    <string name="issues_empty_hint">NationStates will send your nation a new one shortly.</string>
+    <string name="issues_empty_hint">%1$s is gloriously issue-free.</string>
+    <plurals name="issues_due">
+        <item quantity="one">%1$d issue awaiting your answer</item>
+        <item quantity="other">%1$d issues awaiting your answer</item>
+    </plurals>
+    <string name="issues_next_in">Next issue in %1$s</string>
+    <string name="issues_next_label">Next issue in</string>
     <string name="issues_options_header">Choose a course of action</string>
     <string name="action_dismiss_issue">Dismiss this issue</string>
     <string name="issue_dismiss_explainer">No legislation is enacted, and the issue does not come back.</string>

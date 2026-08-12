@@ -43,12 +43,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import coil.ImageLoader
 import dev.cazh0.civily.R
+import dev.cazh0.civily.core.result.LoadState
 import dev.cazh0.civily.core.session.Accounts
 import dev.cazh0.civily.core.session.Session
 import dev.cazh0.civily.core.text.Initials
 import dev.cazh0.civily.core.text.NsId
+import dev.cazh0.civily.data.issues.IssueBadge
+import dev.cazh0.civily.feature.issues.IssuesLinkRow
 import dev.cazh0.civily.ui.component.AmbientFlag
-import dev.cazh0.civily.ui.component.LinkRow
 import dev.cazh0.civily.ui.component.SectionHeader
 import dev.cazh0.civily.ui.theme.Dimens
 import dev.cazh0.civily.ui.theme.avatarColor
@@ -65,13 +67,19 @@ import dev.cazh0.civily.ui.theme.avatarColor
  *
  * Switching costs no request. NationStates issues a session per nation, so each account keeps
  * its own token and PIN, and the next request simply carries a different pair.
+ *
+ * The Issues button lives under the card rather than beside the rest of the app's destinations
+ * because it is about *this* nation, and it carries [issues] for the same reason: a row that
+ * says how many decisions are waiting belongs directly under the nation they are waiting for.
  */
 @Composable
 fun AccountsSection(
     accounts: Accounts,
+    issues: LoadState<IssueBadge>,
     imageLoader: ImageLoader,
     onOpenNation: (String) -> Unit,
     onOpenIssues: () -> Unit,
+    onNextIssueDue: () -> Unit,
     onSwitch: (String) -> Unit,
     onForget: (String) -> Unit,
     onAddNation: () -> Unit,
@@ -128,12 +136,12 @@ fun AccountsSection(
         )
 
         if (active != null) {
-            LinkRow(
-                name = stringResource(R.string.title_issues),
-                subtitle = stringResource(R.string.subtitle_issues),
-                flagUrl = "",
+            IssuesLinkRow(
+                badge = issues,
+                activeNationId = active.nationId,
                 imageLoader = imageLoader,
                 onClick = onOpenIssues,
+                onNextIssueDue = onNextIssueDue,
             )
         }
     }
@@ -255,7 +263,12 @@ private fun AccountRow(
             // A row with a confirmation open somewhere in the card must not also be a button:
             // the next press belongs to that confirmation, not to a change of nation.
             .clickable(enabled = enabled, onClick = onPress)
-            .padding(Dimens.ItemSpacing),
+            // Why the sides are not the ends: this row's caret and the mark at the end of the
+            // Issues row below it are two cards' worth of trailing edge in one stack, and a
+            // slot centred 24dp inside the card only lands on the same vertical line as the
+            // one below if both cards are inset the same. The ends keep [Dimens.ItemSpacing],
+            // so the row's height is unchanged.
+            .padding(horizontal = Dimens.CardPadding, vertical = Dimens.ItemSpacing),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Dimens.ItemSpacing),
     ) {

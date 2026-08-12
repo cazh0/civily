@@ -11,6 +11,23 @@ data class IssuesPage(
     val flagUrl: String,
     val currency: String,
     val issues: List<Issue>,
+    /** Unix seconds, or null when the API named no next issue. */
+    val nextIssueTime: Long?,
+)
+
+/**
+ * What the Issues button knows without opening the Issues screen: how many decisions are
+ * waiting, and when the next one lands.
+ *
+ * [nationId] is stamped on because the button sits beside the account switcher. Switching
+ * nations costs no request, so without it the button would show the previous nation's count
+ * against the new nation's name for as long as the reload takes.
+ */
+data class IssueBadge(
+    val nationId: String,
+    val dueCount: Int,
+    /** Unix seconds, or null when the API named no next issue. */
+    val nextIssueTime: Long?,
 )
 
 /** An issue in the shape the screen shows it, with its BBCode already parsed. */

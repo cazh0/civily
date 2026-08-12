@@ -15,7 +15,40 @@ data class IssuesPageDto(
     @XmlElement(true) @XmlSerialName("FLAG", "", "") val flagUrl: String = "",
     /** Printed as the cover price — "1 DOLLAR" on the design's example page. */
     @XmlElement(true) @XmlSerialName("CURRENCY", "", "") val currency: String = "",
+    /** Unix seconds. See [IssueBadgeDto.nextIssueTime] for the sentinel. */
+    @XmlElement(true) @XmlSerialName("NEXTISSUETIME", "", "") val nextIssueTime: Long = 0,
     val issues: IssueListDto = IssueListDto(),
+)
+
+/**
+ * The Issues button's counter: `api.cgi?nation=…&q=unread+nextissuetime`.
+ *
+ * Why not the `issues` shard the screen behind the button uses: a count and an instant are two
+ * numbers, and the full shard is every issue's prose and five options each. The button asks for
+ * what the button shows.
+ */
+@Serializable
+@XmlSerialName("NATION", "", "")
+data class IssueBadgeDto(
+    val unread: UnreadDto = UnreadDto(),
+    /**
+     * Unix seconds. Absent — a nation with no scheduled issue — decodes to the zero the
+     * repository turns into a null, the same sentinel handling the rest of `data/` uses.
+     */
+    @XmlElement(true) @XmlSerialName("NEXTISSUETIME", "", "") val nextIssueTime: Long = 0,
+)
+
+/**
+ * The `unread` shard's counters. Only issues are read here.
+ *
+ * The other four counters — telegrams, notices, the RMB, the World Assembly — arrive in the
+ * same element and are deliberately not modelled: nothing in the app has a place to show them,
+ * and a field nobody reads is a field that goes stale without anyone noticing.
+ */
+@Serializable
+@XmlSerialName("UNREAD", "", "")
+data class UnreadDto(
+    @XmlElement(true) @XmlSerialName("ISSUES", "", "") val issues: Int = 0,
 )
 
 @Serializable

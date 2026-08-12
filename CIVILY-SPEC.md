@@ -90,8 +90,8 @@ may grow the APK by accident.
 - Authenticate with `X-Pin` wherever a session exists. `X-Password` and `X-Autologin` each perform a *login*, and a login cancels the previous session — including the user's own browser tab. Two logins in quick succession return 409. Background polling in particular must never re-login per poll.
 - Unit tests mandatory on parsing, rate limiting, and BBCode/HTML.
   - `Stately/` — `dto/*`, `DashHelper`, `SparkleHelper`, `MuffinsHelper`. None exist.
-  - `civily-app/` — `RateLimiterTest`, `NationDtoTest`, `RegionDtoTest`, `AutologinTokenTest`, `PercentCodecTest`, `NsUrlTest`, `NsIdTest`, `PopulationTest`, `AssemblyDtoTest`, `BbParserTest`, `BbColorTest`, `HtmlEntitiesTest`, `RelativeTimeTest`, `RmbDtoTest`, `IssueDtoTest`, `IssueHtmlParserTest`, `NsTextTest`, `InitialsTest`, `NewspaperTest`, `IssueResultDtoTest`, `PercentTest`, `AccountsTest`, `FlagAmbienceTest`, `FreedomRatingTest`, `MagnitudeTest` exist
-    (216 tests). Every new DTO ships a parser test including a missing-element case.
+  - `civily-app/` — `RateLimiterTest`, `NationDtoTest`, `RegionDtoTest`, `AutologinTokenTest`, `PercentCodecTest`, `NsUrlTest`, `NsIdTest`, `PopulationTest`, `AssemblyDtoTest`, `BbParserTest`, `BbColorTest`, `HtmlEntitiesTest`, `RelativeTimeTest`, `RmbDtoTest`, `IssueDtoTest`, `IssueHtmlParserTest`, `NsTextTest`, `InitialsTest`, `NewspaperTest`, `IssueResultDtoTest`, `PercentTest`, `AccountsTest`, `FlagAmbienceTest`, `FreedomRatingTest`, `MagnitudeTest`, `CountdownTest`, `IssueBadgeDtoTest` exist
+    (228 tests). Every new DTO ships a parser test including a missing-element case.
     `IssueHtmlParserTest` runs against a whole captured aftermath page, `src/test/resources/issues/`,
     not an excerpt: the parser's job is to find the papers inside the site's own chrome.
 - One PR, one concern.

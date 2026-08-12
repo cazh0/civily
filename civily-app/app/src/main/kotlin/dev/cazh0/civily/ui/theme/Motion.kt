@@ -2,6 +2,9 @@ package dev.cazh0.civily.ui.theme
 
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 
 /**
  * Every duration in the app.
@@ -38,6 +41,27 @@ object Motion {
      * there, and the plate catching up under it should not read as a flash.
      */
     const val PlateMillis = 220
+
+    /**
+     * A count badge arriving, and its digits rolling over.
+     *
+     * The one deliberately springy thing in the app. A badge appears because something is now
+     * waiting for the reader, so it is allowed to arrive with a little weight — a linear fade
+     * would put it on screen without ever saying it was not there a moment ago. The overshoot
+     * is small: this is a notification count, not a toy.
+     */
+    val BadgeEnter: FiniteAnimationSpec<Float> = spring(
+        dampingRatio = Spring.DampingRatioMediumBouncy,
+        stiffness = Spring.StiffnessMediumLow,
+    )
+
+    /**
+     * One digit replacing another, and the badge crossing over with the chevron it stands in for.
+     *
+     * Long enough to be read as the same object changing rather than as two objects swapped,
+     * short enough that a reader who glanced at the row already has the new value.
+     */
+    const val BadgeRollMillis = 200
 
     /**
      * The standard Material easing, for anything that moves.

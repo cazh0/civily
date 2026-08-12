@@ -44,6 +44,16 @@ object Dimens {
 
     val FlagCornerRadius = 6.dp
 
+    /**
+     * The count of things waiting behind a row.
+     *
+     * A circle at one digit and a pill at two — the shape everyone already reads as "unanswered",
+     * from every notification badge on the device. It stands in the chevron's place, so it is
+     * sized to sit inside the same slot without moving anything around it.
+     */
+    val BadgeSize = 24.dp
+    val BadgePaddingHorizontal = 6.dp
+
     val ProgressSize = 40.dp
 
     /** Illustrative icon in an empty or failed state. */
