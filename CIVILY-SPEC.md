@@ -91,7 +91,7 @@ may grow the APK by accident.
 - Unit tests mandatory on parsing, rate limiting, and BBCode/HTML.
   - `Stately/` — `dto/*`, `DashHelper`, `SparkleHelper`, `MuffinsHelper`. None exist.
   - `civily-app/` — `RateLimiterTest`, `NationDtoTest`, `RegionDtoTest`, `AutologinTokenTest`, `PercentCodecTest`, `NsUrlTest`, `NsIdTest`, `PopulationTest`, `AssemblyDtoTest`, `BbParserTest`, `BbColorTest`, `HtmlEntitiesTest`, `RelativeTimeTest`, `RmbDtoTest`, `IssueDtoTest`, `IssueHtmlParserTest`, `NsTextTest`, `InitialsTest`, `NewspaperTest`, `IssueResultDtoTest`, `PercentTest`, `AccountsTest`, `FlagAmbienceTest`, `FreedomRatingTest`, `MagnitudeTest`, `CountdownTest`, `IssueBadgeDtoTest` exist
-    (228 tests). Every new DTO ships a parser test including a missing-element case.
+    (230 tests). Every new DTO ships a parser test including a missing-element case.
     `IssueHtmlParserTest` runs against a whole captured aftermath page, `src/test/resources/issues/`,
     not an excerpt: the parser's job is to find the papers inside the site's own chrome.
 - One PR, one concern.

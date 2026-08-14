@@ -15,6 +15,24 @@ object Newspaper {
 
     data class Edition(val city: String, val date: String, val volume: String)
 
+    /** Which front page an issue is printed on. Both are the game's own. */
+    enum class Design { Broadsheet, Tabloid }
+
+    /**
+     * The paper's design, and so the last thing about it that varies per issue.
+     *
+     * Why it belongs here rather than at the screen: it has to be the same page in the list and
+     * in the detail, and it has to be the same page tomorrow, which is exactly what the masthead
+     * and the edition line already promise. A design picked at the call site would change under
+     * the reader on the way into the issue.
+     *
+     * Why: two designs over consecutive ids is parity, and [EDITIONS] is a four-cycle, so the
+     * two divide the cities between them — the broadsheet always prints the first and third,
+     * the tabloid the second and fourth. That is arithmetic and not an oversight; breaking it
+     * would mean an uneven split between the designs, which is the more visible fault.
+     */
+    fun design(issueId: Int): Design = Design.entries[issueId.mod(Design.entries.size)]
+
     /**
      * @param capital the nation's capital, which is what the paper is named after — the same
      *   convention the desktop site uses. Falls back to the nation itself when the capital is

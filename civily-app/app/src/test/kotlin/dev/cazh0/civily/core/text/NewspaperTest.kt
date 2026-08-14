@@ -53,9 +53,24 @@ class NewspaperTest {
     }
 
     @Test
+    fun `an issue always prints on the same design`() {
+        // The list and the detail ask separately. A design that disagreed between them would
+        // redraw the paper under the reader on the way into the issue.
+        assertEquals(Newspaper.design(976), Newspaper.design(976))
+    }
+
+    @Test
+    fun `both designs are printed`() {
+        val designs = (1..10).map { Newspaper.design(it) }.toSet()
+
+        assertEquals(Newspaper.Design.entries.toSet(), designs)
+    }
+
+    @Test
     fun `a negative issue id does not crash the masthead`() {
         // mod, not rem: a negative id must still land inside the title list.
         assertNotEquals("", Newspaper.masthead("Itagüí", "Bacata", issueId = -3))
         assertNotEquals("", Newspaper.edition(-3, date).city)
+        assertTrue(Newspaper.design(-3) in Newspaper.Design.entries)
     }
 }

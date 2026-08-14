@@ -31,7 +31,7 @@ import dev.cazh0.civily.data.issues.IssuesPage
 import dev.cazh0.civily.ui.component.CountdownReachedEffect
 import dev.cazh0.civily.ui.component.EmptyState
 import dev.cazh0.civily.ui.component.LoadStateScaffold
-import dev.cazh0.civily.ui.component.NewspaperFrontPage
+import dev.cazh0.civily.ui.component.NewspaperForIssue
 import dev.cazh0.civily.ui.component.countdownClock
 import dev.cazh0.civily.ui.component.rememberCountdown
 import dev.cazh0.civily.ui.theme.Dimens
@@ -86,9 +86,10 @@ fun IssuesScreen(
                 items(
                     items = page.issues,
                     key = { it.id },
-                    // One shape per row, so the list can reuse a front page's layout nodes for
-                    // the next front page rather than building them again.
-                    contentType = { FRONT_PAGE },
+                    // The design, so the list reuses a broadsheet's layout nodes for the next
+                    // broadsheet rather than trying to make a tabloid out of them. The two are
+                    // different trees; one shared type would rebuild on nearly every row.
+                    contentType = { Newspaper.design(it.id) },
                 ) { issue ->
                     IssueHeadlineCard(
                         issue = issue,
@@ -111,7 +112,8 @@ private fun IssueHeadlineCard(
 ) {
     // Why there is no card: a card is a rectangle, and the whole point of the torn strips is
     // that the page is not one. The newspaper meets the screen directly.
-    NewspaperFrontPage(
+    NewspaperForIssue(
+        issueId = issue.id,
         masthead = remember(page, issue.id) {
             Newspaper.masthead(page.capital, page.nationName, issue.id)
         },
@@ -183,9 +185,6 @@ private fun NextIssueClock(
         }
     }
 }
-
-/** The list holds one shape, and this names it for the reuse pool. */
-private const val FRONT_PAGE = "front-page"
 
 /** OpenType tabular figures: every digit the same width, so a running clock cannot reflow. */
 private const val TABULAR_FIGURES = "tnum"

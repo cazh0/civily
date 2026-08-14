@@ -269,6 +269,37 @@ still prints its headline.
 twice the room because its headlines wrap. Their horizontal geometry agrees to within a third
 of a percent, so it is written once.
 
+**The game prints two papers, so the app does.** `newNewspaper.svg` is a second front page on
+the same three strips and it is a different newspaper: the masthead sits on a slate plate
+between two flags rather than beside one, the cover price is a tilted flash pinned across the
+tear, the edition line runs cream out of a slate bar under a heavy red rule, and the body is
+given over to one photograph with the headline shouted across it in outlined capitals. It has
+no headline band at all, which is why `NewspaperTabloid` is its own component and not a third
+`NewspaperStyle` — that enum holds band heights, and this page has no such band to give one to.
+The photographs go *over* the strip here rather than through it: the picture is wider than the
+windows cut in `dpaper5` and covers the paper between them, which is only possible from on top.
+It is printed whether or not the issue offered a photograph, because it covers both windows and
+leaving it out would open two holes; the inset beside it is printed only when there is a second
+picture, an empty frame with a shadow under it being no part of a page.
+
+Which paper an issue prints on is `Newspaper.design`, alongside the masthead and the edition
+line and for the same reason: it has to be the same page in the list, in the detail, and
+tomorrow. Two designs over consecutive ids is parity and the edition city is a four-cycle, so
+the two divide the cities between them — arithmetic, not an oversight, and the alternative is
+an uneven split between the designs, which is the more visible fault. `NewspaperForIssue` is
+the one door: every screen showing a single issue goes through it, and only the aftermath pile
+addresses `NewspaperFrontPage` directly, a pile being a shape the tabloid has no frame for.
+
+Its type is stated as cap heights rather than point sizes. The frame is set in a bold condensed
+grotesque the app does not ship and will not — a display font is tens of kilobytes against a §4
+row that says the APK may not grow — so the page is set in the device's `sans-serif-condensed`,
+and two faces at one point size do not put capitals at one height. Carrying the height of the
+letters across is what keeps the masthead the size the frame drew it. For the same reason the
+masthead's fitting box is the plate less the frame's own 4.61-unit inset and not the frame's
+219.88-unit text box: that box hugs one string in the frame's own face, and a hug is a
+measurement rather than a margin. The headline is drawn twice at one measurement, outline under
+fill, and both the outline and its offset scale with however far the string had to shrink.
+
 **`NewspaperStack` is a pile, not a list.** Positions, offsets and angles — −0.7°, +1.4°,
 −2.1°, +2.8° — are the frame's own, as fractions of its 517.86-unit canvas; the sheet is 480
 of those wide, which is what leaves room for each to sit somewhere different. Sheets draw

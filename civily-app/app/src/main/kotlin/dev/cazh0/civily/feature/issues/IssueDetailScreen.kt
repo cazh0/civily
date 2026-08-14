@@ -55,7 +55,7 @@ import dev.cazh0.civily.data.issues.IssueOption
 import dev.cazh0.civily.data.issues.IssuesPage
 import dev.cazh0.civily.data.issues.IssuesRepository
 import dev.cazh0.civily.ui.component.LoadingState
-import dev.cazh0.civily.ui.component.NewspaperFrontPage
+import dev.cazh0.civily.ui.component.NewspaperForIssue
 import dev.cazh0.civily.ui.component.RichText
 import dev.cazh0.civily.ui.theme.Dimens
 import java.util.Locale
@@ -157,7 +157,8 @@ fun IssueDetailScreen(
             verticalArrangement = Arrangement.spacedBy(Dimens.ItemSpacing),
         ) {
             item {
-                NewspaperFrontPage(
+                NewspaperForIssue(
+                    issueId = issue.id,
                     masthead = remember(page, issue.id) {
                         Newspaper.masthead(page.capital, page.nationName, issue.id)
                     },

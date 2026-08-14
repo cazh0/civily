@@ -46,6 +46,26 @@ internal val NewsprintRule = Color(0xFF444444)
 internal val NewsprintSubhead = Color(0xFF666666)
 
 /**
+ * The tabloid front page's second colour, from `newNewspaper.svg`.
+ *
+ * The broadsheet above is ink on paper and nothing else. This one is printed: a slate plate
+ * behind the masthead and under the edition line, red rules, and the paper's own cream showing
+ * through as the letters. Fixed in both themes for the reason [Newsprint] is.
+ *
+ * The three carrying an alpha are the frame's own drop shadows and borders, which are offsets
+ * with no blur — a printed edge, not an elevation.
+ */
+internal val TabloidPlate = Color(0xFF263746)
+internal val TabloidPlateShadow = Color(0x59263746)
+internal val TabloidPhotoEdge = Color(0xD9263746)
+internal val TabloidFlagShadow = Color(0x73263746)
+internal val TabloidRule = Color(0xFF762A22)
+internal val TabloidInk = Color(0xFFF4EFE3)
+internal val TabloidHeadlineInk = Color(0xFFE7E2D8)
+internal val TabloidHeadlineEdge = Color(0xFF555555)
+internal val TabloidFlagFrame = Color(0xFFD0D0D0)
+
+/**
  * Rising and falling, taken from Material 3's own tonal palettes.
  *
  * These are the only colours in the app that do not come from the user's wallpaper, because

@@ -74,6 +74,51 @@ enum class NewspaperStyle(
 }
 
 /**
+ * An issue's front page, on whichever of the game's two papers that issue prints on.
+ *
+ * The choice is [Newspaper.design]'s, not this function's, so it is the same paper in the list
+ * and in the detail. Every screen showing a single issue goes through here; only the aftermath
+ * pile addresses [NewspaperFrontPage] directly, because a pile is a shape the tabloid has no
+ * frame for.
+ */
+@Composable
+fun NewspaperForIssue(
+    issueId: Int,
+    masthead: String,
+    edition: Newspaper.Edition,
+    headline: String,
+    modifier: Modifier = Modifier,
+    price: String? = null,
+    flagUrl: String? = null,
+    imageUrls: List<String> = emptyList(),
+    imageLoader: ImageLoader? = null,
+) {
+    when (Newspaper.design(issueId)) {
+        Newspaper.Design.Broadsheet -> NewspaperFrontPage(
+            masthead = masthead,
+            edition = edition,
+            headline = headline,
+            modifier = modifier,
+            price = price,
+            flagUrl = flagUrl,
+            imageUrls = imageUrls,
+            imageLoader = imageLoader,
+        )
+
+        Newspaper.Design.Tabloid -> NewspaperTabloid(
+            masthead = masthead,
+            edition = edition,
+            headline = headline,
+            modifier = modifier,
+            price = price,
+            flagUrl = flagUrl,
+            imageUrls = imageUrls,
+            imageLoader = imageLoader,
+        )
+    }
+}
+
+/**
  * The front page, transcribed from the supplied Figma frames.
  *
  * Every position is a fraction of the component's own width, so this is the same page on a
@@ -175,18 +220,18 @@ fun NewspaperFrontPage(
 
                 // Rules sit against the foot of the band, so they follow its height.
                 val ruleBase = style.mastheadBand - RULES_FROM_BAND_FOOT
-                Rule(px(MARGIN), px(ruleBase), px(RULE_W), px(RULE_THICK))
-                Rule(px(MARGIN), px(ruleBase + RULE_2_OFFSET), px(RULE_W), px(RULE_THIN))
-                Rule(px(MARGIN), px(ruleBase + RULE_3_OFFSET), px(RULE_W), px(RULE_THIN))
+                PaperBlock(px(MARGIN), px(ruleBase), px(RULE_W), px(RULE_THICK), NewsprintRule)
+                PaperBlock(px(MARGIN), px(ruleBase + RULE_2_OFFSET), px(RULE_W), px(RULE_THIN), NewsprintRule)
+                PaperBlock(px(MARGIN), px(ruleBase + RULE_3_OFFSET), px(RULE_W), px(RULE_THIN), NewsprintRule)
 
                 val editionStyle = TextStyle(
                     fontFamily = FontFamily.Serif,
                     fontSize = px(SMALL_SIZE).toSp(),
                 )
                 val editionY = px(ruleBase + EDITION_OFFSET)
-                EditionCell(edition.city, px(MARGIN), editionY, px(EDITION_L_W), editionStyle, TextAlign.Start)
-                EditionCell(edition.date, px(EDITION_C_X), editionY, px(EDITION_C_W), editionStyle, TextAlign.Center)
-                EditionCell(edition.volume, px(EDITION_R_X), editionY, px(EDITION_R_W), editionStyle, TextAlign.End)
+                EditionCell(edition.city, px(MARGIN), editionY, px(EDITION_L_W), editionStyle, TextAlign.Start, NewsprintSubhead)
+                EditionCell(edition.date, px(EDITION_C_X), editionY, px(EDITION_C_W), editionStyle, TextAlign.Center, NewsprintSubhead)
+                EditionCell(edition.volume, px(EDITION_R_X), editionY, px(EDITION_R_W), editionStyle, TextAlign.End, NewsprintSubhead)
             }
 
             Box(
@@ -257,14 +302,16 @@ fun NewspaperFrontPage(
 }
 
 /**
- * One photograph, in one of the windows cut out of the body strip.
+ * One photograph, in the space the page leaves for it.
  *
- * Why paper is laid down first: those windows are holes, so an empty one shows the screen
- * straight through the page. Newsprint is what is behind a photograph on a real front page,
- * and it is what the window should show while one loads — or when the source has none to give.
+ * Why paper is laid down first: on this page that space is a window cut out of the body strip,
+ * so an empty one shows the screen straight through it. Newsprint is what is behind a
+ * photograph on a real front page, and it is what the window should show while one loads — or
+ * when the source has none to give. The tabloid prints its photographs over the strip instead
+ * of through it, and it lays the same floor for the same reason: the windows are still there.
  */
 @Composable
-private fun NewspaperPhoto(
+internal fun NewspaperPhoto(
     url: String?,
     imageLoader: ImageLoader?,
     x: Dp,
@@ -290,31 +337,34 @@ private fun NewspaperPhoto(
     }
 }
 
+/** A solid rectangle at a place on the page: a rule, a plate, a border, a printed shadow. */
 @Composable
-private fun Rule(x: Dp, y: Dp, width: Dp, thickness: Dp) {
+internal fun PaperBlock(x: Dp, y: Dp, width: Dp, height: Dp, color: Color) {
     Box(
         Modifier
             .offset(x = x, y = y)
             .width(width)
-            .height(thickness)
-            .background(NewsprintRule),
+            .height(height)
+            .background(color),
     )
 }
 
+/** One of the three cells — city, date, volume — the edition line is divided into. */
 @Composable
-private fun EditionCell(
+internal fun EditionCell(
     text: String,
     x: Dp,
     y: Dp,
     width: Dp,
     style: TextStyle,
     align: TextAlign,
+    color: Color,
 ) {
     FittedText(
         text = text,
         maxWidth = width,
         style = style.copy(textAlign = align),
-        color = NewsprintSubhead,
+        color = color,
         modifier = Modifier
             .offset(x = x, y = y)
             .width(width),
@@ -328,7 +378,7 @@ private fun EditionCell(
  * wrote, but the bands are fixed. Shrinking keeps both the layout and the words.
  */
 @Composable
-private fun FittedText(
+internal fun FittedText(
     text: String,
     maxWidth: Dp,
     style: TextStyle,
@@ -336,9 +386,33 @@ private fun FittedText(
     modifier: Modifier = Modifier,
     maxLines: Int = 1,
 ) {
+    Text(
+        text = text,
+        style = rememberFittedStyle(text, maxWidth, style, maxLines),
+        color = color,
+        maxLines = maxLines,
+        softWrap = maxLines > 1,
+        modifier = modifier,
+    )
+}
+
+/**
+ * The size [FittedText] would print this string at, without printing it.
+ *
+ * Why it is separable: the tabloid's headline is drawn twice, outline under fill, and the two
+ * passes have to be the same measurement. Fitting each of them on its own would let a string
+ * that lands on a shrink boundary come out at two sizes and print as a smear.
+ */
+@Composable
+internal fun rememberFittedStyle(
+    text: String,
+    maxWidth: Dp,
+    style: TextStyle,
+    maxLines: Int = 1,
+): TextStyle {
     val measurer = rememberTextMeasurer()
     val density = LocalDensity.current
-    val fitted = remember(text, style, maxWidth, maxLines, density) {
+    return remember(text, style, maxWidth, maxLines, density) {
         var candidate = style
         repeat(MAX_SHRINK_STEPS) {
             val measured = measurer.measure(
@@ -364,19 +438,10 @@ private fun FittedText(
         }
         candidate
     }
-
-    Text(
-        text = text,
-        style = fitted,
-        color = color,
-        maxLines = maxLines,
-        softWrap = maxLines > 1,
-        modifier = modifier,
-    )
 }
 
 @Composable
-private fun Dp.toSp() = with(LocalDensity.current) { this@toSp.toSp() }
+internal fun Dp.toSp() = with(LocalDensity.current) { this@toSp.toSp() }
 
 private const val MAX_SHRINK_STEPS = 14
 private const val SHRINK_STEP = 0.93f
