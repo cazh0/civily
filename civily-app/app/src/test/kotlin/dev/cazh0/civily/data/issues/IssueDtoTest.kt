@@ -99,6 +99,7 @@ class IssueDtoTest {
             <ISSUES></ISSUES>
             <CAPITAL>Free Land</CAPITAL>
             <CURRENCY>Kro-bro-ulk</CURRENCY>
+            <DEMONYM>Itagui Republician</DEMONYM>
             <NEXTISSUETIME>1755000000</NEXTISSUETIME>
             </NATION>
             """.trimIndent(),
@@ -106,5 +107,18 @@ class IssueDtoTest {
 
         assertEquals(1755000000L, page.nextIssueTime)
         assertEquals("Free Land", page.capital)
+        // The aftermath's reclassification sentence is written in this adjective, so it has to
+        // survive the request that carries the issues themselves.
+        assertEquals("Itagui Republician", page.demonym)
+    }
+
+    @Test
+    fun `a nation whose response names no demonym still parses`() {
+        val page = NsXml.decodeFromString(
+            IssuesPageDto.serializer(),
+            """<NATION id="testlandia"><ISSUES></ISSUES><CAPITAL>Free Land</CAPITAL></NATION>""",
+        )
+
+        assertEquals("", page.demonym)
     }
 }

@@ -413,6 +413,48 @@ photographs, and those are the only photographs the pile ever shows.
 The aftermath screen has no front page at its head. The headlines *are* the newspapers, so
 printing one above them said the same thing twice.
 
+**The aftermath runs talking point, reclassification, headlines, new policies, canceled
+policies, postcards, trends.** The sentence and the word it moved are one thought, so the
+reclassification sits directly under the talking point rather than down among the ledger
+entries; the papers come next because that is the answer's own voice; then what changed in law,
+then the keepsake, then the numbers. Each section is absent when the answer carried nothing for
+it, which is the usual case — most answers move statistics and print headlines without touching
+a policy at all.
+
+A reclassification is a sentence, in the game's own words. The nation's own title leads —
+"Itagui Republic was reclassified from an Inoffensive Centrist Democracy to Democratic
+Socialists" — and its ratings follow: "The Itagui Republician Economy fell from Reasonable to
+Developing." The classification names the nation because it is the nation's title; a rating
+names the people because it is a fact about them. That adjective is the `demonym` shard, which
+now rides along on the issues request with the capital, the flag and the currency.
+
+The article is `Classification`: a kind of state takes one and a group of people does not, so
+"from **an** Inoffensive Centrist Democracy" but "to Democratic Socialists". The two words that
+changed are bold, and only those two — the article stays plain, so the emphasis falls on what
+moved rather than on the grammar around it.
+
+Nothing in the section is coloured, and that is a decision rather than an omission. The verb
+comes from `FreedomLadder`, which says which of the two words sits higher on the scale that
+produced them; whether the new word is *good* is `FreedomRating`'s question, and the two
+disagree often enough that answering both at once reads as a contradiction. Political freedom
+going from World Benchmark to Excessive **rose** — by score it is the top of the ladder, by word
+it is a nation being told its freedoms have run away with themselves. A sentence saying "rose"
+in a warning colour makes the reader stop and work out which half to believe. The sentence says
+the direction; the ratings on the nation screen, where `FreedomRating` colours the standing on
+its own, say what it is worth. The legacy client goes the other way and reads position only, so
+it reports a move to "Frightening" as good news.
+
+Emphasis is marked with control characters before the sentence is formatted, not with `<b>` in
+the resource and `AnnotatedString.fromHtml`. The same sentence formats in the nation's demonym,
+which is text its owner typed: an `&` in it would reach the HTML parser as the start of an
+entity and take the rest of the sentence with it.
+
+A cancelled policy is the one card in the app that prints without its artwork. It keeps the
+name and the sentence and loses the banner, because the banner is the thing the nation used to
+fly: on a scroll, two identical cards under two headings is exactly where enacting and
+repealing must not be confused. A postcard is the opposite — artwork and nothing else. `UNLOCKS`
+gives an artwork code (`s1`) and no title, and the heading above it already says whose it is.
+
 **A nation has seven subjects, so it has seven tabs.** Overview, Policies, People, Government,
 Economy, Rankings, Happenings — the set and the order of the game's own nation page, which is
 what the legacy client mirrors too. A reader who knows NationStates knows where to look before
@@ -857,9 +899,25 @@ These are tracked, not hidden (spec §2 R1). Nothing here is stubbed to look lik
 - **A few census scales are named "Unknown".** That name comes from the legacy app's list,
   which had gaps of its own. They render honestly rather than being hidden, and ids past the
   end of the list fall back to "Scale N".
-- **The result still skips policy and reclassification changes.** `c=issue` can return
-  `RECLASSIFICATIONS`, `NEW_POLICIES` and `REMOVED_POLICIES`; the captured answers carried none
-  of them, so there is no real sample to build against and nothing was guessed.
+- **Only one reclassification `type` has been seen live.** The captured answer carries
+  `<RECLASSIFY type="0"><FROM>Some</FROM><TO>Few</TO></RECLASSIFY>`, and `0` → civil rights is
+  the only one of the four codes confirmed against a real response. `1` (economy), `2`
+  (political freedom) and `govt` (classification) come from the legacy client. A code outside
+  those four is dropped and logged rather than labelled: the legacy client falls back to civil
+  rights for an unknown code, which would print a change to a rating that never moved. The
+  article rule in `Classification` and the ladder in `FreedomLadder` are both closed lists of
+  the game's own vocabulary; a rung or a classification NationStates adds later degrades to
+  "changed" and to the wrong article respectively, never to the wrong direction or rating.
+- **`REMOVED_POLICIES` has never been seen live.** It is documented beside `NEW_POLICIES`, the
+  legacy client reads both as the same `<POLICY>` element, and Civily maps it the same way — but
+  the one captured answer enacted a policy without cancelling one, so the Canceled Policies
+  section is the only part of this screen not confirmed against a real response.
+- **A postcard has no title.** `UNLOCKS` names the artwork by code, and the code is a filename.
+  The legacy client ships a hand-written table of 321 banner titles to caption them; that table
+  is not the API's, it is a decade old, and its census equivalent is already the reason a few
+  scales here read "Unknown". The artwork prints under "Postcards from *nation*" and carries no
+  caption and no content description, because there is no text the app holds that describes the
+  picture.
 - **The RMB is read-only, and unpaged.** Fifty most recent posts, no posting, no liking, no
   older pages. Posting is a two-step Private Command.
 - **No WA voting.** Also a two-step Private Command (`mode=prepare` → token → `mode=execute`),

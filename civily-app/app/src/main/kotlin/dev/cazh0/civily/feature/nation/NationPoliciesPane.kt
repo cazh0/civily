@@ -1,28 +1,21 @@
 package dev.cazh0.civily.feature.nation
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import coil.ImageLoader
-import coil.compose.AsyncImage
 import dev.cazh0.civily.R
-import dev.cazh0.civily.core.net.NsUrl
 import dev.cazh0.civily.data.nation.Policy
+import dev.cazh0.civily.ui.component.PolicyCard
 import dev.cazh0.civily.ui.component.SectionHeader
 import dev.cazh0.civily.ui.theme.Dimens
 
@@ -79,45 +72,6 @@ fun NationPoliciesPane(
                 contentType = { PaneContent.Policy },
             ) { policy ->
                 PolicyCard(policy, imageLoader)
-            }
-        }
-    }
-}
-
-@Composable
-private fun PolicyCard(policy: Policy, imageLoader: ImageLoader) {
-    Surface(
-        shape = RoundedCornerShape(Dimens.TileCornerRadius),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column {
-            if (policy.imageId.isNotEmpty()) {
-                // Cropped to fill, like every other piece of artwork in the app: a Rift banner
-                // is wide and decorative, and fitting one leaves plate above and below it. No
-                // content description — the policy's name is directly beneath it.
-                AsyncImage(
-                    model = NsUrl.banner(policy.imageId),
-                    contentDescription = null,
-                    imageLoader = imageLoader,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(Dimens.PolicyBannerHeight),
-                )
-            }
-            Column(
-                modifier = Modifier.padding(Dimens.CardPadding),
-                verticalArrangement = Arrangement.spacedBy(Dimens.TextSpacing),
-            ) {
-                Text(text = policy.name, style = MaterialTheme.typography.titleMedium)
-                if (policy.description.isNotEmpty()) {
-                    Text(
-                        text = policy.description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
             }
         }
     }

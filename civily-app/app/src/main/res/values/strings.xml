@@ -71,6 +71,26 @@
     <string name="action_dismiss_confirm">Dismiss without acting</string>
     <string name="title_issue_result">The result</string>
     <string name="talking_point_heading">The Talking Point</string>
+    <string name="reclassification_heading">Reclassification</string>
+    <!-- The classification sentence. %2$s and %3$s arrive with their article already on them. -->
+    <string name="reclassification_government">%1$s was reclassified from %2$s to %3$s.</string>
+    <string name="article_a">a %1$s</string>
+    <string name="article_an">an %1$s</string>
+    <!--
+         The rating sentence, one per direction. The verb is the scale's own movement
+         (FreedomLadder), not a judgement of the new word (FreedomRating) — the two can
+         disagree, and the sentence and its colour then say so together.
+    -->
+    <string name="reclassification_rose">The %1$s %2$s rose from %3$s to %4$s.</string>
+    <string name="reclassification_fell">The %1$s %2$s fell from %3$s to %4$s.</string>
+    <string name="reclassification_changed">The %1$s %2$s changed from %3$s to %4$s.</string>
+    <string name="rating_civil_rights">Civil Rights</string>
+    <string name="rating_economy">Economy</string>
+    <string name="rating_political_freedom">Political Freedom</string>
+    <string name="new_policies_heading">New Policies</string>
+    <string name="canceled_policies_heading">Canceled Policies</string>
+    <!-- The game unlocks a piece of artwork for the nation; the heading names whose it is. -->
+    <string name="postcards_heading">Postcards from %1$s</string>
     <string name="recent_headlines_heading">Recent Headlines</string>
     <string name="trends_heading">Recent Trends</string>
     <string name="newspaper_price">1 %1$s</string>

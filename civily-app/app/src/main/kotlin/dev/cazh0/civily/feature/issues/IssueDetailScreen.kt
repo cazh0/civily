@@ -128,6 +128,8 @@ fun IssueDetailScreen(
                     nationName = page?.nationName.orEmpty(),
                     issueId = issueId,
                 ),
+                nationName = page?.nationName.orEmpty(),
+                demonym = page?.demonym.orEmpty(),
                 edition = Newspaper.edition(issueId),
                 price = page?.coverPrice(),
                 flagUrl = page?.flagUrl?.takeIf { it.isNotBlank() },

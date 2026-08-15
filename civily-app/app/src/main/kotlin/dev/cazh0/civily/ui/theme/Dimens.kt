@@ -127,4 +127,10 @@ object Dimens {
 
     /** The artwork strip at the head of an enacted policy. Rift banners are wide. */
     val PolicyBannerHeight = 88.dp
+
+    /**
+     * A postcard the nation earned. Taller than [PolicyBannerHeight] off the same artwork,
+     * because here the picture is the thing being shown rather than the lid on a card of text.
+     */
+    val PostcardHeight = 180.dp
 }

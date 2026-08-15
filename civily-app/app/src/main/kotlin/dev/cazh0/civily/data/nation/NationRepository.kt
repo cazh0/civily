@@ -101,14 +101,7 @@ class NationRepository(private val client: NsClient) {
             description = BbParser.parse(industryDescription),
             sectors = sectors.toSectors(),
         ),
-        policies = policies.policies.map {
-            Policy(
-                name = text(it.name),
-                imageId = it.imageId,
-                category = text(it.category),
-                description = text(it.description),
-            )
-        },
+        policies = policies.policies.map { it.toPolicy() },
         rankings = census.scales.map {
             Ranking(
                 scaleId = it.id,

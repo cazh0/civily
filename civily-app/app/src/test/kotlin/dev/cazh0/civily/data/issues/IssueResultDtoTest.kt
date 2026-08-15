@@ -1,6 +1,7 @@
 package dev.cazh0.civily.data.issues
 
 import dev.cazh0.civily.data.NsXml
+import dev.cazh0.civily.data.nation.PolicyDto
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -80,5 +81,86 @@ class IssueResultDtoTest {
         assertEquals("nothing much", page.issue.description)
         assertEquals(emptyList<RankDto>(), page.issue.rankings.ranks)
         assertEquals(emptyList<HeadlineDto>(), page.issue.headlines.headlines)
+    }
+
+    @Test
+    fun `an answer with no policy change, reclassification or unlock still parses`() {
+        val issue = NsXml.decodeFromString(IssueResultPageDto.serializer(), live).issue
+
+        assertEquals(emptyList<PolicyDto>(), issue.newPolicies.policies)
+        assertEquals(emptyList<PolicyDto>(), issue.removedPolicies.policies)
+        assertEquals(emptyList<BannerDto>(), issue.unlocks.banners)
+        assertEquals(
+            emptyList<ReclassifyDto>(),
+            issue.reclassifications.reclassifications,
+        )
+    }
+
+    @Test
+    fun `carries the rating the answer renamed, type code and all`() {
+        val reclassifications =
+            NsXml.decodeFromString(IssueResultPageDto.serializer(), enacted)
+                .issue.reclassifications.reclassifications
+
+        assertEquals(1, reclassifications.size)
+        assertEquals("0", reclassifications[0].type)
+        assertEquals("Some", reclassifications[0].from)
+        assertEquals("Few", reclassifications[0].to)
+    }
+
+    @Test
+    fun `carries a policy the answer put on the books`() {
+        val policies = NsXml.decodeFromString(IssueResultPageDto.serializer(), enacted)
+            .issue.newPolicies.policies
+
+        assertEquals(1, policies.size)
+        assertEquals("Corporal Punishment", policies[0].name)
+        assertEquals("b39", policies[0].imageId)
+        assertEquals("Law & Order", policies[0].category)
+        assertEquals(
+            "Criminals may be ordered to undergo physical punishment.",
+            policies[0].description,
+        )
+    }
+
+    @Test
+    fun `carries the banner the answer unlocked`() {
+        val banners = NsXml.decodeFromString(IssueResultPageDto.serializer(), enacted)
+            .issue.unlocks.banners
+
+        assertEquals(listOf("s1"), banners.map { it.bannerId })
+    }
+
+    @Test
+    fun `reads the rest of a whole live answer past the sections it does not model`() {
+        val issue = NsXml.decodeFromString(IssueResultPageDto.serializer(), enacted).issue
+
+        assertEquals(87, issue.id)
+        assertEquals(2, issue.choice)
+        assertEquals(1, issue.ok)
+        // The sections arrive out of declaration order and with `OK` and `DESC` between them;
+        // everything must still land, or a reordering upstream would be silent data loss.
+        assertEquals(54, issue.rankings.ranks.size)
+        assertEquals(5, issue.headlines.headlines.size)
+        assertEquals(
+            "Old Woman Waits In Vain For Help Crossing Road",
+            issue.headlines.headlines.last().displayText,
+        )
+        assertEquals(emptyList<PolicyDto>(), issue.removedPolicies.policies)
+    }
+
+    /**
+     * The whole answer NationStates returned when this nation enacted issue 87, untrimmed.
+     *
+     * Whole for the same reason the aftermath HTML fixture is: this is the only response seen
+     * that carries `UNLOCKS`, `RECLASSIFICATIONS` and `NEW_POLICIES` at once, and the order and
+     * the unmodelled section between them are exactly what the parser has to survive.
+     */
+    private val enacted: String =
+        checkNotNull(javaClass.getResourceAsStream(ENACTED)) { "missing fixture $ENACTED" }
+            .use { it.reader().readText() }
+
+    private companion object {
+        const val ENACTED = "/issues/enacted_result.xml"
     }
 }

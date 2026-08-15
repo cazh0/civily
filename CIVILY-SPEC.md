@@ -90,10 +90,13 @@ may grow the APK by accident.
 - Authenticate with `X-Pin` wherever a session exists. `X-Password` and `X-Autologin` each perform a *login*, and a login cancels the previous session — including the user's own browser tab. Two logins in quick succession return 409. Background polling in particular must never re-login per poll.
 - Unit tests mandatory on parsing, rate limiting, and BBCode/HTML.
   - `Stately/` — `dto/*`, `DashHelper`, `SparkleHelper`, `MuffinsHelper`. None exist.
-  - `civily-app/` — `RateLimiterTest`, `NationDtoTest`, `RegionDtoTest`, `AutologinTokenTest`, `PercentCodecTest`, `NsUrlTest`, `NsIdTest`, `PopulationTest`, `AssemblyDtoTest`, `BbParserTest`, `BbColorTest`, `HtmlEntitiesTest`, `RelativeTimeTest`, `RmbDtoTest`, `IssueDtoTest`, `IssueHtmlParserTest`, `NsTextTest`, `InitialsTest`, `NewspaperTest`, `IssueResultDtoTest`, `PercentTest`, `AccountsTest`, `FlagAmbienceTest`, `FreedomRatingTest`, `MagnitudeTest`, `CountdownTest`, `IssueBadgeDtoTest` exist
-    (232 tests). Every new DTO ships a parser test including a missing-element case.
+  - `civily-app/` — `RateLimiterTest`, `NationDtoTest`, `RegionDtoTest`, `AutologinTokenTest`, `PercentCodecTest`, `NsUrlTest`, `NsIdTest`, `PopulationTest`, `AssemblyDtoTest`, `BbParserTest`, `BbColorTest`, `HtmlEntitiesTest`, `RelativeTimeTest`, `RmbDtoTest`, `IssueDtoTest`, `IssueHtmlParserTest`, `NsTextTest`, `InitialsTest`, `NewspaperTest`, `IssueResultDtoTest`, `PercentTest`, `AccountsTest`, `FlagAmbienceTest`, `FreedomRatingTest`, `MagnitudeTest`, `CountdownTest`, `IssueBadgeDtoTest`, `FreedomLadderTest`, `ClassificationTest` exist
+    (250 tests). Every new DTO ships a parser test including a missing-element case.
     `IssueHtmlParserTest` runs against a whole captured aftermath page, `src/test/resources/issues/`,
     not an excerpt: the parser's job is to find the papers inside the site's own chrome.
+    `IssueResultDtoTest` runs against a whole captured `c=issue` answer in the same directory,
+    for the same reason: the answer carries sections this app does not model, and reading past
+    them without losing what follows is the thing under test.
 - One PR, one concern.
 
 ## 6. Scope boundaries

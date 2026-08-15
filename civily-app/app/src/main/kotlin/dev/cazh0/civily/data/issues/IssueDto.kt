@@ -15,6 +15,15 @@ data class IssuesPageDto(
     @XmlElement(true) @XmlSerialName("FLAG", "", "") val flagUrl: String = "",
     /** Printed as the cover price — "1 DOLLAR" on the design's example page. */
     @XmlElement(true) @XmlSerialName("CURRENCY", "", "") val currency: String = "",
+    /**
+     * The demonym *adjective* — "Itagui Republician" — which is what a reclassification
+     * sentence needs: "The Itagui Republician Economy fell from Reasonable to Developing."
+     *
+     * `DEMONYM` and not `DEMONYM2`: the second is the noun for one citizen. They read alike on
+     * many nations, checked against a live response where both came back "Itagui Republician",
+     * so the difference only shows on the nations where it matters.
+     */
+    @XmlElement(true) @XmlSerialName("DEMONYM", "", "") val demonym: String = "",
     /** Unix seconds. See [IssueBadgeDto.nextIssueTime] for the sentinel. */
     @XmlElement(true) @XmlSerialName("NEXTISSUETIME", "", "") val nextIssueTime: Long = 0,
     val issues: IssueListDto = IssueListDto(),

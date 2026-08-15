@@ -79,6 +79,16 @@ object IssueHtmlParser {
                 description = description,
                 headlines = headlines,
                 rankings = trends(html),
+                // The aftermath page has its own markup for reclassifications, policy changes
+                // and unlocked banners, and the captured page carries none of them — so there
+                // is nothing here to write a selector against. `c=issue` names all four
+                // outright and is the path that actually runs (see
+                // `IssuesRepository.answerViaSiteOrApi`), so these stay empty rather than being
+                // parsed from a guess at the page's shape.
+                reclassifications = emptyList(),
+                newPolicies = emptyList(),
+                canceledPolicies = emptyList(),
+                postcards = emptyList(),
             ),
         )
     }

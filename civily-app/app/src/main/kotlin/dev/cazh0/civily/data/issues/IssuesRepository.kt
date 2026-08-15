@@ -8,10 +8,13 @@ import dev.cazh0.civily.core.result.CivilyError
 import dev.cazh0.civily.core.result.flatMap
 import dev.cazh0.civily.core.result.map
 import dev.cazh0.civily.core.session.SessionStore
+import dev.cazh0.civily.core.text.HtmlEntities
 import dev.cazh0.civily.core.text.bbcode.BbParser
 import dev.cazh0.civily.data.decodeNsXml
+import dev.cazh0.civily.data.nation.toPolicy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
 /**
  * The signed-in nation's issues, and the command that answers one.
@@ -37,6 +40,7 @@ class IssuesRepository(
                     nationName = active.nationName,
                     flagUrl = page.flagUrl,
                     currency = page.currency,
+                    demonym = HtmlEntities.decode(page.demonym),
                     issues = page.issues.issues.map { it.toIssue() },
                     nextIssueTime = page.nextIssueTime.orNoNextIssue(),
                 )
@@ -163,7 +167,36 @@ class IssuesRepository(
             )
         },
         headlines = headlines.headlines.mapNotNull { it.toHeadline() },
+        reclassifications = reclassifications.reclassifications.mapNotNull { it.toReclassification() },
+        newPolicies = newPolicies.policies.map { it.toPolicy() },
+        canceledPolicies = removedPolicies.policies.map { it.toPolicy() },
+        postcards = unlocks.banners.map { it.bannerId }.filter { it.isNotEmpty() },
     )
+
+    /**
+     * Null for a `type` this app has no name for, which drops the row.
+     *
+     * Dropping rather than defaulting: the legacy client falls back to civil rights for an
+     * unrecognised code, so a fifth code NationStates adds would be printed as a civil-rights
+     * change that never happened. A reclassification the reader does not see is a gap; one
+     * labelled with the wrong rating is a lie about their nation.
+     */
+    private fun ReclassifyDto.toReclassification(): Reclassification? {
+        val rating = when (type.trim().lowercase(Locale.US)) {
+            "0" -> Reclassification.Rating.CivilRights
+            "1" -> Reclassification.Rating.Economy
+            "2" -> Reclassification.Rating.PoliticalFreedom
+            "govt" -> Reclassification.Rating.Government
+            else -> {
+                Log.w(TAG, "unknown reclassification type '$type'")
+                return null
+            }
+        }
+        val from = HtmlEntities.decode(from).trim()
+        val to = HtmlEntities.decode(to).trim()
+        if (from.isEmpty() || to.isEmpty()) return null
+        return Reclassification(rating = rating, from = from, to = to)
+    }
 
     /** No artwork: `c=issue` gives the headline as bare text. See [HeadlineDto]. */
     private fun HeadlineDto.toHeadline(): IssueResultHeadline? =
@@ -218,13 +251,14 @@ class IssuesRepository(
         private const val RESULT_TAG = "IssueResult"
         private const val BADGE_TAG = "IssueBadge"
         /**
-         * The four extras ride along free — one request either way. Three of them dress the
+         * The five extras ride along free — one request either way. Three of them dress the
          * masthead: the capital names the paper, the flag flies on it and the currency is the
          * cover price. `nextissuetime` is what the screen counts down to when there is nothing
-         * on the desk.
+         * on the desk, and `demonym` is the adjective the aftermath's reclassification sentence
+         * is written in.
          */
         private val SHARDS =
-            listOf("issues", "capital", "flag", "currency", "nextissuetime")
+            listOf("issues", "capital", "flag", "currency", "demonym", "nextissuetime")
 
         /** A count and an instant. See [badge]. */
         private val BADGE_SHARDS = listOf("unread", "nextissuetime")

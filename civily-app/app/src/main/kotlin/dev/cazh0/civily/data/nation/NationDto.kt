@@ -1,5 +1,6 @@
 package dev.cazh0.civily.data.nation
 
+import dev.cazh0.civily.core.text.HtmlEntities
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
@@ -222,6 +223,20 @@ data class ScaleDto(
      * Testlandia's population percentile comes back as `0.09`.
      */
     @XmlElement(true) @XmlSerialName("PRANK", "", "") val percentile: Double = 0.0,
+)
+
+/**
+ * A wire policy in the shape a screen reads it.
+ *
+ * Why it lives beside the DTO rather than in [NationRepository]: the same `<POLICY>` element
+ * arrives from the `policies` shard and from a `c=issue` answer's `NEW_POLICIES` and
+ * `REMOVED_POLICIES`, and both callers want the entity decoding done for them.
+ */
+fun PolicyDto.toPolicy(): Policy = Policy(
+    name = HtmlEntities.decode(name),
+    imageId = imageId,
+    category = HtmlEntities.decode(category),
+    description = HtmlEntities.decode(description),
 )
 
 // Why file scope and not a companion: `@Serializable` generates a public `Companion` to hold
