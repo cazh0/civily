@@ -21,11 +21,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
@@ -40,46 +43,119 @@ import dev.cazh0.civily.ui.theme.NewsprintRule
 import dev.cazh0.civily.ui.theme.NewsprintSubhead
 
 /**
- * How tall the bands are. The two supplied frames differ only in this.
+ * Where a page is printed: on its own, or as one sheet in a pile.
  *
- * Their horizontal geometry — margins, rule width, flag, masthead and price positions — agrees
- * to within a third of a percent, so it is expressed once. The vertical proportions do not: the
- * stacked frame gives the headline twice the room because its headlines wrap, and a deeper body.
+ * The two supplied frames of a design differ only in vertical proportion, and the body band is
+ * the one part of that every banded design agrees on — a pile is drawn on deeper paper. What is
+ * left over, the two bands above it, each design states for itself.
  */
-enum class NewspaperStyle(
+enum class NewspaperStyle(val body: Float) {
+    /** `Newspaper.svg` and `npVariant2.svg`, 594-wide frames: one issue, alone on the screen. */
+    FrontPage(body = 111.61f / 594f),
+
+    /** `recentHeadlines.svg` and `newspaperStack.svg`, 480-wide sheets: one paper in a pile. */
+    Stacked(body = 128f / 480f),
+}
+
+/**
+ * The bands a banded design divides its sheet into, below the torn top edge every design shares,
+ * as fractions of the sheet's own width.
+ */
+internal class NewspaperBands(
     val mastheadBand: Float,
     val headlineBand: Float,
     val body: Float,
     val headlineLines: Int,
 ) {
-    /** `Newspaper.svg`, a 594-wide frame: one issue, one line of headline. */
-    FrontPage(
+    /** How tall the whole sheet is, as a fraction of its width. */
+    val aspect: Float get() = TOP_EDGE + mastheadBand + headlineBand + body
+
+    /** The top of the headline band, which is where every banded design's headline box sits. */
+    val headlineTop: Float get() = TOP_EDGE + mastheadBand
+}
+
+/** One line of print, as a fraction of the sheet's width: where it runs, and where it ends. */
+internal data class TextBox(val left: Float, val right: Float, val foot: Float)
+
+/**
+ * How tall a design's sheet is, and the lines its headline came out on — all as fractions of the
+ * sheet's own width.
+ *
+ * A line and not the paragraph. The paragraph's box is as wide as the measure it was given, and
+ * the sheet below is turned, so clearing that box means clearing a corner of empty paper past
+ * the end of the shortest line — which on a headline that breaks to a short last line holds the
+ * next paper a finger below where it could sit. Every line's own box is asked instead, and each
+ * one only has to be clear of the paper that lands on top of it.
+ *
+ * Only the headline is stated. Everything a design prints above it — mastheads, flags, price,
+ * edition line — is both higher and no wider, so a sheet clearing these clears those.
+ */
+internal data class SheetExtent(val height: Float, val lines: List<TextBox>)
+
+/** The broadsheet's bands. `Stacked` gives the headline twice the room because it wraps. */
+internal fun broadsheetBands(style: NewspaperStyle): NewspaperBands = when (style) {
+    NewspaperStyle.FrontPage -> NewspaperBands(
         mastheadBand = 56.94f / 594f,
         headlineBand = 32f / 594f,
-        body = 111.61f / 594f,
+        body = style.body,
         headlineLines = 1,
-    ),
+    )
 
-    /** `recentHeadlines.svg`, a 480-wide paper: stacked, headline wraps to two lines. */
-    Stacked(
+    NewspaperStyle.Stacked -> NewspaperBands(
         mastheadBand = 47.78f / 480f,
         headlineBand = 52f / 480f,
-        body = 128f / 480f,
+        body = style.body,
         headlineLines = 2,
-    ),
-    ;
-
-    /** Total height as a fraction of width — what a caller needs to lay a stack out. */
-    val aspect: Float get() = TOP_EDGE + mastheadBand + headlineBand + body
+    )
 }
 
 /**
- * An issue's front page, on whichever of the game's two papers that issue prints on.
+ * The proportions of a design as one sheet [width] wide in a pile, with this headline on it.
+ *
+ * The headline is an argument because it is the string that decides the answer: it is the
+ * lowest thing on every one of the three papers, and how far down it reaches is how far it had
+ * to shrink to fit.
+ */
+@Composable
+internal fun stackedExtent(design: Newspaper.Design, headline: String, width: Dp): SheetExtent =
+    when (design) {
+        Newspaper.Design.Broadsheet -> broadsheetExtent(headline, width)
+        Newspaper.Design.Tabloid -> tabloidExtent(headline, width)
+        Newspaper.Design.Berliner -> berlinerExtent(headline, width)
+    }
+
+/** The broadsheet's, whose headline is ranged left at the top of its own band. */
+@Composable
+private fun broadsheetExtent(headline: String, width: Dp): SheetExtent {
+    val bands = broadsheetBands(NewspaperStyle.Stacked)
+    return SheetExtent(
+        height = bands.aspect,
+        lines = broadsheetHeadline(headline, width, bands)
+            .boxes(MARGIN, bands.headlineTop + HEADLINE_Y, width),
+    )
+}
+
+/** The type the broadsheet's headline comes out at, which both the page and a pile ask for. */
+@Composable
+private fun broadsheetHeadline(headline: String, width: Dp, bands: NewspaperBands): FittedType =
+    rememberFittedType(
+        text = headline,
+        maxWidth = width * HEADLINE_W,
+        style = TextStyle(
+            fontFamily = FontFamily.Serif,
+            fontWeight = FontWeight.Bold,
+            fontSize = (width * HEADLINE_SIZE).toSp(),
+            lineHeight = (width * HEADLINE_SIZE * HEADLINE_LEADING).toSp(),
+        ),
+        maxLines = bands.headlineLines,
+    )
+
+/**
+ * An issue's front page, on whichever of the game's three papers that issue prints on.
  *
  * The choice is [Newspaper.design]'s, not this function's, so it is the same paper in the list
- * and in the detail. Every screen showing a single issue goes through here; only the aftermath
- * pile addresses [NewspaperFrontPage] directly, because a pile is a shape the tabloid has no
- * frame for.
+ * and in the detail. Every screen showing a single issue goes through here, and so does every
+ * sheet of the aftermath pile.
  */
 @Composable
 fun NewspaperForIssue(
@@ -88,6 +164,7 @@ fun NewspaperForIssue(
     edition: Newspaper.Edition,
     headline: String,
     modifier: Modifier = Modifier,
+    style: NewspaperStyle = NewspaperStyle.FrontPage,
     price: String? = null,
     flagUrl: String? = null,
     imageUrls: List<String> = emptyList(),
@@ -99,6 +176,7 @@ fun NewspaperForIssue(
             edition = edition,
             headline = headline,
             modifier = modifier,
+            style = style,
             price = price,
             flagUrl = flagUrl,
             imageUrls = imageUrls,
@@ -110,6 +188,19 @@ fun NewspaperForIssue(
             edition = edition,
             headline = headline,
             modifier = modifier,
+            style = style,
+            price = price,
+            flagUrl = flagUrl,
+            imageUrls = imageUrls,
+            imageLoader = imageLoader,
+        )
+
+        Newspaper.Design.Berliner -> NewspaperBerliner(
+            masthead = masthead,
+            edition = edition,
+            headline = headline,
+            modifier = modifier,
+            style = style,
             price = price,
             flagUrl = flagUrl,
             imageUrls = imageUrls,
@@ -119,7 +210,7 @@ fun NewspaperForIssue(
 }
 
 /**
- * The front page, transcribed from the supplied Figma frames.
+ * The broadsheet front page, transcribed from the supplied Figma frames.
  *
  * Every position is a fraction of the component's own width, so this is the same page on a
  * 380dp phone and a 900dp tablet rather than a picture that happens to fit one of them.
@@ -148,25 +239,20 @@ fun NewspaperFrontPage(
     imageUrls: List<String> = emptyList(),
     imageLoader: ImageLoader? = null,
 ) {
+    val bands = broadsheetBands(style)
+
     BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
         // Captured because the nested Boxes shadow this scope's `maxWidth`.
         val w = maxWidth
         val px: (Float) -> Dp = { w * it }
 
         Column(Modifier.fillMaxWidth()) {
-            Image(
-                painter = painterResource(R.drawable.newspaper_edge_top),
-                contentDescription = null,
-                contentScale = ContentScale.FillBounds,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(px(TOP_EDGE)),
-            )
+            NewspaperTopEdge(px(TOP_EDGE))
 
             Box(
                 Modifier
                     .fillMaxWidth()
-                    .height(px(style.mastheadBand)),
+                    .height(px(bands.mastheadBand)),
             ) {
                 Image(
                     painter = painterResource(R.drawable.newspaper_band_masthead),
@@ -219,7 +305,7 @@ fun NewspaperFrontPage(
                 }
 
                 // Rules sit against the foot of the band, so they follow its height.
-                val ruleBase = style.mastheadBand - RULES_FROM_BAND_FOOT
+                val ruleBase = bands.mastheadBand - RULES_FROM_BAND_FOOT
                 PaperBlock(px(MARGIN), px(ruleBase), px(RULE_W), px(RULE_THICK), NewsprintRule)
                 PaperBlock(px(MARGIN), px(ruleBase + RULE_2_OFFSET), px(RULE_W), px(RULE_THIN), NewsprintRule)
                 PaperBlock(px(MARGIN), px(ruleBase + RULE_3_OFFSET), px(RULE_W), px(RULE_THIN), NewsprintRule)
@@ -237,7 +323,7 @@ fun NewspaperFrontPage(
             Box(
                 Modifier
                     .fillMaxWidth()
-                    .height(px(style.headlineBand)),
+                    .height(px(bands.headlineBand)),
             ) {
                 Image(
                     painter = painterResource(R.drawable.newspaper_band_headline),
@@ -245,17 +331,12 @@ fun NewspaperFrontPage(
                     contentScale = ContentScale.FillBounds,
                     modifier = Modifier.fillMaxSize(),
                 )
-                FittedText(
+                Text(
                     text = headline,
-                    maxWidth = px(HEADLINE_W),
-                    maxLines = style.headlineLines,
-                    style = TextStyle(
-                        fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = px(HEADLINE_SIZE).toSp(),
-                        lineHeight = px(HEADLINE_SIZE * HEADLINE_LEADING).toSp(),
-                    ),
+                    style = broadsheetHeadline(headline, w, bands).style,
                     color = NewsprintHeadlineInk,
+                    maxLines = bands.headlineLines,
+                    softWrap = bands.headlineLines > 1,
                     // Why the top and not the middle: the frame sets the headline against the
                     // top of its band, and the sheet below covers the band's foot. Centring it
                     // would push a wrapped headline under the next paper.
@@ -266,38 +347,65 @@ fun NewspaperFrontPage(
                 )
             }
 
-            val band = px(style.body)
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(band),
-            ) {
-                // Under the strip, not over it: the strip's windows are holes, and its torn
-                // edges are what gives a photo printed on newsprint its border.
-                NewspaperPhoto(
-                    url = imageUrls.getOrNull(0),
-                    imageLoader = imageLoader,
-                    x = w * PHOTO1_X,
-                    y = band * PHOTO_Y,
-                    width = w * PHOTO1_W,
-                    height = band * PHOTO_H,
-                )
-                NewspaperPhoto(
-                    url = imageUrls.getOrNull(1),
-                    imageLoader = imageLoader,
-                    x = w * PHOTO2_X,
-                    y = band * PHOTO_Y,
-                    width = w * PHOTO2_W,
-                    height = band * PHOTO_H,
-                )
-                Image(
-                    painter = painterResource(R.drawable.newspaper_edge_bottom),
-                    contentDescription = null,
-                    contentScale = ContentScale.FillBounds,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
+            NewspaperBody(imageUrls, imageLoader, w, px(bands.body))
         }
+    }
+}
+
+/** The torn top of the sheet, which is `dpaper1` at its own aspect on every design. */
+@Composable
+internal fun NewspaperTopEdge(height: Dp) {
+    Image(
+        painter = painterResource(R.drawable.newspaper_edge_top),
+        contentDescription = null,
+        contentScale = ContentScale.FillBounds,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height),
+    )
+}
+
+/**
+ * The foot of the sheet: two photographs, and `dpaper5` torn over them.
+ *
+ * Under the strip, not over it: the strip's windows are holes, and its torn edges are what gives
+ * a photo printed on newsprint its border. Both banded designs cut the same two windows in the
+ * same strip, so both print their pictures through this.
+ */
+@Composable
+internal fun NewspaperBody(
+    imageUrls: List<String>,
+    imageLoader: ImageLoader?,
+    width: Dp,
+    band: Dp,
+) {
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .height(band),
+    ) {
+        NewspaperPhoto(
+            url = imageUrls.getOrNull(0),
+            imageLoader = imageLoader,
+            x = width * PHOTO1_X,
+            y = band * PHOTO_Y,
+            width = width * PHOTO1_W,
+            height = band * PHOTO_H,
+        )
+        NewspaperPhoto(
+            url = imageUrls.getOrNull(1),
+            imageLoader = imageLoader,
+            x = width * PHOTO2_X,
+            y = band * PHOTO_Y,
+            width = width * PHOTO2_W,
+            height = band * PHOTO_H,
+        )
+        Image(
+            painter = painterResource(R.drawable.newspaper_edge_bottom),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.fillMaxSize(),
+        )
     }
 }
 
@@ -388,7 +496,7 @@ internal fun FittedText(
 ) {
     Text(
         text = text,
-        style = rememberFittedStyle(text, maxWidth, style, maxLines),
+        style = rememberFittedType(text, maxWidth, style, maxLines).style,
         color = color,
         maxLines = maxLines,
         softWrap = maxLines > 1,
@@ -396,47 +504,108 @@ internal fun FittedText(
     )
 }
 
+/** The size a string comes out at once it has been fitted, and the lines it then takes. */
+internal class FittedType(val style: TextStyle, val height: Dp, val lines: List<LineBox>) {
+
+    /**
+     * Those lines as boxes on a sheet [width] wide, with the text box's own corner at [x], [y].
+     *
+     * `getLineLeft` and `getLineRight` already carry the alignment, so a centred headline
+     * reports the box its ink is centred in rather than the measure it was centred within.
+     */
+    fun boxes(x: Float, y: Float, width: Dp): List<TextBox> = boxes(x, y, width) { it.foot }
+
+    /**
+     * The same, down to each baseline instead of each line's foot.
+     *
+     * For type set in capitals: the room a line box keeps for descenders is empty paper on such
+     * a page, and a pile spaced by it holds the next sheet a descender's depth lower than the
+     * words need. What can still reach under the baseline in an alphabet of capitals is a comma,
+     * and only where a line ends in one — a tenth of an em, at the single point along the line
+     * where the sheet below is tangent and under its own torn edge, which is transparent there.
+     */
+    fun capBoxes(x: Float, y: Float, width: Dp): List<TextBox> = boxes(x, y, width) { it.baseline }
+
+    private fun boxes(x: Float, y: Float, width: Dp, foot: (LineBox) -> Dp): List<TextBox> =
+        lines.map {
+            TextBox(
+                left = x + it.left / width,
+                right = x + it.right / width,
+                foot = y + foot(it) / width,
+            )
+        }
+}
+
+/** One line of a fitted string, measured from the corner of the box it was laid out in. */
+internal class LineBox(val left: Dp, val right: Dp, val foot: Dp, val baseline: Dp)
+
 /**
- * The size [FittedText] would print this string at, without printing it.
+ * The lines of a laid-out string, in the units the caller placed its text box in.
+ *
+ * Compose gives no per-line baseline, but every line here is set in one style, so the drop from
+ * a line's foot to its baseline is the same on all of them and the last one reports it.
+ */
+internal fun TextLayoutResult.lineBoxes(density: Density): List<LineBox> = with(density) {
+    val descent = getLineBottom(lineCount - 1) - lastBaseline
+    List(lineCount) { line ->
+        LineBox(
+            left = getLineLeft(line).toDp(),
+            right = getLineRight(line).toDp(),
+            foot = getLineBottom(line).toDp(),
+            baseline = (getLineBottom(line) - descent).toDp(),
+        )
+    }
+}
+
+/**
+ * What [FittedText] would print this string as, without printing it.
  *
  * Why it is separable: the tabloid's headline is drawn twice, outline under fill, and the two
- * passes have to be the same measurement. Fitting each of them on its own would let a string
- * that lands on a shrink boundary come out at two sizes and print as a smear.
+ * passes have to be the same measurement — fitting each on its own would let a string that
+ * lands on a shrink boundary come out at two sizes and print as a smear. The pile asks for the
+ * same reason and one more: [height] is the box the words ended up in rather than the box they
+ * were offered, which is the only figure that says where a sheet may be laid over this one.
  */
 @Composable
-internal fun rememberFittedStyle(
+internal fun rememberFittedType(
     text: String,
     maxWidth: Dp,
     style: TextStyle,
     maxLines: Int = 1,
-): TextStyle {
+): FittedType {
     val measurer = rememberTextMeasurer()
     val density = LocalDensity.current
     return remember(text, style, maxWidth, maxLines, density) {
+        fun measure(candidate: TextStyle) = measurer.measure(
+            text = AnnotatedString(text),
+            style = candidate,
+            maxLines = maxLines,
+            softWrap = maxLines > 1,
+            constraints = with(density) { Constraints(maxWidth = maxWidth.roundToPx()) },
+        )
+
         var candidate = style
-        repeat(MAX_SHRINK_STEPS) {
-            val measured = measurer.measure(
-                text = AnnotatedString(text),
-                style = candidate,
-                maxLines = maxLines,
-                softWrap = maxLines > 1,
-                constraints = with(density) {
-                    androidx.compose.ui.unit.Constraints(maxWidth = maxWidth.roundToPx())
-                },
-            )
-            if (!measured.hasVisualOverflow) return@remember candidate
+        var measured = measure(candidate)
+        var steps = 0
+        while (measured.hasVisualOverflow && steps < MAX_SHRINK_STEPS) {
             candidate = candidate.copy(
                 fontSize = candidate.fontSize * SHRINK_STEP,
-                // Only the wrapping headline sets a line height. TextUnit arithmetic throws
-                // on Unspecified, so the single-line styles must be left alone.
+                // Only a wrapping headline sets a line height. TextUnit arithmetic throws on
+                // Unspecified, so the single-line styles must be left alone.
                 lineHeight = if (candidate.lineHeight.isSpecified) {
                     candidate.lineHeight * SHRINK_STEP
                 } else {
                     candidate.lineHeight
                 },
             )
+            measured = measure(candidate)
+            steps++
         }
-        candidate
+        FittedType(
+            style = candidate,
+            height = with(density) { measured.size.height.toDp() },
+            lines = measured.lineBoxes(density),
+        )
     }
 }
 
@@ -447,7 +616,10 @@ private const val MAX_SHRINK_STEPS = 14
 private const val SHRINK_STEP = 0.93f
 
 // Geometry as fractions of the page width, from the Figma frames. Nothing here is a guess.
-private const val TOP_EDGE = 47.03f / 594f
+
+/** `dpaper1` at its own aspect, which is the one figure all three designs' frames agree on. */
+internal const val TOP_EDGE = 47.03f / 594f
+
 private const val MARGIN = 29.69f / 594f
 private const val RULE_W = 510.86f / 594f
 private const val FLAG_X = 76.15f / 594f

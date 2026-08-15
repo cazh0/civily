@@ -122,6 +122,7 @@ fun IssueDetailScreen(
         if (outcome != null) {
             IssueResultView(
                 result = outcome.result,
+                issueId = issueId,
                 masthead = Newspaper.masthead(
                     capital = page?.capital.orEmpty(),
                     nationName = page?.nationName.orEmpty(),

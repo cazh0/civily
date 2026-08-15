@@ -29,13 +29,18 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.DeviceFontFamilyName
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import coil.ImageLoader
 import coil.compose.AsyncImage
@@ -77,6 +82,7 @@ fun NewspaperTabloid(
     edition: Newspaper.Edition,
     headline: String,
     modifier: Modifier = Modifier,
+    style: NewspaperStyle = NewspaperStyle.FrontPage,
     price: String? = null,
     flagUrl: String? = null,
     imageUrls: List<String> = emptyList(),
@@ -86,6 +92,7 @@ fun NewspaperTabloid(
         // Captured because the nested Boxes shadow this scope's `maxWidth`.
         val page = maxWidth
         val px: (Float) -> Dp = { page * it }
+        val layout = tabloidLayout(headline, page, style)
 
         Column(Modifier.fillMaxWidth()) {
             Image(
@@ -127,7 +134,7 @@ fun NewspaperTabloid(
             Box(
                 Modifier
                     .fillMaxWidth()
-                    .height(px(BODY)),
+                    .height(px(layout.body)),
             ) {
                 // Over the strip, not under it: this page's photograph is wider than the windows
                 // cut in `dpaper5` and covers the paper between them as well, which is only
@@ -149,13 +156,13 @@ fun NewspaperTabloid(
                     x = px(PHOTO_X),
                     y = px(PHOTO_Y),
                     width = px(PHOTO_W),
-                    height = px(PHOTO_H),
+                    height = px(layout.photo),
                 )
                 PhotoEdge(
                     x = px(PHOTO_X),
                     y = px(PHOTO_Y),
                     width = px(PHOTO_W),
-                    height = px(PHOTO_H),
+                    height = px(layout.photo),
                     thickness = px(PHOTO_EDGE),
                     color = TabloidPhotoEdge,
                     // Open at the foot, as the frame draws it: the picture runs off the torn edge.
@@ -191,7 +198,148 @@ fun NewspaperTabloid(
                     )
                 }
 
-                Headline(headline, page)
+                Headline(headline, page, layout)
+            }
+        }
+    }
+}
+
+/**
+ * The proportions of this page as one sheet in a pile.
+ *
+ * Its words reach further down than either banded design's, and further down than its own bands
+ * go: the headline is shouted across the photograph rather than into a band of its own, so what
+ * a sheet below may not cover is the foot of that headline and not the foot of the masthead.
+ *
+ * The lines are the ones the headline came out on and not the room it was given, because the
+ * room here is a whole sheet of photograph and a shouted headline breaks short. The flags and
+ * the price flash run wider than any of them, but they are a band higher up.
+ */
+@Composable
+internal fun tabloidExtent(headline: String, width: Dp): SheetExtent {
+    val layout = tabloidLayout(headline, width, NewspaperStyle.Stacked)
+    return SheetExtent(
+        height = TOP_EDGE + MASTHEAD_BAND + layout.body,
+        lines = layout.type.capBoxes(
+            x = HEADLINE_X,
+            y = TOP_EDGE + MASTHEAD_BAND + HEADLINE_Y - layout.lead / width,
+            width = width,
+        ),
+    )
+}
+
+/**
+ * The two tabloids the pile's frame draws, which are one page printed on two depths of paper.
+ *
+ * Both set the headline at one size, the same size the front page sets it at, and differ only in
+ * how much photograph is under it. [Normal] is the sheet the frame prints two lines on;
+ * [Extended] is the sheet it prints three on, and whose picture is deep enough to carry six.
+ */
+private enum class StackedTabloid(val body: Float) {
+    Normal(body = 123.948f / STACK_FRAME),
+    Extended(body = 258.938f / STACK_FRAME),
+    ;
+
+    /** Lines of headline between the top of the headline and the foot of the sheet. */
+    val headlineLines: Int get() = ((body - HEADLINE_Y) / HEADLINE_LINE).toInt()
+}
+
+/** Everything about this page that the headline decides. */
+private class TabloidLayout(
+    val type: FittedType,
+    val lines: Int,
+    val measure: Float,
+    val shrunk: Float,
+    val body: Float,
+    val photo: Float,
+    private val width: Dp,
+) {
+    val style: TextStyle get() = type.style
+
+    /**
+     * How much taller the first line's box is than the frame's own line — which is how far the
+     * whole headline has to come back up.
+     *
+     * The frame sets this headline on a 50-unit line. Asked for one shorter than the face's own,
+     * Compose gives the first line the face's and every line after it the 50, and the deficit
+     * cannot be trimmed away because it is not space anything added. So the block starts a fifth
+     * of a line low, which puts the words below where the frame draws them and, in a pile, holds
+     * the next sheet the same distance lower for nothing.
+     */
+    val lead: Dp
+        get() = (type.lines.first().foot - width * HEADLINE_LINE).coerceAtLeast(0.dp)
+}
+
+/**
+ * How this page prints this headline, which the page and a pile both have to agree on.
+ *
+ * On the front page the string is fitted: one sheet, one depth of paper, and a headline that has
+ * to end up inside it. In a pile it is not. The stack's frame sets both of its tabloids at the
+ * frame's own size and answers a long headline with a deeper sheet instead of smaller type, so
+ * that is what happens here — the string is measured once at that size, and a headline that will
+ * not go in [StackedTabloid.Normal]'s two lines is printed on [StackedTabloid.Extended] instead.
+ *
+ * Six lines is where that stops. A headline past it is ellipsised rather than quietly cut: the
+ * reader can see that a word is missing, which is the point.
+ */
+@Composable
+private fun tabloidLayout(headline: String, width: Dp, style: NewspaperStyle): TabloidLayout {
+    val shout = remember(headline) { headline.uppercase(Locale.US) }
+    val measure = when (style) {
+        NewspaperStyle.FrontPage -> HEADLINE_W
+        NewspaperStyle.Stacked -> STACKED_HEADLINE_W
+    }
+    val asDrawn = TextStyle(
+        fontFamily = Condensed,
+        fontWeight = FontWeight.Bold,
+        fontSize = (width * HEADLINE_SIZE).toSp(),
+        lineHeight = (width * HEADLINE_LINE).toSp(),
+    )
+
+    return when (style) {
+        NewspaperStyle.FrontPage -> {
+            val fitted = rememberFittedType(shout, width * measure, asDrawn, HEADLINE_LINES)
+            TabloidLayout(
+                type = fitted,
+                lines = HEADLINE_LINES,
+                measure = measure,
+                shrunk = fitted.style.fontSize.value / asDrawn.fontSize.value,
+                body = BODY,
+                photo = PHOTO_H,
+                width = width,
+            )
+        }
+
+        NewspaperStyle.Stacked -> {
+            val measurer = rememberTextMeasurer()
+            val density = LocalDensity.current
+            remember(shout, asDrawn, width, density) {
+                val laid = measurer.measure(
+                    text = AnnotatedString(shout),
+                    style = asDrawn,
+                    maxLines = StackedTabloid.Extended.headlineLines,
+                    constraints = with(density) {
+                        Constraints(maxWidth = (width * measure).roundToPx())
+                    },
+                )
+                val sheet = if (laid.lineCount <= StackedTabloid.Normal.headlineLines) {
+                    StackedTabloid.Normal
+                } else {
+                    StackedTabloid.Extended
+                }
+                TabloidLayout(
+                    type = FittedType(
+                        style = asDrawn,
+                        height = with(density) { laid.size.height.toDp() },
+                        lines = laid.lineBoxes(density),
+                    ),
+                    lines = sheet.headlineLines,
+                    measure = measure,
+                    shrunk = 1f,
+                    body = sheet.body,
+                    photo = sheet.body * PHOTO_OF_BODY,
+                    width = width,
+                )
             }
         }
     }
@@ -370,35 +518,37 @@ private fun EditionLine(edition: Newspaper.Edition, page: Dp) {
  * band below has the room — the photograph is what is under it either way.
  */
 @Composable
-private fun Headline(text: String, page: Dp) {
+private fun Headline(text: String, page: Dp, layout: TabloidLayout) {
     val px: (Float) -> Dp = { page * it }
     val shout = remember(text) { text.uppercase(Locale.US) }
+    val shrunk = layout.shrunk
+    val drop = px(HEADLINE_SHADOW * shrunk)
 
-    val asDrawn = TextStyle(
-        fontFamily = Condensed,
-        fontWeight = FontWeight.Bold,
-        fontSize = px(HEADLINE_SIZE).toSp(),
-        lineHeight = px(HEADLINE_SIZE * HEADLINE_LEADING).toSp(),
-    )
-    val fitted = rememberFittedStyle(shout, px(HEADLINE_W), asDrawn, HEADLINE_LINES)
-    val shrunk = fitted.fontSize.value / asDrawn.fontSize.value
-
-    val edged = with(LocalDensity.current) {
-        fitted.copy(
+    val ringed = with(LocalDensity.current) {
+        layout.style.copy(
             drawStyle = Stroke(width = px(HEADLINE_OUTLINE * shrunk).toPx(), join = StrokeJoin.Round),
-            shadow = Shadow(
-                TabloidHeadlineEdge,
-                Offset(px(HEADLINE_SHADOW * shrunk).toPx(), px(HEADLINE_SHADOW * shrunk).toPx()),
-                NO_BLUR,
-            ),
         )
     }
     val place = Modifier
-        .offset(x = px(HEADLINE_X), y = px(HEADLINE_Y))
-        .width(px(HEADLINE_W))
+        .offset(x = px(HEADLINE_X), y = px(HEADLINE_Y) - layout.lead)
+        .width(px(layout.measure))
 
-    Text(shout, style = edged, color = TabloidHeadlineEdge, maxLines = HEADLINE_LINES, modifier = place)
-    Text(shout, style = fitted, color = TabloidHeadlineInk, maxLines = HEADLINE_LINES, modifier = place)
+    @Composable
+    fun pass(style: TextStyle, color: Color, modifier: Modifier) = Text(
+        shout,
+        style = style,
+        color = color,
+        maxLines = layout.lines,
+        overflow = TextOverflow.Ellipsis,
+        modifier = modifier,
+    )
+
+    // The drop is the letter itself, moved: a solid silhouette and not a second outline. It was
+    // the ring's own shadow, which printed the ring again a few units down and read as a smear
+    // rather than as something the type was standing above.
+    pass(layout.style, TabloidHeadlineEdge, place.offset(x = drop, y = drop))
+    pass(ringed, TabloidHeadlineEdge, place)
+    pass(layout.style, TabloidHeadlineInk, place)
 }
 
 /** The dark edge printed around a photograph, inside it. */
@@ -451,7 +601,6 @@ private const val FRAME = 594f
 private const val BAND_TOP = 47.03f
 private const val BODY_TOP = 124.76f
 
-private const val TOP_EDGE = BAND_TOP / FRAME
 private const val MASTHEAD_BAND = 77.73f / FRAME
 private const val BODY = 154.19f / FRAME
 private const val MARGIN = 29.69f / FRAME
@@ -530,6 +679,15 @@ private const val PHOTO_W = 518.61f / FRAME
 private const val PHOTO_H = 131.97f / FRAME
 private const val PHOTO_EDGE = 3f / FRAME
 
+/**
+ * How much of the body band the picture takes, which is what lets the band get deeper.
+ *
+ * Both of the pile's tabloids give it this same share of two bodies that differ by a factor of
+ * two, so it is a share and not a height. The front page keeps its own 131.97 of 154.19 — a
+ * fifth of a percent of the sheet away from this, and exact for the frame it was measured in.
+ */
+private const val PHOTO_OF_BODY = 217.5f / 258.938f
+
 private const val INSET_X = 434.61f / FRAME
 private const val INSET_Y = (135.22f - BODY_TOP) / FRAME
 private const val INSET_W = 97.03f / FRAME
@@ -540,6 +698,23 @@ private const val INSET_SHADOW = 4f / FRAME
 private const val HEADLINE_X = 41.58f / FRAME
 private const val HEADLINE_Y = (133.76f - BODY_TOP) / FRAME
 private const val HEADLINE_W = 386.09f / FRAME
+
+/**
+ * The pile's frame, whose sheet is 480 units wide where the front page's is 594.
+ *
+ * Its two tabloids agree with each other and with the front page on everything this file states
+ * in width fractions — the plate, the flags, the flash, the picture's margins, and above all the
+ * headline's cap height and line box, which is what makes the size a size and not a suggestion.
+ * They disagree with it on two figures: the headline is given four fifths of the sheet rather
+ * than two thirds, and the sheet is deep or deeper. Both are stated here.
+ *
+ * The one figure not carried across is the masthead band, which the pile draws 1.5% of the
+ * sheet deeper with all its furniture ruled down to sit flush at the foot. Taking the depth
+ * without the furniture would open a strip of bare paper the frame does not have, and taking
+ * both is a second copy of the band to move the edition line by four points on a phone.
+ */
+private const val STACK_FRAME = 480f
+private const val STACKED_HEADLINE_W = 383.99f / STACK_FRAME
 private const val HEADLINE_OUTLINE = 2f / FRAME
 private const val HEADLINE_SHADOW = 3.8016f / FRAME
 private const val HEADLINE_SIZE = 37.55f / CAP_RATIO / FRAME
@@ -547,3 +722,6 @@ private const val HEADLINE_LINES = 2
 
 /** The frame's line box is 50 units where its cap height asks for nearly 53: a tight headline. */
 private const val HEADLINE_LEADING = 50f / (37.55f / CAP_RATIO)
+
+/** That line box as a fraction of the page width — how far down the sheet each line reaches. */
+private const val HEADLINE_LINE = HEADLINE_SIZE * HEADLINE_LEADING

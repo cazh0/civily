@@ -264,31 +264,55 @@ becomes a 404 the first time the game picks a name that does not fit the pattern
 read by document order, not by `dpaperpic1`/`dpaperpic2`, and one that prints no photograph
 still prints its headline.
 
-`NewspaperStyle` holds the only thing the two supplied frames disagree on: band heights.
-`FrontPage` is `Newspaper.svg`; `Stacked` is `recentHeadlines.svg`, which gives the headline
-twice the room because its headlines wrap. Their horizontal geometry agrees to within a third
-of a percent, so it is written once.
+`NewspaperStyle` says where a page is being printed and nothing else: `FrontPage` is alone on
+the screen, `Stacked` is one sheet in a pile. What the two supplied frames of a design disagree
+on is vertical proportion, and the body band is the one part of that every banded design agrees
+on — a pile is drawn on deeper paper, 128 of its 480 units against 111.61 of 594 — so the body
+hangs on the style and the two bands above it hang on the design. Their horizontal geometry
+agrees to within a third of a percent, so it is written once.
 
-**The game prints two papers, so the app does.** `newNewspaper.svg` is a second front page on
+The broadsheet is the one design whose bands move: stacked, it gives the headline twice the
+room, because the aftermath's headlines are sentences and they wrap. Both stack frames happen
+to be drawn with a headline that fits on one line, and holding the app to that would mean
+shrinking every longer one until it stopped being a headline.
+
+**The game prints three papers, so the app does.** `newNewspaper.svg` is a second front page on
 the same three strips and it is a different newspaper: the masthead sits on a slate plate
 between two flags rather than beside one, the cover price is a tilted flash pinned across the
 tear, the edition line runs cream out of a slate bar under a heavy red rule, and the body is
 given over to one photograph with the headline shouted across it in outlined capitals. It has
-no headline band at all, which is why `NewspaperTabloid` is its own component and not a third
-`NewspaperStyle` — that enum holds band heights, and this page has no such band to give one to.
+no headline band at all, which is why `NewspaperTabloid` shares no band table with the other
+two: there is no such band on it to give a height to.
 The photographs go *over* the strip here rather than through it: the picture is wider than the
 windows cut in `dpaper5` and covers the paper between them, which is only possible from on top.
 It is printed whether or not the issue offered a photograph, because it covers both windows and
 leaving it out would open two holes; the inset beside it is printed only when there is a second
 picture, an empty frame with a shadow under it being no part of a page.
 
+`npVariant2.svg` is the third, and `NewspaperBerliner` is named for it the way the other two
+are: the three papers carry the names of the three formats a real one is printed in, and this
+is the middle of them. It is the broadsheet's four strips and the broadsheet's bands, arranged
+as a quieter paper — the cover price takes the left of the masthead where the broadsheet flies
+its flag and the flag takes the right where the broadsheet prints its price, the paper's name
+sits in the middle of that rather than over toward one end, and the edition line is ruled off
+top and bottom by three hairlines instead of hanging under one heavy rule. Its edition line
+also runs the other way: volume, city, date. The headline is centred and italic, and every
+mark on the page is one slate ink.
+
+Its cells are the thirds of the ruled width, not the frame's own 216.7/77.45/216.7 boxes. That
+middle figure hugs one date set in the frame's own face, and a hug is a measurement rather than
+a margin — the tabloid's masthead is off its frame's 219.88 for the same reason. Ranged out,
+centred and ranged in over equal thirds, the frame's own strings land exactly where the frame
+puts them and a longer one still has somewhere to go.
+
 Which paper an issue prints on is `Newspaper.design`, alongside the masthead and the edition
 line and for the same reason: it has to be the same page in the list, in the detail, and
-tomorrow. Two designs over consecutive ids is parity and the edition city is a four-cycle, so
-the two divide the cities between them — arithmetic, not an oversight, and the alternative is
-an uneven split between the designs, which is the more visible fault. `NewspaperForIssue` is
-the one door: every screen showing a single issue goes through it, and only the aftermath pile
-addresses `NewspaperFrontPage` directly, a pile being a shape the tabloid has no frame for.
+tomorrow. Three designs over consecutive ids, against the edition city's four-cycle, come back
+around together only every twelfth issue, so every design prints under every city. Two did not:
+three and four share no factor, two and four share one, which had the broadsheet taking the
+first and third cities for good and the tabloid the other two. `NewspaperForIssue` is the one
+door — every screen showing a single issue goes through it, and so does every sheet of the
+aftermath pile.
 
 Its type is stated as cap heights rather than point sizes. The frame is set in a bold condensed
 grotesque the app does not ship and will not — a display font is tens of kilobytes against a §4
@@ -297,20 +321,94 @@ and two faces at one point size do not put capitals at one height. Carrying the 
 letters across is what keeps the masthead the size the frame drew it. For the same reason the
 masthead's fitting box is the plate less the frame's own 4.61-unit inset and not the frame's
 219.88-unit text box: that box hugs one string in the frame's own face, and a hug is a
-measurement rather than a margin. The headline is drawn twice at one measurement, outline under
-fill, and both the outline and its offset scale with however far the string had to shrink.
+measurement rather than a margin.
 
-**`NewspaperStack` is a pile, not a list.** Positions, offsets and angles — −0.7°, +1.4°,
-−2.1°, +2.8° — are the frame's own, as fractions of its 517.86-unit canvas; the sheet is 480
-of those wide, which is what leaves room for each to sit somewhere different. Sheets draw
+The headline is drawn three times at one measurement: a solid silhouette offset down and right,
+the one-unit ring around the letters, then the cream face. That is what the frame's filter is —
+eight offset copies of the *filled* glyph, seven of them a unit apart to make the ring and one
+3.072 units down to make the drop. Hanging the drop off the ring instead, as one shadow on one
+stroked pass, prints the ring a second time a few units below and reads as a smear rather than
+as type standing above the page. The ring and the drop both scale with however far the string
+had to shrink.
+
+**In a pile the tabloid does not shrink at all.** Alone on a screen it has one sheet and one
+depth of paper, so a headline that will not fit has to be fitted to it. `newspaperStack.svg`
+answers the same problem the other way: both of its tabloids set the headline at the frame's own
+cap height and line box — the same size the front page starts from, to five decimal places — and
+the one carrying the longer headline is simply printed on deeper paper. So that is what the pile
+does. `Normal` is the sheet the frame prints two lines on, `Extended` the sheet it prints three
+on; neither line count is typed in, both fall out of how many line boxes fit between the top of
+the headline and the foot of the sheet, which is two and six. A headline that will not go in two
+gets `Extended`, and one that will not go in six is ellipsised — cut where the reader can see it
+was cut.
+
+Only two figures separate those sheets from the front page: the headline is given four fifths of
+the sheet rather than two thirds, and the picture is stated as its share of the body band rather
+than as a height, which is what lets the band get twice as deep and stay a photograph. The
+masthead band is the one figure not carried across — the pile draws it 1.5% deeper with all its
+furniture ruled down to sit flush at the foot, and taking the depth without the furniture would
+open a strip of bare paper the frame does not have.
+
+**`NewspaperStack` is a pile, not a list.** Offsets and angles — +0.7°, −1.4°, +2.1°, −2.8° —
+are `newspaperStack.svg`'s own, as fractions of its 518.45-unit canvas; the sheet is 480 of
+those wide, which is what leaves room for each to sit somewhere different, and a sheet turns
+about its top left corner because that is the corner the frame turns it about. Sheets draw
 first to last so each lands on top of the one before: that ordering is the whole illusion, and
-reversing it buries every headline under the paper beneath it.
+reversing it buries every headline under the paper beneath it. Past the frame's four, the four
+repeat — the API has never returned more than four headlines, and a repeat is the one
+continuation that cannot walk a fifth sheet off the side of the canvas the way a growing angle
+would.
 
-The pile runs to the foot of its last sheet, rotated corner included — the frame's one number
-not transcribed, because the frame stops 65 units short and cuts the bottom paper through its
-photographs. Every sheet above is covered from the headline down by the next one, so those are
-the only photographs the pile ever shows, and half of them were being cropped away; the block
-is 13% taller for it.
+The pile prints the game's papers in the game's own order, continuing from the paper the issue
+was itself printed on, so the top sheet is the front page the reader has just come from and the
+rest are the papers that would follow it. That is `Newspaper.design` applied one step at a
+time; a pile that picked its papers by some other rule would need a second rule to explain.
+
+**Where each sheet starts is the one thing not transcribed.** The frame lays its four out by
+hand and its own spacing lands the next sheet across the foot of the one above — the last third
+of the broadsheet's headline at one end of the pile, a whole line of the tabloid's at the
+other. A pile whose entire point is that every sheet shows its words cannot be laid out by
+numbers that cover them, so each sheet is set down where the sheet above stops printing.
+
+Straight lines decide that and nothing else: the foot of each line of the headline above, and
+the torn top edge below. Both sheets are turned, so every one of those is sloped, and a sloped
+line clears a sloped line all the way along a span if it clears it at the two ends — so each
+line's own two bottom corners are asked, and nothing else is.
+
+Each *line*, not the paragraph. A paragraph's box is as wide as the measure it was given, so
+clearing it means clearing a corner of blank paper past the end of the shortest line: a headline
+that breaks to a short last line — `GOVERNMENT CUTS` over `ECO-WASTE` — was holding the next
+paper a finger below where it could sit, with the seam between two torn edges showing through.
+Asking the lines gets that back.
+
+The lines are also the ones the words came out on, not the ones they were offered. The tabloid
+keeps room for two at the front and up to six in a pile, and the game's headlines regularly take
+fewer; spaced by the room rather than the ink, the sheet below started under the whole
+photograph. So `rememberFittedType` hands back the boxes it measured along with the size it
+settled on, and the page and the pile read the same figures — the page to print them, the pile
+to know where they end.
+
+Two things still stood between a line's last ink and its box, and both were the tabloid's.
+
+A line box keeps room for descenders, which a page shouting in capitals has no use for, so that
+page hands the pile its baselines rather than its feet. The banded designs keep their feet:
+their headlines are sentences, and sentences have descenders.
+
+And its first line is a fifth of a line taller than the rest. Asked for a line shorter than the
+face's own — the frame sets this headline on 50 units where the condensed face wants 56 —
+Compose gives the first line the face's and every line after it the 50. That deficit cannot be
+trimmed, because `LineHeightStyle.Trim` removes space something added and nothing added this;
+so the headline is drawn up by the difference, measured off its own first line. It was landing
+0.046 of the sheet's width below the body band where the frame draws it at 0.028; it now lands
+at 0.026, and the pile gets the same distance back.
+
+Together they lift the sheet under a tabloid by 35px on a 1008px canvas.
+
+Everything a design prints above those lines — masthead, flags, price, edition line — is both
+higher and no wider, so clearing them clears those too, and only the headline is stated.
+The pile then runs to the foot of its lowest sheet, turned corner included, rather than to the
+frame's own end: the frame stops short of that and cuts the bottom paper through its
+photographs, and those are the only photographs the pile ever shows.
 
 The aftermath screen has no front page at its head. The headlines *are* the newspapers, so
 printing one above them said the same thing twice.

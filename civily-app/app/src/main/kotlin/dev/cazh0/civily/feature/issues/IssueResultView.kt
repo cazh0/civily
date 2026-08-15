@@ -37,6 +37,7 @@ import kotlin.math.abs
 @Composable
 fun IssueResultView(
     result: IssueResult,
+    issueId: Int,
     masthead: String,
     edition: Newspaper.Edition,
     price: String?,
@@ -70,6 +71,7 @@ fun IssueResultView(
             item { Heading(stringResource(R.string.recent_headlines_heading)) }
             item {
                 NewspaperStack(
+                    issueId = issueId,
                     headlines = result.headlines.map { it.text },
                     masthead = masthead,
                     edition = edition,

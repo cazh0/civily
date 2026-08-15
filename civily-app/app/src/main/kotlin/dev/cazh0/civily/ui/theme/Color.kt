@@ -63,6 +63,16 @@ internal val TabloidRule = Color(0xFF762A22)
 internal val TabloidInk = Color(0xFFF4EFE3)
 internal val TabloidHeadlineInk = Color(0xFFE7E2D8)
 internal val TabloidHeadlineEdge = Color(0xFF555555)
+
+/**
+ * The berliner front page's one colour, from `npVariant2.svg`.
+ *
+ * A slate that is not the tabloid's by a single step of red, which is why it is its own value
+ * rather than a reach across to [TabloidPlate]: the two are different papers and a shared
+ * constant would say they are the same one. Its headline is printed in
+ * [NewsprintHeadlineInk] — that paper and this one shout in the same grey.
+ */
+internal val BerlinerInk = Color(0xFF273746)
 internal val TabloidFlagFrame = Color(0xFFD0D0D0)
 
 /**

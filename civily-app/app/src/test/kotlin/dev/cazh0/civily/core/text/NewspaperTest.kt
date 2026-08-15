@@ -60,10 +60,28 @@ class NewspaperTest {
     }
 
     @Test
-    fun `both designs are printed`() {
+    fun `every design is printed`() {
         val designs = (1..10).map { Newspaper.design(it) }.toSet()
 
         assertEquals(Newspaper.Design.entries.toSet(), designs)
+    }
+
+    @Test
+    fun `consecutive issues print on different designs`() {
+        // The aftermath pile walks this sequence one step at a time, so a run that repeated
+        // would print the same paper twice in a row down the stack.
+        val run = (1..Newspaper.Design.entries.size).map { Newspaper.design(it) }
+
+        assertEquals(run.size, run.toSet().size)
+    }
+
+    @Test
+    fun `every design meets every edition city`() {
+        // Three designs against a four-cycle of cities: the pair comes back around only every
+        // twelfth issue, which is what stops a design being stuck with the same two cities.
+        val pairs = (1..12).map { Newspaper.design(it) to Newspaper.edition(it, date).city }
+
+        assertEquals(12, pairs.toSet().size)
     }
 
     @Test
