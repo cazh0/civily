@@ -56,6 +56,8 @@
 
     <!-- Issues -->
     <string name="title_issues">Issues</string>
+    <!-- Not grouped: it is an issue number, not a count. The masthead prints it the same way. -->
+    <string name="title_issue_number">Issue #%1$d</string>
     <string name="subtitle_issues">Decide what your nation does next</string>
     <string name="issues_empty">No issues right now.</string>
     <string name="issues_empty_hint">%1$s is gloriously issue-free.</string>

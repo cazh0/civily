@@ -98,10 +98,13 @@ fun IssueDetailScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = when {
-                            outcome != null -> stringResource(R.string.title_issue_result)
-                            issue != null -> issue.title
-                            else -> stringResource(R.string.title_issues)
+                        text = if (outcome != null) {
+                            stringResource(R.string.title_issue_result)
+                        } else {
+                            // Why the number and not the headline: the newspaper below already
+                            // prints the headline, and the id is known before the page loads,
+                            // so the bar never has to say anything vaguer while it waits.
+                            stringResource(R.string.title_issue_number, issueId)
                         },
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
