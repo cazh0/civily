@@ -122,6 +122,12 @@ object Dimens {
      */
     val DonutDiameter = 300.dp
 
+    /** Height of the World Assembly's visible voting trend. */
+    val VoteHistoryHeight = 132.dp
+
+    /** Stroke used by the World Assembly voting trend. */
+    val VoteHistoryStroke = 2.dp
+
     /** The colour dot beside a legend label. */
     val LegendDotSize = 10.dp
 

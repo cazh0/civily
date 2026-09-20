@@ -24,6 +24,8 @@ data class Resolution(
     val proposedBy: String,
     val votesFor: Int,
     val votesAgainst: Int,
+    val voteHistory: List<VoteTally>,
+    val voteBreakdown: VoteBreakdown,
     val body: List<BbBlock>,
 ) {
     val totalVotes: Int get() = votesFor + votesAgainst
@@ -32,3 +34,17 @@ data class Resolution(
     val supportFraction: Float
         get() = if (totalVotes == 0) 0f else votesFor.toFloat() / totalVotes
 }
+
+/** The vote totals at one hourly World Assembly snapshot. */
+data class VoteTally(
+    val votesFor: Int,
+    val votesAgainst: Int,
+)
+
+/** Cast votes split between ordinary nations and weighted delegate ballots. */
+data class VoteBreakdown(
+    val nationsFor: Int,
+    val nationsAgainst: Int,
+    val delegatesFor: Int,
+    val delegatesAgainst: Int,
+)

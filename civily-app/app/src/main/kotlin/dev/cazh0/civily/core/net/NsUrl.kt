@@ -38,7 +38,7 @@ object NsUrl {
             }
         }
 
-        /** [council] is 1 for the General Assembly, 2 for the Security Council. */
+        /** [council] is 3 for the General Assembly, 2 for the Security Council. */
         data class Assembly(val council: Int) : Target {
             override fun applyTo(builder: HttpUrl.Builder) {
                 builder.addQueryParameter("wa", council.toString())

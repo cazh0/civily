@@ -112,6 +112,11 @@
     <string name="label_proposed_by">Proposed by</string>
     <string name="votes_for">%1$s for</string>
     <string name="votes_against">%1$s against</string>
+    <string name="section_vote_breakdown">Vote breakdown</string>
+    <string name="label_nation_votes">Non-delegate votes</string>
+    <string name="label_delegate_votes">Delegate votes</string>
+    <string name="section_vote_history">Vote history</string>
+    <string name="vote_history_description">Hourly vote history. Latest: %1$s for, %2$s against.</string>
     <string name="label_wa_members">Member nations</string>
     <string name="label_wa_delegates">Delegates</string>
     <string name="wa_no_resolution">Nothing at vote right now.</string>

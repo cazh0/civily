@@ -3,10 +3,13 @@ package dev.cazh0.civily.data.wa
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
+import nl.adaptivity.xmlutil.serialization.XmlValue
 
 /** Which chamber. The API addresses them by number, so the number is the identity. */
 enum class Council(val id: Int) {
-    GeneralAssembly(1),
+    // Why 3 rather than 1: NationStates moved active General Assembly resolutions to 3 in 2026;
+    // 1 remains a readable archive of the Legacy General Assembly.
+    GeneralAssembly(3),
     SecurityCouncil(2),
 }
 
@@ -45,6 +48,14 @@ data class ResolutionDto(
     @XmlElement(true) @XmlSerialName("DESC", "", "") val body: String = "",
     @XmlElement(true) @XmlSerialName("TOTAL_VOTES_FOR", "", "") val votesFor: Int = 0,
     @XmlElement(true) @XmlSerialName("TOTAL_VOTES_AGAINST", "", "") val votesAgainst: Int = 0,
+    @XmlElement(true) @XmlSerialName("VOTE_TRACK_FOR", "", "")
+    val voteTrackFor: VoteTrackDto = VoteTrackDto(),
+    @XmlElement(true) @XmlSerialName("VOTE_TRACK_AGAINST", "", "")
+    val voteTrackAgainst: VoteTrackDto = VoteTrackDto(),
+    @XmlElement(true) @XmlSerialName("DELVOTES_FOR", "", "")
+    val delegateVotesFor: DelegateVotesDto = DelegateVotesDto(),
+    @XmlElement(true) @XmlSerialName("DELVOTES_AGAINST", "", "")
+    val delegateVotesAgainst: DelegateVotesDto = DelegateVotesDto(),
 ) {
     /**
      * The one thing the wire shape decides. Vote arithmetic lives on [Resolution], so it is
@@ -52,3 +63,31 @@ data class ResolutionDto(
      */
     val isAtVote: Boolean get() = name.isNotEmpty()
 }
+
+/** One side of the hourly voting history returned by `votetrack`. */
+@Serializable
+@XmlSerialName("VOTE_TRACK_FOR", "", "")
+data class VoteTrackDto(
+    val points: List<VotePointDto> = emptyList(),
+)
+
+/** A single hourly total. Both FOR and AGAINST tracks use this same XML shape. */
+@Serializable
+@XmlSerialName("N", "", "")
+data class VotePointDto(
+    @XmlValue(true) val votes: Int = 0,
+)
+
+/** Delegates on one side of a resolution, returned by `delvotes`. */
+@Serializable
+@XmlSerialName("DELVOTES_FOR", "", "")
+data class DelegateVotesDto(
+    val delegates: List<DelegateVoteDto> = emptyList(),
+)
+
+@Serializable
+@XmlSerialName("DELEGATE", "", "")
+data class DelegateVoteDto(
+    @XmlElement(true) @XmlSerialName("NATION", "", "") val nationId: String = "",
+    @XmlElement(true) @XmlSerialName("VOTES", "", "") val votes: Int = 0,
+)
