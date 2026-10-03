@@ -7,8 +7,9 @@ Token values → `ui/theme/`. Inventory → the code. Changes only when a rule d
 
 ## 1. Colour and tokens
 
-1. No literal outside `ui/theme/` (`RULES.md` §3). A feature speaks `MaterialTheme`, `Dimens`,
-   `Motion`, `TrendColors`, `ChartColors`. Nothing else.
+1. No literal outside `ui/theme/` (`RULES.md` §3), except zero and a paper's frame measurements
+   (§6.1), which stay beside its drawing. A feature speaks `MaterialTheme` and `ui/theme`. Nothing
+   else.
 2. Colour comes from the wallpaper. Dynamic colour on Android 12+; the indigo scheme is the fallback,
    not the intent.
 3. A colour that ignores the wallpaper carries meaning or identity, and `Color.kt` says which: trend
@@ -22,7 +23,7 @@ Token values → `ui/theme/`. Inventory → the code. Changes only when a rule d
 
 ## 2. Components
 
-1. One definition per family. Used by ≥2 screens → `ui/component/`. A recoloured copy fails.
+1. One definition per family, placed per `ARCHITECTURE.md` A7. A recoloured copy fails.
 2. Every screen is an `ARCHITECTURE.md` §4 shape.
 3. A list of things is not a list of cards. Post = avatar, name, time, whitespace. Removed post = one
    thin italic line.

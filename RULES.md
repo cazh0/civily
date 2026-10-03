@@ -53,8 +53,9 @@ Strict order; higher wins a conflict. Work order is `BACKLOG.md`'s, not this lis
   `OkHttpClient`.
 - Credentials in logs, Intent extras, backups, or off-device. A password lives only for the request
   that trades it for a token: never a field, never saved state, never persisted.
-- Colour, radius, size or duration literals outside `res/values` (`Stately/`) or `ui/theme`
-  (`civily-app/`). Sizes → `Dimens` · durations → `Motion`.
+- On-screen colour, radius, size or duration literals outside `res/values` (`Stately/`) or
+  `ui/theme` (`civily-app/`). Sizes → `Dimens` · durations → `Motion`. Exceptions:
+  `DESIGN_RULES.md` §1.1.
 - Decoding, parsing or mapping off a background dispatcher. `NsClient` backgrounds only the network
   call → every repository method that decodes wraps its body in `withContext(Dispatchers.Default)`.
   BBCode is parsed there, never in a composable.
@@ -99,7 +100,7 @@ APK exception: the Baseline Profile, ~120 KB. Nothing else grows it.
 7. A decoded bitmap never outlives what was taken from it.
 8. Every cache size stated, never defaulted.
 9. The Baseline Profile is recorded by `:benchmark`, never hand-written, checked in, regenerated when
-   the journey changes.
+   the journey changes or a class it reaches moves.
 
 ## 5. Robustness
 

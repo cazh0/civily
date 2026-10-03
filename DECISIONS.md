@@ -36,6 +36,9 @@ stays here.
 - **A DTO reaches the screen directly when mapping only copies** — a mapper with no work is a second definition of one shape. Sign-in and search read `NationDto`; only the nation screen gets `Nation`.
 - **The graph is hand-wired** — it fits one screen; Hilt = an annotation processor on every build and edges in generated code.
 - **Entities decoded exactly twice** — CDATA leaves the XML unescaped, and NationStates escapes stored HTML on the way out: `&amp;amp;#43457;` is `꧁`. A third pass eats text an author escaped on purpose. A numeric C1 reference → the Windows-1252 character meant. A Private Use code point = NationStates' icon font, not shipped → dropped, never drawn as tofu.
+- **Placement by reach, not one folder per feature holding its own data** — data is shared: `NationRepository` feeds home and nation, sign-in reads `NationDto`, home reads `IssuesRepository`. Slices would hide that sharing, and A1 would have to read file suffixes instead of packages.
+- **Reach counts only calls through `core/text` and `ui/component`** — counted through sections, `IssuesLinkRow` → `AccountsSection` → home makes code only issues uses look shared by three features.
+- **One noun per concept: assembly, signin, home** — `Wa` reads badly as a type; "auth" names a mechanism, not what the player does; "lookup" names one box on the home screen. Two names for one thing = a search that finds half of it.
 - **`@@nation@@` and `%%region%%` are tags only in happenings** — a factbook may contain `%%`; reading it as a link eats half the sentence.
 - **Emphasis in a composed sentence uses control characters, not `<b>` + `fromHtml`** — the sentence carries the player-typed demonym, and an `&` in it would parse as an entity and eat the rest.
 
@@ -43,7 +46,7 @@ stays here.
 
 - **Only release timings count** — debug: ~700 ms cold start, missed vsyncs. Release: ~190 ms, none. Debug has no R8, no inlining, no AOT.
 - **The Baseline Profile earns its ~120 KB** — Pixel 8 Pro, ten runs: 283 ms median with it, 297 ms with no AOT. It matters more the slower the CPU.
-- **Profile generation sits outside the build** — a build needing a phone is not a build. Checked in; regenerated when the journey changes.
+- **Profile generation sits outside the build** — a build needing a phone is not a build. Checked in; regenerated per `RULES.md` §4.9.
 - **`androidx.benchmark` pinned at 1.4.1** — 1.3.3 cannot parse this platform's `gfxinfo`; 1.5.0-beta01 breaks the app's compilation on Gradle 8.11.1.
 - **Daemon JVM pinned to 21** — AGP rejects newer JVMs; unpinned, the build depends on the JDK on PATH.
 - **Transitions 110 ms in, 80 ms out** — the 700 ms default each way is time spent watching a finished screen. A fade costs one alpha layer, no per-frame relayout.
@@ -61,6 +64,7 @@ stays here.
 - **A reclassification is never coloured** — `FreedomLadder` gives direction, `FreedomRating` gives worth, and they disagree: World Benchmark → Excessive *rose*. "Rose" in warning red contradicts itself.
 - **A cancelled policy prints without its banner** — two identical cards under two headings is where enacting and repealing get confused.
 - **The wait for the next issue is the empty state, and it ticks** — seconds on the issues screen, minutes on the home button. It reloads at zero, keyed on the awaited instant, so it is never a poll.
+- **A paper's frame measurements stay beside its drawing, letter-spacing included** — they transcribe one frame; split into `ui/theme` they can no longer be read against the frame's numbers (`DESIGN_RULES.md` §7.2).
 - **No confirm dialog on enact** — the commit inside the chosen option says what it does; a dialog repeating it is a third tap with no third thought, and trains dismissal.
 
 ## Nation
@@ -80,4 +84,5 @@ stays here.
 - **The issues badge is `primary`, not `error`** — red means broken; an issue waiting is why the player came.
 - **List flags crop to fill** — a fitted flag floats in empty plate. A chip is for recognition; the whole flag is one tap away.
 - **The plate is mixed from the flag, and the picture decides how** — a fixed pale plate = a lit slab at night; a theme plate swallows dark-on-transparent flags. Opaque flag → surface + a wash of its colour. Transparent → a plate pushed away from the artwork's brightness: legibility beats blending.
+- **Zero is not a token** — it is the absence of a size; nobody tunes it.
 - **Posts are not cards** — fifty outlined cards give fifty posts equal weight: a spreadsheet, not a conversation.

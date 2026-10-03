@@ -36,7 +36,7 @@ Cold start + frames.
 ./gradlew :app:generateReleaseBaselineProfile
 ```
 
-Rewrites the checked-in profile. Run when the journey changes.
+Rewrites the checked-in profile. When: `RULES.md` §4.9.
 
 ## Documents
 

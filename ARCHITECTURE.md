@@ -34,12 +34,13 @@ Seven files, one job each. A sentence in the wrong file = defect.
 
 | # | Rule | Gate |
 |---|---|---|
-| A1 | Imports point down: `nav` → `feature` → `ui` → `data` → `core`. Never up a tier. `data` imports no Compose. | none (T1) |
+| A1 | Imports point down: `nav` → `feature` → `ui` → `data` → `core`. Never up a tier. `data` imports no Compose. The package root holds the composition root, above every tier; only `feature` and `nav` import from it (`graph`), `R` and `BuildConfig` aside. | none (T1) |
 | A2 | Failure is a value. A repository returns `Outcome<T>`: never throws, never null for "broke". Every `CivilyError` carries its user-facing string. | none (T1) |
 | A3 | One way out. API → `NsClient`. Images → `AppGraph.imageLoader`. One `OkHttpClient`. | none (T1) |
-| A4 | Colours, sizes, durations only in `ui/theme`. | none (T1) |
+| A4 | On-screen colours, sizes, durations only in `ui/theme`. Exceptions: `DESIGN_RULES.md` §1.1. | none (T1) |
 | A5 | Every user-visible string is a resource in `res/values/`. | none (T1) |
 | A6 | Route strings built only in `Routes`. Navigation only via `NavActions`. | none (T1) |
+| A7 | Placement by reach. A file in `core/text/` or `ui/component/` is reached by ≥2 features, or by `data/`; reach counts only calls through those two folders. A path `RULES.md` names is exempt (`Population`). | none (T1) |
 
 A gate lands only once the code satisfies it, and counts only once mutation proves it: break the
 code, watch it go red.
@@ -51,17 +52,18 @@ civily-app/                    Gradle root
 ├── app/                       :app, the only shipping module
 │   └── src/
 │       ├── main/kotlin/dev/cazh0/civily/
+│       │   ├── *.kt           AppGraph · CivilyApp · MainActivity: the composition root (A1)
 │       │   ├── core/          no feature knowledge
 │       │   │   ├── net/       NsClient · NsUrl · RateLimiter · UserAgent
 │       │   │   ├── session/   Session · Accounts · SessionStore (sole credential copy)
 │       │   │   ├── result/    Outcome · CivilyError · LoadState
-│       │   │   └── text/      pure formatting + parsing; bbcode/ = BbParser + tree
+│       │   │   └── text/      pure formatting + parsing, reached per A7; bbcode/ = BbParser + tree
 │       │   ├── data/          NsXml + one package per resource
-│       │   ├── feature/       one package per screen
+│       │   ├── feature/       one package per feature; a family inside it → its own subpackage
 │       │   ├── nav/           Routes · NavActions · CivilyNavHost
 │       │   └── ui/
-│       │       ├── theme/     every colour, size, duration; the theme
-│       │       └── component/ used by ≥2 screens
+│       │       ├── theme/     every on-screen colour, size, duration; the theme
+│       │       └── component/ composables reached per A7
 │       ├── main/res/          strings · census names · newspaper strips (drawable-nodpi)
 │       ├── release/generated/ Baseline Profile, a checked-in build input
 │       └── test/              JVM tests; resources/ = whole captured responses
@@ -72,14 +74,15 @@ fastlane/                      Stately store metadata
 
 | Thing | Goes in |
 |---|---|
-| Formatting or parsing, no Android, no feature | `core/text/` + test |
+| Formatting or parsing, no Android, reached per A7 | `core/text/` + test |
+| Formatting or parsing, no Android, one feature | `feature/<feature>/` + test |
 | Wire shape | `data/<resource>/…Dto.kt`, `@Serializable` |
 | Screen shape, where mapping does real work | `data/<resource>/<Type>.kt`, mapped in the repository |
 | Request | `data/<resource>/…Repository.kt`, shards in its companion |
-| Screen state | `feature/<screen>/…ViewModel.kt` |
-| Composable, one screen | `feature/<screen>/` |
-| Composable, ≥2 screens | `ui/component/` |
-| Colour, size, duration | `ui/theme/` |
+| Screen state | `feature/<feature>/…ViewModel.kt` |
+| Composable, one feature | `feature/<feature>/` |
+| Composable, reached per A7 | `ui/component/` |
+| On-screen colour, size, duration | `ui/theme/` |
 | Long-lived object | `by lazy` in `AppGraph` |
 | Route | `Routes` |
 
@@ -129,11 +132,12 @@ Three screen shapes. No others.
 
 | Thing | Form | Example |
 |---|---|---|
-| Package | lower, singular | `feature/nation` |
+| Concept | one noun, from folder to class to string | `region`: `data/region` · `RegionRepository` · `feature/region` · `RegionScreen` |
+| Package | lower, the concept's noun | `feature/nation` · `feature/issues` |
 | Wire shape | `<Thing>Dto` | `NationDto` |
 | Screen shape | the noun | `Nation` |
 | Repository | `<Thing>Repository` | `RegionRepository` |
-| Screen · state | `<Thing>Screen` · `<Thing>ViewModel` | `WaScreen` · `WaViewModel` |
+| Screen · state | `<Thing>Screen` · `<Thing>ViewModel` | `RegionScreen` · `RegionViewModel` |
 | Section | `<Thing>Section` / `<Thing>Row` | `AccountsSection` |
 | String resource | snake, prefixed by role or surface | `label_endorsements` · `action_back` · `rmb_from_embassy` |
 | Test | `<Subject>Test`; method states the behaviour | `NationDtoTest` |
@@ -156,8 +160,18 @@ names them, in code and on screen.
 
 ## 7. Where today's code goes
 
-Existence = placement (§0.7). Moves when its file is next edited for another reason. Not a task.
+Existence = placement (§0.7). A row moves whole when one of its source files is next edited for
+another reason, or as the blocking part of a gate (T1). Never a task on its own. A test moves with
+its subject.
 
 | Today | Goes to |
 |---|---|
-| `core/AppGraph` · `core/CivilyApp` · `core/MainActivity`: the composition root, which imports `data/`, `ui/` and `nav/` and so breaks A1 from inside `core/` | package root `dev.cazh0.civily`, outside the tiers |
+| `core/AppGraph` · `core/CivilyApp` · `core/MainActivity`: the composition root, which imports `data/`, `ui/` and `nav/` and so breaks A1 from inside `core/` | package root `dev.cazh0.civily` |
+| `ui/component/Newspaper` · `NewspaperBerliner` · `NewspaperStack` · `NewspaperTabloid` · `core/text/Newspaper`: issues only (A7) | `feature/issues/newspaper/`; one `Newspaper.kt` renamed for its main declaration |
+| `ui/component/Countdown` · `TrendPill` · `core/text/Countdown` · `Classification` · `FreedomLadder`: issues only (A7) | `feature/issues/`; one `Countdown.kt` renamed for its main declaration |
+| `core/text/Magnitude` · `FreedomRating`: nation only (A7) | `feature/nation/` |
+| `ui/component/FactCard`: region only (A7) | `feature/region/` |
+| `ui/component/NationAvatar`: RMB only (A7) | `feature/rmb/` |
+| `wa`: `feature/wa` · `WaScreen` · `WaViewModel` · `data/wa` · strings named `wa` | `assembly`: `feature/assembly` · `AssemblyScreen` · `AssemblyViewModel` · `data/assembly` · strings named `assembly` |
+| `auth`: `data/auth` · `AuthRepository` · `AppGraph.authRepository` | `signin`: `data/signin` · `SignInRepository` · `AppGraph.signInRepository` |
+| `lookup`: `feature/lookup` · `LookupScreen` · `LookupViewModel` · `LookupState` · `Routes.LOOKUP` · strings named `lookup` | `home`: `feature/home` · `HomeScreen` · `HomeViewModel` · `HomeState` · `Routes.HOME` · strings named `home` |
