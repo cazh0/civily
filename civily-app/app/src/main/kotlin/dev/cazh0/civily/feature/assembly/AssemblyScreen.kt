@@ -1,4 +1,4 @@
-package dev.cazh0.civily.feature.wa
+package dev.cazh0.civily.feature.assembly
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
@@ -49,10 +49,10 @@ import dev.cazh0.civily.R
 import dev.cazh0.civily.core.graph
 import dev.cazh0.civily.core.text.Numbers
 import dev.cazh0.civily.core.text.NsId
-import dev.cazh0.civily.data.wa.Assembly
-import dev.cazh0.civily.data.wa.Council
-import dev.cazh0.civily.data.wa.Resolution
-import dev.cazh0.civily.data.wa.VoteTally
+import dev.cazh0.civily.data.assembly.Assembly
+import dev.cazh0.civily.data.assembly.Council
+import dev.cazh0.civily.data.assembly.Resolution
+import dev.cazh0.civily.data.assembly.VoteTally
 import dev.cazh0.civily.ui.component.LoadStateContent
 import dev.cazh0.civily.ui.component.richTextItems
 import dev.cazh0.civily.ui.theme.Dimens
@@ -61,7 +61,7 @@ private val COUNCILS = listOf(Council.GeneralAssembly, Council.SecurityCouncil)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WaScreen(
+fun AssemblyScreen(
     onOpenNation: (String) -> Unit,
     onOpenRegion: (String) -> Unit,
     onSignIn: () -> Unit,
@@ -77,7 +77,7 @@ fun WaScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.title_wa)) },
+                title = { Text(stringResource(R.string.title_assembly)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -124,9 +124,9 @@ private fun CouncilPane(
     onSignIn: () -> Unit,
 ) {
     val graph = LocalContext.current.graph
-    val viewModel: WaViewModel = viewModel(
-        key = "wa-${council.id}",
-        factory = WaViewModel.factory(graph.assemblyRepository, council),
+    val viewModel: AssemblyViewModel = viewModel(
+        key = "assembly-${council.id}",
+        factory = AssemblyViewModel.factory(graph.assemblyRepository, council),
     )
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -153,19 +153,31 @@ private fun CouncilContent(
     // out before the title appeared.
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(Dimens.ScreenPadding),
-        verticalArrangement = Arrangement.spacedBy(Dimens.ItemSpacing),
+        // No bottom margin of its own: the last block's own gap is the foot of the page.
+        contentPadding = PaddingValues(
+            start = Dimens.ScreenPadding,
+            top = Dimens.ScreenPadding,
+            end = Dimens.ScreenPadding,
+        ),
     ) {
         if (resolution == null) {
             // Why a neutral card and not an error: between votes the chamber is genuinely
             // empty for hours at a time. That is the World Assembly working normally.
-            item(contentType = "empty") { NoResolutionCard() }
+            item(contentType = "empty") {
+                NoResolutionCard(Modifier.padding(bottom = Dimens.ItemSpacing))
+            }
         } else {
             item(contentType = "resolution") {
-                ResolutionCard(resolution, onOpenNation)
+                ResolutionCard(
+                    resolution = resolution,
+                    onOpenNation = onOpenNation,
+                    modifier = Modifier.padding(bottom = Dimens.ItemSpacing),
+                )
             }
         }
-        item(contentType = "facts") { AssemblyFactsCard(assembly) }
+        item(contentType = "facts") {
+            AssemblyFactsCard(assembly, Modifier.padding(bottom = Dimens.ItemSpacing))
+        }
         if (resolution != null) {
             richTextItems(
                 blocks = resolution.body,
@@ -177,22 +189,22 @@ private fun CouncilContent(
 }
 
 @Composable
-private fun AssemblyFactsCard(assembly: Assembly) {
+private fun AssemblyFactsCard(assembly: Assembly, modifier: Modifier = Modifier) {
     OutlinedCard(
         shape = RoundedCornerShape(Dimens.CardCornerRadius),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier.padding(Dimens.CardPadding),
             verticalArrangement = Arrangement.spacedBy(Dimens.ItemSpacing),
         ) {
             AssemblyFact(
-                label = stringResource(R.string.label_wa_members),
+                label = stringResource(R.string.label_assembly_members),
                 value = Numbers.grouped(assembly.memberCount),
             )
             HorizontalDivider()
             AssemblyFact(
-                label = stringResource(R.string.label_wa_delegates),
+                label = stringResource(R.string.label_assembly_delegates),
                 value = Numbers.grouped(assembly.delegateCount),
             )
         }
@@ -270,10 +282,14 @@ private fun VoteHistoryChart(history: List<VoteTally>, contentDescription: Strin
 }
 
 @Composable
-private fun ResolutionCard(resolution: Resolution, onOpenNation: (String) -> Unit) {
+private fun ResolutionCard(
+    resolution: Resolution,
+    onOpenNation: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Card(
         shape = RoundedCornerShape(Dimens.CardCornerRadius),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier.padding(Dimens.CardPadding),
@@ -404,25 +420,25 @@ private fun ResolutionCard(resolution: Resolution, onOpenNation: (String) -> Uni
 }
 
 @Composable
-private fun NoResolutionCard() {
+private fun NoResolutionCard(modifier: Modifier = Modifier) {
     Card(
         shape = RoundedCornerShape(Dimens.CardCornerRadius),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
         ),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier.padding(Dimens.CardPadding),
             verticalArrangement = Arrangement.spacedBy(Dimens.TextSpacing),
         ) {
             Text(
-                text = stringResource(R.string.wa_no_resolution),
+                text = stringResource(R.string.assembly_no_resolution),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                text = stringResource(R.string.wa_no_resolution_hint),
+                text = stringResource(R.string.assembly_no_resolution_hint),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

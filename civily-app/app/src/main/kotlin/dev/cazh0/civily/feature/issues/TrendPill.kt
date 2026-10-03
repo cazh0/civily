@@ -1,4 +1,4 @@
-package dev.cazh0.civily.ui.component
+package dev.cazh0.civily.feature.issues
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,8 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import dev.cazh0.civily.R
 import dev.cazh0.civily.core.text.Percent
 import dev.cazh0.civily.ui.theme.Dimens
 import dev.cazh0.civily.ui.theme.TrendColors
@@ -46,10 +48,10 @@ fun TrendPill(
         // A movement of nothing is not an event; it takes the theme's quiet colour.
         Percent.Direction.Flat -> MaterialTheme.colorScheme.onSurfaceVariant
     }
-    val arrow = when (movement.direction) {
-        Percent.Direction.Up -> "↑"
-        Percent.Direction.Down -> "↓"
-        Percent.Direction.Flat -> "→"
+    val change = when (movement.direction) {
+        Percent.Direction.Up -> R.string.trend_up
+        Percent.Direction.Down -> R.string.trend_down
+        Percent.Direction.Flat -> R.string.trend_flat
     }
 
     Row(
@@ -81,7 +83,10 @@ fun TrendPill(
                     modifier = Modifier.weight(1f, fill = false),
                 )
                 Text(
-                    text = "$arrow${movement.text.removePrefix("+").removePrefix("−")}",
+                    text = stringResource(
+                        change,
+                        movement.text.removePrefix("+").removePrefix("−"),
+                    ),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
                     color = tint,

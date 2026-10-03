@@ -17,6 +17,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import dev.cazh0.civily.core.graph
+import dev.cazh0.civily.feature.assembly.AssemblyScreen
 import dev.cazh0.civily.feature.issues.IssueDetailScreen
 import dev.cazh0.civily.feature.issues.IssuesScreen
 import dev.cazh0.civily.feature.issues.IssuesViewModel
@@ -25,7 +26,6 @@ import dev.cazh0.civily.feature.nation.NationScreen
 import dev.cazh0.civily.feature.region.RegionScreen
 import dev.cazh0.civily.feature.rmb.RmbScreen
 import dev.cazh0.civily.feature.signin.SignInScreen
-import dev.cazh0.civily.feature.wa.WaScreen
 import dev.cazh0.civily.ui.theme.Motion
 
 /**
@@ -175,7 +175,7 @@ fun CivilyNavHost(navController: NavHostController = rememberNavController()) {
 
         composable(Routes.WORLD_ASSEMBLY) { entry ->
             val nav = navActions(navController, entry)
-            WaScreen(
+            AssemblyScreen(
                 onOpenNation = nav.openNation,
                 onOpenRegion = nav.openRegion,
                 onSignIn = nav.openSignIn,

@@ -1,4 +1,4 @@
-package dev.cazh0.civily.ui.component
+package dev.cazh0.civily.feature.issues
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -11,7 +11,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.currentStateAsState
 import dev.cazh0.civily.R
-import dev.cazh0.civily.core.text.Countdown
 import kotlinx.coroutines.delay
 
 /**

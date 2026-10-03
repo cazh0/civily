@@ -1,6 +1,6 @@
-package dev.cazh0.civily.core.text
+package dev.cazh0.civily.feature.issues
 
-import dev.cazh0.civily.core.text.Countdown.Resolution
+import dev.cazh0.civily.feature.issues.Countdown.Resolution
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

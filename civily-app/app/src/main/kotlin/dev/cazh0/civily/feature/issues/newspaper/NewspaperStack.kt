@@ -1,4 +1,4 @@
-package dev.cazh0.civily.ui.component
+package dev.cazh0.civily.feature.issues.newspaper
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -13,7 +13,6 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import coil.ImageLoader
-import dev.cazh0.civily.core.text.Newspaper
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin

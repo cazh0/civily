@@ -1,4 +1,4 @@
-package dev.cazh0.civily.data.auth
+package dev.cazh0.civily.data.signin
 
 import dev.cazh0.civily.core.net.NsClient
 import dev.cazh0.civily.core.net.NsUrl
@@ -10,6 +10,8 @@ import dev.cazh0.civily.core.session.SessionStore
 import dev.cazh0.civily.core.text.NsId
 import dev.cazh0.civily.data.decodeNsXml
 import dev.cazh0.civily.data.nation.NationDto
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Signs a nation in.
@@ -22,34 +24,35 @@ import dev.cazh0.civily.data.nation.NationDto
  * [SessionStore.forget], and the UI calls it directly rather than through a method that would
  * only pass it on.
  */
-class AuthRepository(
+class SignInRepository(
     private val client: NsClient,
     private val session: SessionStore,
 ) {
 
-    suspend fun signIn(nationName: String, password: String): Outcome<Session> {
-        val nationId = NsId.fromName(nationName)
-        val url = NsUrl.api(NsUrl.Target.Nation(nationId), SHARDS)
+    suspend fun signIn(nationName: String, password: String): Outcome<Session> =
+        withContext(Dispatchers.Default) {
+            val nationId = NsId.fromName(nationName)
+            val url = NsUrl.api(NsUrl.Target.Nation(nationId), SHARDS)
 
-        val outcome = client.signIn(url, password).flatMap { result ->
-            decodeNsXml<NationDto>(TAG, result.body).map { nation ->
-                Session(
-                    nationId = nationId,
-                    nationName = nation.name.ifEmpty { NsId.toName(nationId) },
-                    autologin = result.autologin,
-                    pin = result.pin,
-                    regionId = nation.region.takeIf { it.isNotEmpty() }?.let(NsId::fromName),
-                    isWaMember = nation.isWaMember,
-                    flagUrl = nation.flagUrl,
-                )
+            val outcome = client.signIn(url, password).flatMap { result ->
+                decodeNsXml<NationDto>(TAG, result.body).map { nation ->
+                    Session(
+                        nationId = nationId,
+                        nationName = nation.name.ifEmpty { NsId.toName(nationId) },
+                        autologin = result.autologin,
+                        pin = result.pin,
+                        regionId = nation.region.takeIf { it.isNotEmpty() }?.let(NsId::fromName),
+                        isWaMember = nation.isWaMember,
+                        flagUrl = nation.flagUrl,
+                    )
+                }
             }
-        }
 
-        // Why the store is written here and not inside the map: a mapping function that also
-        // mutates global state is a mapping function nobody can reuse or test.
-        if (outcome is Outcome.Success) session.signIn(outcome.value)
-        return outcome
-    }
+            // Why the store is written here and not inside the map: a mapping function that also
+            // mutates global state is a mapping function nobody can reuse or test.
+            if (outcome is Outcome.Success) session.signIn(outcome.value)
+            outcome
+        }
 
     private companion object {
         const val TAG = "SignIn"

@@ -7,12 +7,8 @@ import androidx.compose.ui.res.stringResource
 import coil.ImageLoader
 import dev.cazh0.civily.R
 import dev.cazh0.civily.core.result.LoadState
-import dev.cazh0.civily.core.text.Countdown
 import dev.cazh0.civily.data.issues.IssueBadge
-import dev.cazh0.civily.ui.component.CountdownReachedEffect
 import dev.cazh0.civily.ui.component.LinkRow
-import dev.cazh0.civily.ui.component.countdownCompact
-import dev.cazh0.civily.ui.component.rememberCountdown
 
 /**
  * The Issues button, carrying its own answer.

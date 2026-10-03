@@ -1,4 +1,4 @@
-package dev.cazh0.civily.data.wa
+package dev.cazh0.civily.data.assembly
 
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement

@@ -88,8 +88,9 @@ fun RichText(
  *
  * Why it exists: a regional factbook is prose without a length limit — some run to hundreds of
  * paragraphs, and [RichText] lays out every one of them before the first is on screen. As items
- * of the screen's own list, the reader pays for what they can see. The caller's
- * `verticalArrangement` is the gap between blocks, which is why nothing here adds one.
+ * of the screen's own list, the reader pays for what they can see. Each block carries the gap
+ * [RichText] puts between blocks under itself (RULES §4.2), so the last one is spaced from
+ * whatever the list puts after it.
  *
  * Nested prose — a quote, a bullet's contents — still goes through [RichText]: it is bounded by
  * the block it sits inside, and a lazy list cannot nest in its own axis anyway.
@@ -114,6 +115,7 @@ fun LazyListScope.richTextItems(
             openTarget = openTarget,
             onOpenNation = onOpenNation,
             onOpenRegion = onOpenRegion,
+            modifier = Modifier.padding(bottom = Dimens.ItemSpacing),
         )
     }
 }
@@ -150,6 +152,7 @@ private fun BlockView(
     openTarget: (BbTarget) -> Unit,
     onOpenNation: (String) -> Unit,
     onOpenRegion: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     when (block) {
         // Why remembered: flattening spans into an AnnotatedString allocates a string builder,
@@ -161,14 +164,15 @@ private fun BlockView(
                 annotate(block.spans, linkColor, openTarget)
             },
             style = MaterialTheme.typography.bodyLarge,
+            modifier = modifier,
         )
 
-        BbBlock.Rule -> HorizontalDivider()
+        BbBlock.Rule -> HorizontalDivider(modifier)
 
         is BbBlock.Preformatted -> Surface(
             shape = RoundedCornerShape(Dimens.FlagCornerRadius),
             color = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
         ) {
             // Why it scrolls sideways: preformatted text is usually ASCII art or a table
             // whose alignment is the content. Wrapping it destroys the thing it is.
@@ -183,17 +187,24 @@ private fun BlockView(
             )
         }
 
-        is BbBlock.Quote -> QuoteView(block, linkColor, openTarget, onOpenNation, onOpenRegion)
+        is BbBlock.Quote ->
+            QuoteView(block, linkColor, openTarget, onOpenNation, onOpenRegion, modifier)
 
-        is BbBlock.Spoiler -> SpoilerView(block, onOpenNation, onOpenRegion)
+        is BbBlock.Spoiler -> SpoilerView(block, onOpenNation, onOpenRegion, modifier)
 
         is BbBlock.Bullets -> Column(
+            modifier = modifier,
             verticalArrangement = Arrangement.spacedBy(Dimens.TextSpacing),
         ) {
+            val bullet = stringResource(R.string.rich_text_bullet)
             block.items.forEachIndexed { index, item ->
                 Row {
                     Text(
-                        text = if (block.ordered) "${index + 1}." else "•",
+                        text = if (block.ordered) {
+                            stringResource(R.string.rich_text_ordinal, index + 1)
+                        } else {
+                            bullet
+                        },
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.width(Dimens.BulletGutter),
@@ -217,6 +228,7 @@ private fun QuoteView(
     openTarget: (BbTarget) -> Unit,
     onOpenNation: (String) -> Unit,
     onOpenRegion: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     // A stripe rather than a box: quotes nest, and nested boxes quickly leave no room for the
     // words.
@@ -230,7 +242,7 @@ private fun QuoteView(
     val stripe = MaterialTheme.colorScheme.primary
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .drawBehind {
                 val width = Dimens.QuoteBarWidth.toPx()
@@ -263,6 +275,7 @@ private fun SpoilerView(
     spoiler: BbBlock.Spoiler,
     onOpenNation: (String) -> Unit,
     onOpenRegion: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     // Why collapsed by default and why the state is saveable: hiding the text is the entire
     // purpose of a spoiler, and a rotation that reveals it defeats it.
@@ -271,7 +284,7 @@ private fun SpoilerView(
     Surface(
         shape = RoundedCornerShape(Dimens.FlagCornerRadius),
         color = MaterialTheme.colorScheme.surfaceVariant,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         Column(modifier = Modifier.padding(Dimens.CardPadding)) {
             Row(

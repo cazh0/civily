@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import dev.cazh0.civily.R
 import dev.cazh0.civily.data.nation.Happening
 import dev.cazh0.civily.ui.component.RichText
+import dev.cazh0.civily.ui.component.elapsedWords
 import dev.cazh0.civily.ui.theme.Dimens
 
 /**

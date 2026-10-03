@@ -1,4 +1,4 @@
-package dev.cazh0.civily.ui.component
+package dev.cazh0.civily.feature.rmb
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -10,8 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Dp
+import dev.cazh0.civily.R
 import dev.cazh0.civily.core.text.Initials
 import dev.cazh0.civily.ui.theme.Dimens
 import dev.cazh0.civily.ui.theme.avatarColor
@@ -44,7 +46,7 @@ fun NationAvatar(
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
-                text = Initials.of(displayName),
+                text = Initials.of(displayName) ?: stringResource(R.string.avatar_no_initials),
                 style = MaterialTheme.typography.labelLarge,
                 color = Color.White,
             )

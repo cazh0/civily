@@ -10,12 +10,12 @@ import dev.cazh0.civily.BuildConfig
 import dev.cazh0.civily.core.net.NsClient
 import dev.cazh0.civily.core.net.RateLimiter
 import dev.cazh0.civily.core.session.SessionStore
-import dev.cazh0.civily.data.auth.AuthRepository
+import dev.cazh0.civily.data.assembly.AssemblyRepository
 import dev.cazh0.civily.data.nation.NationRepository
 import dev.cazh0.civily.data.region.RegionRepository
 import dev.cazh0.civily.data.issues.IssuesRepository
 import dev.cazh0.civily.data.rmb.RmbRepository
-import dev.cazh0.civily.data.wa.AssemblyRepository
+import dev.cazh0.civily.data.signin.SignInRepository
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 
@@ -63,7 +63,7 @@ class AppGraph(context: Context) {
 
     val issuesRepository: IssuesRepository by lazy { IssuesRepository(nsClient, sessionStore) }
 
-    val authRepository: AuthRepository by lazy { AuthRepository(nsClient, sessionStore) }
+    val signInRepository: SignInRepository by lazy { SignInRepository(nsClient, sessionStore) }
 
     /**
      * Why a shared loader: NationStates serves many flags as SVG, which Coil needs told about.

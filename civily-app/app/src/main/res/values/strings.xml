@@ -3,7 +3,7 @@
     <string name="app_name">Civily</string>
 
     <!-- Common -->
-    <!-- How long ago, in words. `RelativeTime.compact` is the short form and needs no plural. -->
+    <!-- How long ago, in words: never "3h" (DESIGN_RULES §4.4). -->
     <string name="elapsed_now">Just now</string>
     <plurals name="elapsed_minutes">
         <item quantity="one">%1$d minute ago</item>
@@ -43,6 +43,10 @@
     <string name="action_hide">Hide</string>
     <string name="quote_author">%1$s wrote</string>
     <string name="spoiler_default_title">Spoiler</string>
+    <string name="rich_text_bullet">•</string>
+    <string name="rich_text_ordinal">%1$d.</string>
+    <!-- Stands in for initials when a nation's name carries no letters at all. -->
+    <string name="avatar_no_initials">?</string>
 
     <!-- Home -->
     <string name="section_your_nation">Your nation</string>
@@ -96,6 +100,29 @@
     <string name="recent_headlines_heading">Recent Headlines</string>
     <string name="trends_heading">Recent Trends</string>
     <string name="newspaper_price">1 %1$s</string>
+    <!-- The paper's name: %1$s is the capital, or the nation when it has none. -->
+    <string name="newspaper_masthead">The %1$s %2$s</string>
+    <string name="newspaper_masthead_fallback">The Daily Dispatch</string>
+    <string name="newspaper_title_leader">Leader</string>
+    <string name="newspaper_title_times">Times</string>
+    <string name="newspaper_title_herald">Herald</string>
+    <string name="newspaper_title_post">Post</string>
+    <string name="newspaper_title_chronicle">Chronicle</string>
+    <string name="newspaper_title_gazette">Gazette</string>
+    <string name="newspaper_title_sentinel">Sentinel</string>
+    <string name="newspaper_title_tribune">Tribune</string>
+    <string name="newspaper_title_observer">Observer</string>
+    <string name="newspaper_title_register">Register</string>
+    <string name="newspaper_edition_city_final">CITY FINAL</string>
+    <string name="newspaper_edition_late">LATE EDITION</string>
+    <string name="newspaper_edition_morning">MORNING EDITION</string>
+    <string name="newspaper_edition_evening_final">EVENING FINAL</string>
+    <!-- Not grouped: the number is the issue's own id, printed the way the title bar prints it. -->
+    <string name="newspaper_volume">VOL. %1$d NO. %2$d</string>
+    <!-- %1$s is the change without its sign; the arrow carries the direction. -->
+    <string name="trend_up">↑%1$s</string>
+    <string name="trend_down">↓%1$s</string>
+    <string name="trend_flat">→%1$s</string>
     <string name="census_unknown_scale">Scale %1$d</string>
     <string name="action_done">Done</string>
     <string name="issue_answer_failed">That didn\'t go through</string>
@@ -104,8 +131,8 @@
     <string name="action_close">Close</string>
 
     <!-- World Assembly -->
-    <string name="title_wa">World Assembly</string>
-    <string name="subtitle_wa">Resolutions at vote</string>
+    <string name="title_assembly">World Assembly</string>
+    <string name="subtitle_assembly">Resolutions at vote</string>
     <string name="council_general_assembly">General Assembly</string>
     <string name="council_security_council">Security Council</string>
     <string name="section_at_vote">At vote</string>
@@ -117,10 +144,10 @@
     <string name="label_delegate_votes">Delegate votes</string>
     <string name="section_vote_history">Vote history</string>
     <string name="vote_history_description">Hourly vote history. Latest: %1$s for, %2$s against.</string>
-    <string name="label_wa_members">Member nations</string>
-    <string name="label_wa_delegates">Delegates</string>
-    <string name="wa_no_resolution">Nothing at vote right now.</string>
-    <string name="wa_no_resolution_hint">A new resolution reaches the floor once the last one finishes.</string>
+    <string name="label_assembly_members">Member nations</string>
+    <string name="label_assembly_delegates">Delegates</string>
+    <string name="assembly_no_resolution">Nothing at vote right now.</string>
+    <string name="assembly_no_resolution_hint">A new resolution reaches the floor once the last one finishes.</string>
 
     <!-- Nation -->
     <string name="nation_full_title">The %1$s of %2$s</string>
@@ -136,7 +163,7 @@
     <string name="value_percent">%1$s%%</string>
     <string name="value_rank">#%1$s</string>
     <string name="value_percentile">Top %1$s%%</string>
-    <string name="label_wa_status">World Assembly</string>
+    <string name="label_assembly_status">World Assembly</string>
     <string name="label_influence">Regional influence</string>
     <string name="label_currency">Currency</string>
     <string name="label_animal">National animal</string>
@@ -231,7 +258,8 @@
         <item quantity="one">%1$s like</item>
         <item quantity="other">%1$s likes</item>
     </plurals>
-    <string name="rmb_edited_suffix"> · edited</string>
+    <!-- A format, not a suffix: Android drops a resource's leading space. -->
+    <string name="rmb_edited">%1$s · edited</string>
     <string name="rmb_from_embassy">From the embassy in %1$s</string>
     <string name="rmb_suppressed">A moderator or regional officer removed this post.</string>
     <string name="rmb_deleted">The author deleted this post.</string>

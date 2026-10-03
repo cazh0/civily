@@ -1,4 +1,4 @@
-package dev.cazh0.civily.core.text
+package dev.cazh0.civily.feature.issues
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

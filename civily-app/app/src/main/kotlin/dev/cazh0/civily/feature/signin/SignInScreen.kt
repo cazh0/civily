@@ -47,7 +47,7 @@ fun SignInScreen(
     modifier: Modifier = Modifier,
 ) {
     val graph = LocalContext.current.graph
-    val viewModel: SignInViewModel = viewModel(factory = SignInViewModel.factory(graph.authRepository))
+    val viewModel: SignInViewModel = viewModel(factory = SignInViewModel.factory(graph.signInRepository))
     val state by viewModel.state.collectAsStateWithLifecycle()
     val accounts by graph.sessionStore.accounts.collectAsStateWithLifecycle()
 

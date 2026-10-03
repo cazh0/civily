@@ -15,7 +15,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -24,16 +23,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.ImageLoader
 import dev.cazh0.civily.R
 import dev.cazh0.civily.core.graph
-import dev.cazh0.civily.core.text.Countdown
-import dev.cazh0.civily.core.text.Newspaper
 import dev.cazh0.civily.data.issues.Issue
 import dev.cazh0.civily.data.issues.IssuesPage
-import dev.cazh0.civily.ui.component.CountdownReachedEffect
+import dev.cazh0.civily.feature.issues.newspaper.Newspaper
+import dev.cazh0.civily.feature.issues.newspaper.NewspaperForIssue
+import dev.cazh0.civily.feature.issues.newspaper.newspaperEdition
+import dev.cazh0.civily.feature.issues.newspaper.newspaperMasthead
 import dev.cazh0.civily.ui.component.EmptyState
 import dev.cazh0.civily.ui.component.LoadStateScaffold
-import dev.cazh0.civily.ui.component.NewspaperForIssue
-import dev.cazh0.civily.ui.component.countdownClock
-import dev.cazh0.civily.ui.component.rememberCountdown
 import dev.cazh0.civily.ui.theme.Dimens
 import java.util.Locale
 
@@ -80,8 +77,12 @@ fun IssuesScreen(
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(Dimens.ScreenPadding),
-                verticalArrangement = Arrangement.spacedBy(Dimens.ItemSpacing),
+                // No bottom margin of its own: the last paper's own gap is the foot of the page.
+                contentPadding = PaddingValues(
+                    start = Dimens.ScreenPadding,
+                    top = Dimens.ScreenPadding,
+                    end = Dimens.ScreenPadding,
+                ),
             ) {
                 items(
                     items = page.issues,
@@ -114,17 +115,17 @@ private fun IssueHeadlineCard(
     // that the page is not one. The newspaper meets the screen directly.
     NewspaperForIssue(
         issueId = issue.id,
-        masthead = remember(page, issue.id) {
-            Newspaper.masthead(page.capital, page.nationName, issue.id)
-        },
-        edition = remember(issue.id) { Newspaper.edition(issue.id) },
+        masthead = newspaperMasthead(page.capital, page.nationName, issue.id),
+        edition = newspaperEdition(issue.id),
         headline = issue.title,
         price = page.currency.takeIf { it.isNotBlank() }
             ?.let { stringResource(R.string.newspaper_price, it.uppercase(Locale.US)) },
         flagUrl = page.flagUrl.takeIf { it.isNotBlank() },
         imageUrls = issue.imageUrls,
         imageLoader = imageLoader,
+        // The gap sits outside the click, so a tap between two papers opens neither.
         modifier = Modifier
+            .padding(bottom = Dimens.ItemSpacing)
             .fillMaxWidth()
             .clickable(onClick = onClick),
     )

@@ -15,6 +15,7 @@ import dev.cazh0.civily.core.text.Numbers
 import dev.cazh0.civily.core.text.Percent
 import dev.cazh0.civily.data.nation.Nation
 import dev.cazh0.civily.ui.component.FlagHero
+import dev.cazh0.civily.ui.component.elapsedWords
 import dev.cazh0.civily.ui.theme.Dimens
 
 /**
@@ -84,7 +85,7 @@ fun NationOverviewPane(
                             ?.let { region -> { onOpenRegion(NsId.fromName(region)) } },
                     ),
                     Fact(stringResource(R.string.label_category), nation.category),
-                    Fact(stringResource(R.string.label_wa_status), nation.waStatus),
+                    Fact(stringResource(R.string.label_assembly_status), nation.waStatus),
                     Fact(stringResource(R.string.label_influence), nation.influence),
                     // Both are hidden at zero rather than shown as "0": a nation nobody endorses
                     // is the ordinary case outside the World Assembly, and a tile saying so is

@@ -462,7 +462,8 @@ private fun AccountFlag(session: Session, imageLoader: ImageLoader) {
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
-                text = Initials.of(session.nationName),
+                text = Initials.of(session.nationName)
+                    ?: stringResource(R.string.avatar_no_initials),
                 style = MaterialTheme.typography.labelLarge,
                 color = Color.White,
             )

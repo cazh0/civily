@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -49,13 +48,14 @@ import dev.cazh0.civily.R
 import dev.cazh0.civily.core.graph
 import dev.cazh0.civily.core.result.CivilyError
 import dev.cazh0.civily.core.result.LoadState
-import dev.cazh0.civily.core.text.Newspaper
 import dev.cazh0.civily.core.text.bbcode.BbBlock
 import dev.cazh0.civily.data.issues.IssueOption
 import dev.cazh0.civily.data.issues.IssuesPage
 import dev.cazh0.civily.data.issues.IssuesRepository
+import dev.cazh0.civily.feature.issues.newspaper.NewspaperForIssue
+import dev.cazh0.civily.feature.issues.newspaper.newspaperEdition
+import dev.cazh0.civily.feature.issues.newspaper.newspaperMasthead
 import dev.cazh0.civily.ui.component.LoadingState
-import dev.cazh0.civily.ui.component.NewspaperForIssue
 import dev.cazh0.civily.ui.component.RichText
 import dev.cazh0.civily.ui.theme.Dimens
 import java.util.Locale
@@ -126,14 +126,14 @@ fun IssueDetailScreen(
             IssueResultView(
                 result = outcome.result,
                 issueId = issueId,
-                masthead = Newspaper.masthead(
+                masthead = newspaperMasthead(
                     capital = page?.capital.orEmpty(),
                     nationName = page?.nationName.orEmpty(),
                     issueId = issueId,
                 ),
                 nationName = page?.nationName.orEmpty(),
                 demonym = page?.demonym.orEmpty(),
-                edition = Newspaper.edition(issueId),
+                edition = newspaperEdition(issueId),
                 price = page?.coverPrice(),
                 flagUrl = page?.flagUrl?.takeIf { it.isNotBlank() },
                 imageLoader = graph.imageLoader,
@@ -159,17 +159,14 @@ fun IssueDetailScreen(
             modifier = Modifier
                 .padding(insets)
                 .fillMaxSize(),
-            contentPadding = PaddingValues(bottom = Dimens.SectionSpacing),
-            verticalArrangement = Arrangement.spacedBy(Dimens.ItemSpacing),
         ) {
             item {
                 NewspaperForIssue(
                     issueId = issue.id,
-                    masthead = remember(page, issue.id) {
-                        Newspaper.masthead(page.capital, page.nationName, issue.id)
-                    },
-                    edition = remember(issue.id) { Newspaper.edition(issue.id) },
+                    masthead = newspaperMasthead(page.capital, page.nationName, issue.id),
+                    edition = newspaperEdition(issue.id),
                     headline = issue.title,
+                    modifier = Modifier.padding(bottom = Dimens.ItemSpacing),
                     price = page.coverPrice(),
                     flagUrl = page.flagUrl.takeIf { it.isNotBlank() },
                     imageUrls = issue.imageUrls,
@@ -182,7 +179,7 @@ fun IssueDetailScreen(
                     blocks = issue.text,
                     onOpenNation = onOpenNation,
                     onOpenRegion = onOpenRegion,
-                    modifier = Modifier.padding(horizontal = Dimens.ScreenPadding),
+                    modifier = IssueBlock,
                 )
             }
 
@@ -192,9 +189,8 @@ fun IssueDetailScreen(
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(
-                        start = Dimens.ScreenPadding,
-                        end = Dimens.ScreenPadding,
-                        top = Dimens.ItemSpacing,
+                        horizontal = Dimens.ScreenPadding,
+                        vertical = Dimens.ItemSpacing,
                     ),
                 )
             }
@@ -211,7 +207,7 @@ fun IssueDetailScreen(
                     onClick = { chosen = option.id },
                     onCommit = { viewModel.answer(issue.id, option.id) },
                     commitLabel = stringResource(R.string.action_enact_this),
-                    modifier = Modifier.padding(horizontal = Dimens.ScreenPadding),
+                    modifier = IssueBlock,
                 )
             }
 
@@ -221,7 +217,12 @@ fun IssueDetailScreen(
                     busy = busy,
                     onClick = { chosen = IssuesRepository.DISMISS },
                     onCommit = { viewModel.answer(issue.id, IssuesRepository.DISMISS) },
-                    modifier = Modifier.padding(horizontal = Dimens.ScreenPadding),
+                    // The last block: its gap is the foot of the page.
+                    modifier = Modifier.padding(
+                        start = Dimens.ScreenPadding,
+                        end = Dimens.ScreenPadding,
+                        bottom = Dimens.SectionSpacing,
+                    ),
                 )
             }
         }
@@ -407,6 +408,16 @@ private fun OrdinalBadge(ordinal: Int, selected: Boolean, contentColor: Color) {
         }
     }
 }
+
+/**
+ * One block of an issue page, the detail's and the result's: inset to the screen's margin, with
+ * its own gap under it (RULES §4.2). The papers run edge to edge and take only the gap.
+ */
+internal val IssueBlock = Modifier.padding(
+    start = Dimens.ScreenPadding,
+    end = Dimens.ScreenPadding,
+    bottom = Dimens.ItemSpacing,
+)
 
 /** "1 DOLLAR" on the design's example page — the nation's own currency, as the site prints it. */
 @Composable

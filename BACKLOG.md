@@ -13,9 +13,6 @@ Inside a section: a row sits above one that is harder to do right while it stays
 
 | # | Task | Done when |
 |---|---|---|
-| T2 | Sign-in decodes on the main thread | `AuthRepository.signIn`'s body runs under `withContext(Dispatchers.Default)` (`RULES.md` §3). |
-| T29 | Six lazy lists spaced by `verticalArrangement` | WA, region, issues, issue detail, issue result and policies give each block its own bottom gap, `richTextItems` included (`RULES.md` §4.2). |
-| T30 | Copy written in code | The newspaper's masthead, titles, editions, volume line and fallback; `TrendPill`'s arrows; `RichText`'s list markers; `Initials`' `?`: each a resource. RMB reads "3 hours ago", never "3h" (`DESIGN_RULES.md` §4.4); `RelativeTime.compact` is gone. |
 | T31 | Literals outside `ui/theme` | The initials' `Color.White` (`NationAvatar`, `AccountsSection`) and `RichText`'s `0.75.em` come from `ui/theme`. |
 | T32 | Region prints a raw vote count | The delegate's vote count goes through `Numbers` (`RULES.md` §3). |
 | T1 | No rule has a gate | A JVM test in `src/test` fails `testDebugUnitTest` on each of A1–A7, each proven by mutation; `ARCHITECTURE.md` §1 names it. The A1 and A7 rows of `ARCHITECTURE.md` §7 moved first, as its blocking part; both Baseline Profiles regenerated after (`RULES.md` §4.9). |

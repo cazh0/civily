@@ -1,6 +1,5 @@
 package dev.cazh0.civily.feature.region
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -80,23 +79,29 @@ private fun RegionContent(
     // they are on.
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(Dimens.ScreenPadding),
-        verticalArrangement = Arrangement.spacedBy(Dimens.ItemSpacing),
+        // No bottom margin of its own: the last block's own gap is the foot of the page.
+        contentPadding = PaddingValues(
+            start = Dimens.ScreenPadding,
+            top = Dimens.ScreenPadding,
+            end = Dimens.ScreenPadding,
+        ),
     ) {
-        // Guarded here as well as inside FlagHero: an item that draws nothing is still an item,
-        // and the list would space it exactly as it spaces the flag it does not have.
-        if (region.flagUrl.isNotEmpty()) {
-            item(contentType = "flag") {
-                FlagHero(
-                    flagUrl = region.flagUrl,
-                    contentDescription = stringResource(R.string.description_region_flag),
-                    imageLoader = imageLoader,
-                )
-            }
+        item(contentType = "flag") {
+            // A region without a flag draws nothing here, and takes its gap with it.
+            FlagHero(
+                flagUrl = region.flagUrl,
+                contentDescription = stringResource(R.string.description_region_flag),
+                imageLoader = imageLoader,
+                modifier = Modifier.padding(bottom = Dimens.ItemSpacing),
+            )
         }
 
         item(contentType = "name") {
-            Text(text = region.name, style = MaterialTheme.typography.headlineSmall)
+            Text(
+                text = region.name,
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.padding(bottom = Dimens.ItemSpacing),
+            )
         }
 
         item(contentType = "link") {
@@ -106,6 +111,7 @@ private fun RegionContent(
                 flagUrl = "",
                 imageLoader = imageLoader,
                 onClick = onOpenMessageBoard,
+                modifier = Modifier.padding(bottom = Dimens.ItemSpacing),
             )
         }
 
@@ -113,6 +119,7 @@ private fun RegionContent(
             FactCard(
                 labelRes = R.string.label_num_nations,
                 value = stringResource(R.string.value_nations, Numbers.grouped(region.nationCount)),
+                modifier = Modifier.padding(bottom = Dimens.ItemSpacing),
             )
         }
 
@@ -122,6 +129,7 @@ private fun RegionContent(
                 value = region.delegate?.let {
                     stringResource(R.string.value_delegate, NsId.toName(it), region.delegateVotes)
                 } ?: stringResource(R.string.value_none),
+                modifier = Modifier.padding(bottom = Dimens.ItemSpacing),
                 onClick = region.delegate?.let { { onOpenNation(it) } },
             )
         }
@@ -131,6 +139,7 @@ private fun RegionContent(
                 labelRes = R.string.label_founder,
                 value = region.founder?.let { NsId.toName(it) }
                     ?: stringResource(R.string.value_none),
+                modifier = Modifier.padding(bottom = Dimens.ItemSpacing),
                 onClick = region.founder?.let { { onOpenNation(it) } },
             )
         }
@@ -141,7 +150,10 @@ private fun RegionContent(
                     text = stringResource(R.string.section_factbook),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = Dimens.TextSpacing),
+                    modifier = Modifier.padding(
+                        top = Dimens.TextSpacing,
+                        bottom = Dimens.ItemSpacing,
+                    ),
                 )
             }
             richTextItems(

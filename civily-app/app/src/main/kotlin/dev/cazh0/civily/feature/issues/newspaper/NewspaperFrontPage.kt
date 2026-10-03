@@ -1,4 +1,4 @@
-package dev.cazh0.civily.ui.component
+package dev.cazh0.civily.feature.issues.newspaper
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
@@ -35,7 +36,6 @@ import androidx.compose.ui.unit.isSpecified
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import dev.cazh0.civily.R
-import dev.cazh0.civily.core.text.Newspaper
 import dev.cazh0.civily.ui.theme.Newsprint
 import dev.cazh0.civily.ui.theme.NewsprintHeadlineInk
 import dev.cazh0.civily.ui.theme.NewsprintInk
@@ -208,6 +208,22 @@ fun NewspaperForIssue(
         )
     }
 }
+
+/** The paper's name for this issue — "The Itagüí Sentinel" — or a stock one when there is no place. */
+@Composable
+fun newspaperMasthead(capital: String, nationName: String, issueId: Int): String {
+    val place = Newspaper.place(capital, nationName)
+        ?: return stringResource(R.string.newspaper_masthead_fallback)
+    return stringResource(R.string.newspaper_masthead, place, stringResource(Newspaper.title(issueId)))
+}
+
+/** This issue's edition line, in words. The date is read once per issue, not once per frame. */
+@Composable
+fun newspaperEdition(issueId: Int): Newspaper.Edition = Newspaper.Edition(
+    city = stringResource(Newspaper.city(issueId)),
+    date = remember(issueId) { Newspaper.date() },
+    volume = stringResource(R.string.newspaper_volume, Newspaper.volume(issueId), issueId),
+)
 
 /**
  * The broadsheet front page, transcribed from the supplied Figma frames.

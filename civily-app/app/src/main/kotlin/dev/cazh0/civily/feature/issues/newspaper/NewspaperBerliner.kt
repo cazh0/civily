@@ -1,4 +1,4 @@
-package dev.cazh0.civily.ui.component
+package dev.cazh0.civily.feature.issues.newspaper
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.em
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import dev.cazh0.civily.R
-import dev.cazh0.civily.core.text.Newspaper
 import dev.cazh0.civily.ui.theme.BerlinerInk
 import dev.cazh0.civily.ui.theme.NewsprintHeadlineInk
 

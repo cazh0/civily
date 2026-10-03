@@ -167,11 +167,6 @@ its subject.
 | Today | Goes to |
 |---|---|
 | `core/AppGraph` · `core/CivilyApp` · `core/MainActivity`: the composition root, which imports `data/`, `ui/` and `nav/` and so breaks A1 from inside `core/` | package root `dev.cazh0.civily` |
-| `ui/component/Newspaper` · `NewspaperBerliner` · `NewspaperStack` · `NewspaperTabloid` · `core/text/Newspaper`: issues only (A7) | `feature/issues/newspaper/`; one `Newspaper.kt` renamed for its main declaration |
-| `ui/component/Countdown` · `TrendPill` · `core/text/Countdown` · `Classification` · `FreedomLadder`: issues only (A7) | `feature/issues/`; one `Countdown.kt` renamed for its main declaration |
 | `core/text/Magnitude` · `FreedomRating`: nation only (A7) | `feature/nation/` |
 | `ui/component/FactCard`: region only (A7) | `feature/region/` |
-| `ui/component/NationAvatar`: RMB only (A7) | `feature/rmb/` |
-| `wa`: `feature/wa` · `WaScreen` · `WaViewModel` · `data/wa` · strings named `wa` | `assembly`: `feature/assembly` · `AssemblyScreen` · `AssemblyViewModel` · `data/assembly` · strings named `assembly` |
-| `auth`: `data/auth` · `AuthRepository` · `AppGraph.authRepository` | `signin`: `data/signin` · `SignInRepository` · `AppGraph.signInRepository` |
 | `lookup`: `feature/lookup` · `LookupScreen` · `LookupViewModel` · `LookupState` · `Routes.LOOKUP` · strings named `lookup` | `home`: `feature/home` · `HomeScreen` · `HomeViewModel` · `HomeState` · `Routes.HOME` · strings named `home` |

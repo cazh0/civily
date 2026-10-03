@@ -1,16 +1,15 @@
 package dev.cazh0.civily.feature.nation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import dev.cazh0.civily.R
 import dev.cazh0.civily.core.text.Magnitude
 import dev.cazh0.civily.core.text.Numbers
 import dev.cazh0.civily.core.text.Percent
 import dev.cazh0.civily.core.text.Population
-import dev.cazh0.civily.core.text.RelativeTime
 import dev.cazh0.civily.data.nation.Department
 import dev.cazh0.civily.data.nation.Sector
+import dev.cazh0.civily.ui.component.elapsedWords
 
 /**
  * The screen's numbers and the API's vocabulary, put into words.
@@ -59,24 +58,6 @@ internal fun magnitudeWords(amount: Long): String {
 internal fun scoreWords(score: Double): String = when {
     score >= SCALE_FROM -> magnitudeWords(score.toLong())
     else -> Percent.rounded(score)
-}
-
-/**
- * "3 hours ago", in words, because a happening is a sentence and "3h" beside one reads as a
- * stray token. The plural lives in the resource layer, which is why [RelativeTime] hands back a
- * count and a unit instead of a string.
- */
-@Composable
-internal fun elapsedWords(epochSeconds: Long, now: Long): String {
-    val (count, grain) = RelativeTime.elapsed(epochSeconds, now)
-    return when (grain) {
-        RelativeTime.Grain.Now -> stringResource(R.string.elapsed_now)
-        RelativeTime.Grain.Minutes -> pluralStringResource(R.plurals.elapsed_minutes, count, count)
-        RelativeTime.Grain.Hours -> pluralStringResource(R.plurals.elapsed_hours, count, count)
-        RelativeTime.Grain.Days -> pluralStringResource(R.plurals.elapsed_days, count, count)
-        RelativeTime.Grain.Weeks -> pluralStringResource(R.plurals.elapsed_weeks, count, count)
-        RelativeTime.Grain.Years -> pluralStringResource(R.plurals.elapsed_years, count, count)
-    }
 }
 
 /**

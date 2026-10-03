@@ -175,8 +175,8 @@ fun LookupScreen(
             Column(verticalArrangement = Arrangement.spacedBy(Dimens.ItemSpacing)) {
                 SectionHeader(stringResource(R.string.section_explore))
                 LinkRow(
-                    name = stringResource(R.string.title_wa),
-                    subtitle = stringResource(R.string.subtitle_wa),
+                    name = stringResource(R.string.title_assembly),
+                    subtitle = stringResource(R.string.subtitle_assembly),
                     flagUrl = "",
                     imageLoader = graph.imageLoader,
                     onClick = onOpenWorldAssembly,

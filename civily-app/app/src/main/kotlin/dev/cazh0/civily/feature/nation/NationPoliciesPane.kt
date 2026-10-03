@@ -1,6 +1,5 @@
 package dev.cazh0.civily.feature.nation
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -50,8 +49,12 @@ fun NationPoliciesPane(
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(Dimens.ScreenPadding),
-        verticalArrangement = Arrangement.spacedBy(Dimens.ItemSpacing),
+        // No bottom margin of its own: the last card's own gap is the foot of the page.
+        contentPadding = PaddingValues(
+            start = Dimens.ScreenPadding,
+            top = Dimens.ScreenPadding,
+            end = Dimens.ScreenPadding,
+        ),
     ) {
         groups.forEachIndexed { index, group ->
             if (group.category.isNotEmpty()) {
@@ -62,6 +65,7 @@ fun NationPoliciesPane(
                         // as groups rather than as one long ladder.
                         modifier = Modifier.padding(
                             top = if (index == 0) Dimens.TextSpacing else Dimens.ItemSpacing,
+                            bottom = Dimens.ItemSpacing,
                         ),
                     )
                 }
@@ -71,7 +75,7 @@ fun NationPoliciesPane(
                 key = { it.name },
                 contentType = { PaneContent.Policy },
             ) { policy ->
-                PolicyCard(policy, imageLoader)
+                PolicyCard(policy, imageLoader, Modifier.padding(bottom = Dimens.ItemSpacing))
             }
         }
     }

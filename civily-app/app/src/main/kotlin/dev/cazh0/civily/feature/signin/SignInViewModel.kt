@@ -6,7 +6,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import dev.cazh0.civily.core.result.CivilyError
 import dev.cazh0.civily.core.result.fold
-import dev.cazh0.civily.data.auth.AuthRepository
+import dev.cazh0.civily.data.signin.SignInRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +24,7 @@ sealed interface SignInState {
     data class Done(val nationId: String) : SignInState
 }
 
-class SignInViewModel(private val auth: AuthRepository) : ViewModel() {
+class SignInViewModel(private val repository: SignInRepository) : ViewModel() {
 
     private val _state = MutableStateFlow<SignInState>(SignInState.Idle)
     val state: StateFlow<SignInState> = _state.asStateFlow()
@@ -36,7 +36,7 @@ class SignInViewModel(private val auth: AuthRepository) : ViewModel() {
             _state.value = SignInState.Working
             // Why the password is a parameter and never a field: a ViewModel outlives the
             // composition, and a password held there outlives the screen the user typed it on.
-            _state.value = auth.signIn(nationName, password).fold(
+            _state.value = repository.signIn(nationName, password).fold(
                 onSuccess = { session -> SignInState.Done(session.nationId) },
                 onFailure = { error -> SignInState.Failed(error) },
             )
@@ -49,8 +49,8 @@ class SignInViewModel(private val auth: AuthRepository) : ViewModel() {
     }
 
     companion object {
-        fun factory(auth: AuthRepository) = viewModelFactory {
-            initializer { SignInViewModel(auth) }
+        fun factory(repository: SignInRepository) = viewModelFactory {
+            initializer { SignInViewModel(repository) }
         }
     }
 }

@@ -1,13 +1,13 @@
-package dev.cazh0.civily.feature.wa
+package dev.cazh0.civily.feature.assembly
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import dev.cazh0.civily.core.result.LoadState
 import dev.cazh0.civily.core.result.launchLoad
-import dev.cazh0.civily.data.wa.Assembly
-import dev.cazh0.civily.data.wa.AssemblyRepository
-import dev.cazh0.civily.data.wa.Council
+import dev.cazh0.civily.data.assembly.Assembly
+import dev.cazh0.civily.data.assembly.AssemblyRepository
+import dev.cazh0.civily.data.assembly.Council
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * failure. Sharing state would mean a Security Council timeout blanking a General Assembly
  * resolution that loaded perfectly well.
  */
-class WaViewModel(
+class AssemblyViewModel(
     private val repository: AssemblyRepository,
     private val council: Council,
 ) : ViewModel() {
@@ -35,7 +35,7 @@ class WaViewModel(
 
     companion object {
         fun factory(repository: AssemblyRepository, council: Council) = viewModelFactory {
-            initializer { WaViewModel(repository, council) }
+            initializer { AssemblyViewModel(repository, council) }
         }
     }
 }

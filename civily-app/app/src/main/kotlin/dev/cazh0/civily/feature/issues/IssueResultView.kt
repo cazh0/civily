@@ -4,7 +4,6 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -30,14 +29,11 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import dev.cazh0.civily.R
 import dev.cazh0.civily.core.net.NsUrl
-import dev.cazh0.civily.core.text.Classification
-import dev.cazh0.civily.core.text.FreedomLadder
-import dev.cazh0.civily.core.text.Newspaper
 import dev.cazh0.civily.data.issues.IssueResult
 import dev.cazh0.civily.data.issues.Reclassification
-import dev.cazh0.civily.ui.component.NewspaperStack
+import dev.cazh0.civily.feature.issues.newspaper.Newspaper
+import dev.cazh0.civily.feature.issues.newspaper.NewspaperStack
 import dev.cazh0.civily.ui.component.PolicyCard
-import dev.cazh0.civily.ui.component.TrendPill
 import dev.cazh0.civily.ui.theme.Dimens
 import java.util.Locale
 import kotlin.math.abs
@@ -73,11 +69,7 @@ fun IssueResultView(
     val scaleNames = stringArrayResource(R.array.census_scales)
     val scaleUnits = stringArrayResource(R.array.census_units)
 
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = Dimens.SectionSpacing),
-        verticalArrangement = Arrangement.spacedBy(Dimens.ItemSpacing),
-    ) {
+    LazyColumn(modifier = modifier.fillMaxSize()) {
         if (result.description.isNotBlank()) {
             item { Heading(stringResource(R.string.talking_point_heading)) }
             item {
@@ -86,7 +78,7 @@ fun IssueResultView(
                 Text(
                     text = result.description.asSentence(),
                     style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(horizontal = Dimens.ScreenPadding),
+                    modifier = IssueBlock,
                 )
             }
         }
@@ -104,7 +96,7 @@ fun IssueResultView(
                     reclassification = reclassification,
                     nationName = nationName,
                     demonym = demonym,
-                    modifier = Modifier.padding(horizontal = Dimens.ScreenPadding),
+                    modifier = IssueBlock,
                 )
             }
         }
@@ -117,6 +109,7 @@ fun IssueResultView(
                     headlines = result.headlines.map { it.text },
                     masthead = masthead,
                     edition = edition,
+                    modifier = Modifier.padding(bottom = Dimens.ItemSpacing),
                     price = price,
                     flagUrl = flagUrl,
                     imageUrlsByHeadline = result.headlines.map { it.imageUrls },
@@ -134,7 +127,7 @@ fun IssueResultView(
                 PolicyCard(
                     policy = policy,
                     imageLoader = imageLoader,
-                    modifier = Modifier.padding(horizontal = Dimens.ScreenPadding),
+                    modifier = IssueBlock,
                 )
             }
         }
@@ -149,7 +142,7 @@ fun IssueResultView(
                     policy = policy,
                     imageLoader = imageLoader,
                     banner = false,
-                    modifier = Modifier.padding(horizontal = Dimens.ScreenPadding),
+                    modifier = IssueBlock,
                 )
             }
         }
@@ -163,7 +156,7 @@ fun IssueResultView(
                 Postcard(
                     bannerId = bannerId,
                     imageLoader = imageLoader,
-                    modifier = Modifier.padding(horizontal = Dimens.ScreenPadding),
+                    modifier = IssueBlock,
                 )
             }
         }
@@ -174,9 +167,7 @@ fun IssueResultView(
                 // An overview, not an audit: one decision nudges thirty-odd scales, and the
                 // ones that moved by a rounding error are noise.
                 FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = Dimens.ScreenPadding),
+                    modifier = IssueBlock.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(Dimens.SectionSpacing),
                     verticalArrangement = Arrangement.spacedBy(Dimens.ItemSpacing),
                 ) {
@@ -203,10 +194,12 @@ fun IssueResultView(
                 onClick = onDone,
                 modifier = Modifier
                     .fillMaxWidth()
+                    // The last block: its gap is the foot of the page.
                     .padding(
                         start = Dimens.ScreenPadding,
                         end = Dimens.ScreenPadding,
                         top = Dimens.ItemSpacing,
+                        bottom = Dimens.SectionSpacing,
                     ),
             ) {
                 Text(stringResource(R.string.action_done))
@@ -355,9 +348,8 @@ private fun Heading(text: String) {
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(
-            start = Dimens.ScreenPadding,
-            end = Dimens.ScreenPadding,
-            top = Dimens.ItemSpacing,
+            horizontal = Dimens.ScreenPadding,
+            vertical = Dimens.ItemSpacing,
         ),
     )
 }

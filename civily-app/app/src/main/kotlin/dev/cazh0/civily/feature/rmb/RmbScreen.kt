@@ -34,13 +34,12 @@ import dev.cazh0.civily.R
 import dev.cazh0.civily.core.graph
 import dev.cazh0.civily.core.text.NsId
 import dev.cazh0.civily.core.text.Numbers
-import dev.cazh0.civily.core.text.RelativeTime
 import dev.cazh0.civily.data.rmb.RmbPost
 import dev.cazh0.civily.ui.component.EmptyState
 import dev.cazh0.civily.ui.component.LoadStateScaffold
-import dev.cazh0.civily.ui.component.NationAvatar
 import dev.cazh0.civily.ui.component.Pill
 import dev.cazh0.civily.ui.component.RichText
+import dev.cazh0.civily.ui.component.elapsedWords
 import dev.cazh0.civily.ui.theme.Dimens
 
 @Composable
@@ -67,8 +66,8 @@ fun RmbScreen(
         onBack = onBack,
         modifier = modifier,
     ) { posts ->
-        // One clock for the whole list. Reading it per post would make "9h" and "9h" disagree
-        // halfway down the screen. Keyed on the posts rather than on the load state, so the
+        // One clock for the whole list. Reading it per post would make two "9 hours ago"s
+        // disagree halfway down the screen. Keyed on the posts rather than on the load state, so the
         // comparison is against the list instance and not a structural walk of fifty posts.
         val now = remember(posts) { System.currentTimeMillis() }
 
@@ -166,8 +165,9 @@ private fun PostRow(
                         modifier = Modifier.clickable { onOpenNation(post.author) },
                     )
                     Text(
-                        text = RelativeTime.compact(post.postedAtEpochSeconds, now) +
-                            if (post.wasEdited) stringResource(R.string.rmb_edited_suffix) else "",
+                        text = elapsedWords(post.postedAtEpochSeconds, now).let { ago ->
+                            if (post.wasEdited) stringResource(R.string.rmb_edited, ago) else ago
+                        },
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

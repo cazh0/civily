@@ -1,6 +1,7 @@
 package dev.cazh0.civily.core.text
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class InitialsTest {
@@ -32,8 +33,8 @@ class InitialsTest {
     }
 
     @Test
-    fun `a name with no letters falls back`() {
-        assertEquals("?", Initials.of("!!! ---"))
-        assertEquals("?", Initials.of(""))
+    fun `a name with no letters has no initials`() {
+        assertNull(Initials.of("!!! ---"))
+        assertNull(Initials.of(""))
     }
 }

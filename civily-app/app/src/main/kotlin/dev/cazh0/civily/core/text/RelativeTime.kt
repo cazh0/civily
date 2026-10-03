@@ -1,15 +1,9 @@
 package dev.cazh0.civily.core.text
 
 /**
- * How long ago something happened.
+ * How long ago something happened, as the coarsest unit that still describes the gap.
  *
- * Two renderings, one ladder. [compact] is what a message list wants — every post in a board
- * carries one, and "3 hours ago" pushes the author's name off the line on a narrow screen, so
- * "3h" is the convention readers already know from every other feed. [elapsed] is the same gap
- * left unformatted, for the places that have a whole line to spend on it: a happening reads as
- * prose, and "3h" beside a sentence reads as a stray token.
- *
- * Why [elapsed] returns a count and a unit rather than words: the words are plural-sensitive
+ * Why a count and a unit rather than words: the words are plural-sensitive
  * ("1 hour ago", "3 hours ago") and plurals live in the resource layer. Returning the two
  * numbers a plural string needs keeps this object free of `Context` — which is what keeps it
  * testable without a framework.
@@ -23,18 +17,6 @@ object RelativeTime {
     enum class Grain { Now, Minutes, Hours, Days, Weeks, Years }
 
     data class Elapsed(val count: Int, val grain: Grain)
-
-    fun compact(epochSeconds: Long, nowMs: Long): String {
-        val (count, grain) = elapsed(epochSeconds, nowMs)
-        return when (grain) {
-            Grain.Now -> NOW
-            Grain.Minutes -> "${count}m"
-            Grain.Hours -> "${count}h"
-            Grain.Days -> "${count}d"
-            Grain.Weeks -> "${count}w"
-            Grain.Years -> "${count}y"
-        }
-    }
 
     fun elapsed(epochSeconds: Long, nowMs: Long): Elapsed {
         val seconds = nowMs / MILLIS_PER_SECOND - epochSeconds
@@ -57,7 +39,6 @@ object RelativeTime {
         return Elapsed((days / DAYS_PER_YEAR).toInt(), Grain.Years)
     }
 
-    private const val NOW = "now"
     private const val MILLIS_PER_SECOND = 1000L
     private const val SECONDS_PER_MINUTE = 60L
     private const val MINUTES_PER_HOUR = 60L

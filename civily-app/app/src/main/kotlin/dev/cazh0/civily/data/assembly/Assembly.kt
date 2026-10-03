@@ -1,4 +1,4 @@
-package dev.cazh0.civily.data.wa
+package dev.cazh0.civily.data.assembly
 
 import dev.cazh0.civily.core.text.bbcode.BbBlock
 
