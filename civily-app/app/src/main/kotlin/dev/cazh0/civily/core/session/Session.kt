@@ -3,7 +3,7 @@ package dev.cazh0.civily.core.session
 /**
  * One signed-in nation and the credentials that prove it.
  *
- * Never logged, never placed in an Intent, never sent anywhere but nationstates.net (spec §3).
+ * Never logged, never placed in an Intent, never sent anywhere but nationstates.net (RULES §3).
  *
  * NationStates issues a session per nation, so every stored account carries its own token and
  * its own PIN. Signing in as a second nation does not disturb the first one's session — which

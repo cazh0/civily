@@ -9,7 +9,7 @@ import dev.cazh0.civily.core.text.bbcode.BbBlock
  * game's prose is a tree rather than a string. That is the work [NationRepository] does on a
  * background dispatcher so a composable never does it — a composable runs again on every
  * recomposition, and parsing eleven paragraphs each time is exactly the main-thread cost
- * spec §2 R2b forbids.
+ * RULES §2 R2b forbids.
  *
  * The grouping is the screen's seven tabs. Fields a reader wants at a glance sit at the top
  * level; the four subjects that need a page of their own get a type, so a pane takes the one

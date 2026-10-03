@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 /**
  * Holds the nation screen's state across configuration changes.
  *
- * Why this shape closes the crash class in spec §5: the result of a request lands in a
+ * Why this shape closes the crash class in RULES §5: the result of a request lands in a
  * [StateFlow] the ViewModel owns, not in a callback holding a Fragment. There is no
  * `isAdded()` check to forget, because there is nothing here that can outlive its view.
  */

@@ -36,7 +36,7 @@ class NationRepository(private val client: NsClient) {
     /**
      * Both callers wrap this in [Dispatchers.Default] because `NsClient` puts only the network
      * call on a background thread — decoding, and the mapping after it, would otherwise happen
-     * on the caller's thread, which is the main one (spec §2 R2b).
+     * on the caller's thread, which is the main one (RULES §2 R2b).
      */
     private suspend fun request(
         nationId: String,
@@ -78,7 +78,7 @@ class NationRepository(private val client: NsClient) {
         admirable = text(admirable),
         sensibilities = text(sensibilities),
         people = People(
-            // Parsed rather than printed even though the game writes these itself: the README's
+            // Parsed rather than printed even though the game writes these itself: RULES §3's
             // rule is that anything rendering NationStates content goes through BbParser, and
             // that is what guarantees no reader sees a tag the day the game dresses these.
             crime = BbParser.parse(crime),
@@ -193,7 +193,7 @@ class NationRepository(private val client: NsClient) {
         val CENSUS_OPTIONS = mapOf("scale" to "all", "mode" to "score+rank+prank")
 
         /**
-         * Documented shards only (spec §3). Each one maps to a field on [NationDto], and they
+         * Documented shards only (RULES §3). Each one maps to a field on [NationDto], and they
          * travel in one request because the API's own guidance is to combine them rather than
          * spend a rate-limit slot per field.
          */

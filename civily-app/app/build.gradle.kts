@@ -14,7 +14,7 @@ android {
         // Why not com.lloydtorres.stately: this is an independent rebuild, not a continuation
         // of the published listing. A distinct id also lets both apps sit on one device.
         applicationId = "dev.cazh0.civily"
-        // Why: minSdk stays at 21 to honour the compatibility tenet in README.md.
+        // Why: minSdk stays at 21 because RULES §6 keeps every supported device supported.
         // Compose, OkHttp 4 and Coil 2 all support 21.
         minSdk = 21
         targetSdk = 35
@@ -25,7 +25,7 @@ android {
 
     buildTypes {
         release {
-            // Why: spec §4 requires the release APK never grow. R8 + resource shrinking
+            // Why: RULES §4 requires the release APK never grow. R8 + resource shrinking
             // is the only lever that offsets the Compose runtime's baseline cost.
             isMinifyEnabled = true
             isShrinkResources = true
@@ -60,7 +60,7 @@ android {
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
         // Why: kotlinx-coroutines ships a binary descriptor for its debug agent, which nothing
-        // in a shipped app can attach. Spec §4 says the APK may not grow; the first place to
+        // in a shipped app can attach. RULES §4 says the APK may not grow; the first place to
         // look is what is in it that never runs.
         resources.excludes += "DebugProbesKt.bin"
     }

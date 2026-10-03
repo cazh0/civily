@@ -5,7 +5,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Spec §5 makes coverage of BBCode mandatory.
+ * RULES §5 makes coverage of BBCode mandatory.
  *
  * Most of these are malformed on purpose. NationStates content is written by thousands of
  * people in a plain textarea, so unclosed tags, stray closes and tags this app has never

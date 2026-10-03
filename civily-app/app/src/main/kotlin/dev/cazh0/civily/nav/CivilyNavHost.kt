@@ -228,7 +228,7 @@ private fun navActions(controller: NavHostController, entry: NavBackStackEntry):
 /**
  * Why this fails loudly: the argument is declared non-optional on the route, so a null here
  * means the route and its composable have drifted apart. Crashing at the seam beats rendering
- * an empty screen nobody can explain (spec §2 R1).
+ * an empty screen nobody can explain (RULES §2 R1).
  */
 private fun NavBackStackEntry.requireArg(key: String): String =
     requireNotNull(arguments?.getString(key)) { "Route reached without argument '$key'" }

@@ -9,7 +9,7 @@ import androidx.compose.animation.core.spring
 /**
  * Every duration in the app.
  *
- * Why here rather than at the call sites: the Compose counterpart of spec §3's ban on size and
+ * Why here rather than at the call sites: the Compose counterpart of RULES §3's ban on size and
  * colour literals. A `tween(700)` typed into a NavHost is a design decision nobody can find
  * again, and it is the difference between a screen that answers and a screen that thinks about
  * it.

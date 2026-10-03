@@ -59,7 +59,7 @@ fun SignInScreen(
 
     // Why `remember` and not `rememberSaveable`: saveable state is written into the saved
     // instance Bundle, which the system may persist to disk and restore after a reboot. A
-    // password must not survive the composition that collected it (spec §3).
+    // password must not survive the composition that collected it (RULES §3).
     var password by remember { mutableStateOf("") }
 
     val working = state is SignInState.Working

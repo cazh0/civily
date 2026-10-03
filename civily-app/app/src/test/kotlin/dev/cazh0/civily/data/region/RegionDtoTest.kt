@@ -7,7 +7,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Spec §5 makes coverage of parsing mandatory.
+ * RULES §5 makes coverage of parsing mandatory.
  *
  * The founder case matters: NationStates reports "no founder" as the string `"0"`, not as a
  * missing element, so a screen that only checks for emptiness renders a link to nation zero.

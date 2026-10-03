@@ -16,7 +16,7 @@ import org.junit.runner.RunWith
  * because the Compose runtime itself is the code being interpreted.
  *
  * Why it is recorded from a journey rather than written by hand: the profile is only worth what
- * its accuracy is worth. A guessed list of hot classes is a guess shipped as fact (spec §1.1),
+ * its accuracy is worth. A guessed list of hot classes is a guess shipped as fact (RULES §1.1),
  * and a wrong one wastes install-time compilation on code nobody runs.
  *
  * Run it with:

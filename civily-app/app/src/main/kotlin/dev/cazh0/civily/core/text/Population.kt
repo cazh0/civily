@@ -10,7 +10,7 @@ import java.util.Locale
  * and not what the game itself shows. Past a billion the game switches unit, so this does too.
  *
  * Formatting is fixed to [Locale.US] because the app ships English-only by project rule
- * (README), and a number grouped one way beside a word chosen another way reads as a bug.
+ * (RULES §6), and a number grouped one way beside a word chosen another way reads as a bug.
  */
 object Population {
 

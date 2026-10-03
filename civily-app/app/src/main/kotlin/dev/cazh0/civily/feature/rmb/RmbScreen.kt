@@ -184,7 +184,7 @@ private fun PostRow(
                 // Why this is not a pill any more: a filled, rounded, icon-and-count control
                 // is the universal shape of a like *button*, and pressing it did nothing. The
                 // documented API has no like command — only `rmbpost` — so until that changes
-                // this is a readout, and it has to look like one. See the README's gap list.
+                // this is a readout, and it has to look like one. DECISIONS.md says why.
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(Dimens.TextSpacing),

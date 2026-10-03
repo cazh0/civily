@@ -25,7 +25,7 @@ import dev.cazh0.civily.ui.theme.Dimens
  * worse than none.
  *
  * The site opens with a population-size adjective — "a massive, efficient nation". No shard
- * carries it and nothing here invents one; see the README's gap list.
+ * carries it and nothing here invents one; DECISIONS.md says why.
  */
 @Composable
 fun NationPeoplePane(

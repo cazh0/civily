@@ -62,7 +62,7 @@ fun IssuesLinkRow(
 /**
  * One line, and it is always the most useful true thing available.
  *
- * The failure branch is deliberate. Spec §5 has no silent failures in it, and a count that
+ * The failure branch is deliberate. RULES §5 has no silent failures in it, and a count that
  * quietly stops updating when the device drops off the network is exactly that — the reader
  * would go on trusting a digit from twenty minutes ago. Saying so in the row's own quiet grey
  * costs nothing and keeps the press behind it, which reaches a screen that can retry properly.

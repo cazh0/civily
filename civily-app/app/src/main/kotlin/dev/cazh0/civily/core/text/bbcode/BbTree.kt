@@ -7,7 +7,7 @@ package dev.cazh0.civily.core.text.bbcode
  * expressions over the raw markup, one per tag. Regular expressions cannot match nested
  * delimiters, so `[b]bold [i]both[/i][/b]` and any unclosed tag produced wrong output or
  * leaked raw markup onto the screen. A tree is parsed once, is inspectable, and is what makes
- * the spec §5 requirement to test this code achievable at all.
+ * the RULES §5 requirement to test this code achievable at all.
  */
 sealed interface BbBlock {
     data class Paragraph(val spans: List<BbSpan>) : BbBlock

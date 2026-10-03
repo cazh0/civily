@@ -33,7 +33,7 @@ class RegionRepository(private val client: NsClient) {
     private companion object {
         const val TAG = "Region"
 
-        /** Documented shards only (spec §3). Each one maps to a field on [RegionDto]. */
+        /** Documented shards only (RULES §3). Each one maps to a field on [RegionDto]. */
         val SHARDS = listOf(
             "name",
             "flag",

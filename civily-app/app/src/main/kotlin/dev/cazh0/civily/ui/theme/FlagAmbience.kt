@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.luminance
  * alternative is a flag nobody can see.
  *
  * Pure on purpose: pixels in, colour out. That is what makes it testable without a device
- * (spec §5), and the Android side of it is nothing but reading a grid of pixels.
+ * (RULES §5), and the Android side of it is nothing but reading a grid of pixels.
  */
 object FlagAmbience {
 

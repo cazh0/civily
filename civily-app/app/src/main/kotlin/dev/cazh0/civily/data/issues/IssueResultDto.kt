@@ -134,7 +134,7 @@ data class HeadlinesDto(
  * No artwork: unlike `<ISSUE>` in the issues shard, which carries `PIC1` and `PIC2`, a
  * `<HEADLINE>` from `c=issue` is bare text — checked against a live enactment, not assumed.
  * The site's aftermath page is the only place the game names those cutouts, and Civily cannot
- * reach it; `README.md` records why.
+ * reach it; `DECISIONS.md` records why.
  */
 @Serializable
 @XmlSerialName("HEADLINE", "", "")

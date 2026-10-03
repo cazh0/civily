@@ -19,8 +19,8 @@ import java.io.IOException
 /**
  * The only route to the NationStates servers.
  *
- * Every request that leaves the app passes through here, which is what makes three of the
- * spec's hard rules structural rather than aspirational: the rate limit cannot be bypassed
+ * Every request that leaves the app passes through here, which is what makes three of
+ * RULES.md's hard rules structural rather than aspirational: the rate limit cannot be bypassed
  * (§3), credentials are attached in one place and logged in none (§3), and no failure can
  * reach a caller as anything but an [Outcome.Failure] (§1.2, §5).
  *
@@ -95,7 +95,7 @@ class NsClient(
      *
      * The password is sent once, in the `X-Password` header, to nationstates.net and nowhere
      * else. It is never stored, never logged and never returned — only the token NationStates
-     * issues in exchange survives this call (spec §3).
+     * issues in exchange survives this call (RULES §3).
      *
      * [url] must request at least one private shard. A request for public data alone can
      * succeed regardless of the password, which would let a wrong one look like a right one.

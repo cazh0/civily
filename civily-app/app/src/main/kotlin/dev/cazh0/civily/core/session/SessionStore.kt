@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
  *
  * Why not EncryptedSharedPreferences: app-private storage is already unreadable to other
  * apps, and the threat it would defend against — physical access to a rooted device — also
- * exposes the key. It would add a dependency (spec §1.4) for no change in outcome.
+ * exposes the key. It would add a dependency (RULES §1.4) for no change in outcome.
  */
 class SessionStore(context: Context) {
 
@@ -102,7 +102,7 @@ class SessionStore(context: Context) {
         // Why an entry without a token is skipped rather than trusted: this is the one place
         // the app reads state it did not just write, and a nation with no autologin cannot
         // authenticate anything. Listing it would show a signed-in nation whose every request
-        // fails, which is exactly what spec §5 forbids.
+        // fails, which is exactly what RULES §5 forbids.
         val sessions = ids.mapNotNull { id ->
             val autologin = prefs.getString(key(id, FIELD_AUTOLOGIN), null) ?: return@mapNotNull null
             Session(

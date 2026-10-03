@@ -6,7 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Spec §5 makes coverage of parsing mandatory.
+ * RULES §5 makes coverage of parsing mandatory.
  *
  * The sample is trimmed from a live response: CDATA bodies, a `LIKERS` element this app does
  * not model, an `EMBASSY` element that appears only on cross-region posts, and an `EDITED`

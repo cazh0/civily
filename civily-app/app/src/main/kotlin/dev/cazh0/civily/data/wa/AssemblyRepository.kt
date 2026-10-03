@@ -16,7 +16,7 @@ class AssemblyRepository(private val client: NsClient) {
     /**
      * Why the whole body runs on [Dispatchers.Default]: `NsClient` puts only the network call
      * on a background thread, so XML decoding and BBCode parsing would otherwise land on
-     * whichever thread called this — the main one. Spec §2 R2b forbids that, and a long
+     * whichever thread called this — the main one. RULES §2 R2b forbids that, and a long
      * factbook or resolution is exactly the payload that would make it visible.
      */
     suspend fun load(council: Council): Outcome<Assembly> = withContext(Dispatchers.Default) {
@@ -29,7 +29,7 @@ class AssemblyRepository(private val client: NsClient) {
         const val TAG = "Assembly"
 
         /**
-         * Documented shards only (spec §3). `votetrack` and `delvotes` feed the visible hourly
+         * Documented shards only (RULES §3). `votetrack` and `delvotes` feed the visible hourly
          * trend and the split between ordinary and delegate-weighted votes.
          */
         val SHARDS = listOf("resolution", "votetrack", "delvotes", "numnations", "numdelegates")

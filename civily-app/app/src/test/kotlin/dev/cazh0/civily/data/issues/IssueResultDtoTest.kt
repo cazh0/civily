@@ -7,7 +7,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Spec §5 makes coverage of parsing mandatory.
+ * RULES §5 makes coverage of parsing mandatory.
  *
  * This sample is a real `c=issue` response, trimmed. It carries result text and rankings; the
  * exact newspaper image ids come from the separate aftermath HTML parser.

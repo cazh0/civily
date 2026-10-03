@@ -225,7 +225,7 @@ fun NewspaperForIssue(
  * is left open: that is where the artwork goes when the API supplies it.
  *
  * Type is sized from the width rather than in `sp` — a composition, not a paragraph. That
- * trade is recorded in the README's gap list.
+ * trade is recorded in DECISIONS.md.
  */
 @Composable
 fun NewspaperFrontPage(

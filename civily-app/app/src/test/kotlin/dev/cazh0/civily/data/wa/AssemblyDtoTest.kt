@@ -7,7 +7,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Spec §5 makes coverage of parsing mandatory.
+ * RULES §5 makes coverage of parsing mandatory.
  *
  * The empty-chamber sample is the exact response the live API returned while this was being
  * written. Between votes it is the normal answer, not an edge case.

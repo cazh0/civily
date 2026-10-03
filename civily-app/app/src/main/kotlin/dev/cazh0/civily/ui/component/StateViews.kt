@@ -76,7 +76,7 @@ fun EmptyState(
  *
  * Why it takes a [CivilyError] rather than a string: the error already carries the message
  * resource, so no screen can show a failure it invented or forget to offer a way out of it
- * (spec §1.2). The retry button is part of the state for the same reason — a dead end is not
+ * (RULES §1.2). The retry button is part of the state for the same reason — a dead end is not
  * a state this app is allowed to render.
  */
 @Composable

@@ -6,7 +6,7 @@ import kotlin.math.absoluteValue
 /**
  * Every colour value in the app.
  *
- * Why here and nowhere else: spec §3 bans colour literals outside the resource layer. In a
+ * Why here and nowhere else: RULES §3 bans colour literals outside the resource layer. In a
  * Compose UI this file is that layer — a `Color(0xFF…)` anywhere under `feature/` is the
  * violation the rule is aimed at.
  */

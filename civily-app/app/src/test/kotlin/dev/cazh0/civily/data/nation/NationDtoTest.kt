@@ -7,7 +7,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Spec §5 makes coverage of parsing mandatory.
+ * RULES §5 makes coverage of parsing mandatory.
  *
  * The samples carry the shapes NationStates actually sends -- an `id` attribute we never
  * declared, and shards that go missing when the nation has no data for them.
@@ -128,7 +128,7 @@ class NationDtoTest {
     @Test
     fun `a nation with no feed and no freedom ratings parses to empty rather than failing`() {
         // A brand-new nation has no happenings at all, and a request that drops a shard omits
-        // its element entirely. Neither may take the screen down (spec §1.2).
+        // its element entirely. Neither may take the screen down (RULES §1.2).
         val nation = NsXml.decodeFromString(
             NationDto.serializer(),
             """<NATION id="testlandia"><NAME>Testlandia</NAME></NATION>""",
@@ -271,7 +271,7 @@ class NationDtoTest {
     @Test
     fun `unknown elements are ignored rather than fatal`() {
         // Why: NationStates adds shards without notice. A new element must not take the
-        // screen down (spec §1.2).
+        // screen down (RULES §1.2).
         val nation = NsXml.decodeFromString(
             NationDto.serializer(),
             """

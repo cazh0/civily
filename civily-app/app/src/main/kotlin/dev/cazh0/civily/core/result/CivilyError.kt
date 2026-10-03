@@ -8,7 +8,7 @@ import dev.cazh0.civily.R
  *
  * Why: binding the string resource to the error type at the point of definition means no
  * call site can invent its own wording, and no error can reach the UI without one — which
- * is what makes "every failure visible to user" (spec §1.2) enforceable rather than a habit.
+ * is what makes "every failure visible to user" (RULES §1.2) enforceable rather than a habit.
  */
 sealed class CivilyError(@StringRes val messageRes: Int) {
 

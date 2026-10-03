@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
  * The one exception is the session store, and it earns the exception by being the one lazy
  * object that reads a file. `getSharedPreferences` opens, parses and caches an XML document, and
  * the first thing to ask for it is the composition of the first screen — so the read lands on
- * the main thread, inside the first frame, which is exactly what spec §2 R2b forbids. Started
+ * the main thread, inside the first frame, which is exactly what RULES §2 R2b forbids. Started
  * here it overlaps the Activity's own creation and is finished before anything asks. `by lazy`
  * is synchronised, so a screen that somehow gets there first waits for the read rather than
  * repeating it, and cannot see a half-built store either way.

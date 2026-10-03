@@ -13,7 +13,7 @@
         android:allowBackup="false">
         <!--
             allowBackup is off deliberately: auto-backup would copy the session preferences,
-            and with them the autologin token, to Google's servers. Spec §3 permits
+            and with them the autologin token, to Google's servers. RULES §3 permits
             credentials nowhere but this device.
         -->
 

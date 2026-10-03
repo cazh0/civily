@@ -85,7 +85,7 @@ fun AmbientFlag(
             // decoded image in the heap for as long as the screen exists, on top of the copy
             // Coil's own cache is already holding — and this composable needs one colour out of
             // it, once. Sampling is arithmetic over a few hundred pixels, but it is still
-            // reading an image, so it goes to a background dispatcher (spec §3); the reference
+            // reading an image, so it goes to a background dispatcher (RULES §3); the reference
             // dies with the coroutine.
             onSuccess = { state ->
                 val bitmap = (state.result.drawable as? BitmapDrawable)?.bitmap

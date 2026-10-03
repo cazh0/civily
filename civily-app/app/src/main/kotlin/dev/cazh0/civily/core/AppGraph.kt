@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit
  *
  * Why hand-written instead of a DI framework: the whole graph fits on one screen and reads
  * top to bottom. Hilt would add an annotation processor to every build and move these same
- * five edges into generated code you cannot read — cost against spec §1.4 and §1.5 for no
+ * five edges into generated code you cannot read — cost against RULES §1.4 and §1.5 for no
  * gain at this size. Revisit only when the graph stops fitting here.
  *
  * Everything is lazy so [Application.onCreate] stays empty and cold start stays inside the

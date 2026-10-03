@@ -34,7 +34,7 @@ sealed interface LoadState<out T> {
  * Why an extension and not a shared base ViewModel: the loading mechanic is identical across
  * features, but the ViewModels are not — nation will grow issue answering, region will grow
  * message posting. Sharing the mechanic keeps the duplication out without welding the
- * features together (spec §2 R2a).
+ * features together (RULES §2 R2a).
  *
  * Returns the [Job] so a ViewModel with more than one reason to reload can tell whether it is
  * already doing so. The state cannot answer that: it is written from inside the coroutine, so

@@ -5,7 +5,7 @@ import androidx.compose.ui.unit.dp
 /**
  * Every size and radius in the app.
  *
- * Why here and nowhere else: the Compose counterpart of spec §3's ban on size and radius
+ * Why here and nowhere else: the Compose counterpart of RULES §3's ban on size and radius
  * literals outside the resource layer. A screen that needs a spacing this file does not have
  * should add a named token here, not an inline `16.dp`.
  *

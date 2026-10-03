@@ -11,7 +11,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Cold start, measured — which is the first thing in spec §4 that nothing measured before.
+ * Cold start, measured — which is the first thing in RULES §4 that nothing measured before.
  *
  * Two tests rather than one, because a single number answers nothing: [coldStartNoProfile] is
  * the app as it installs with no ahead-of-time compilation at all, and [coldStartWithProfile] is

@@ -16,7 +16,7 @@ import dev.cazh0.civily.data.nation.NationDto
  *
  * The password never leaves this call chain: it goes to [NsClient.signIn], into the
  * `X-Password` header, and is discarded. What is persisted is the autologin token
- * NationStates issues in exchange (spec §3).
+ * NationStates issues in exchange (RULES §3).
  *
  * Signing out has no counterpart here because it makes no request: it is
  * [SessionStore.forget], and the UI calls it directly rather than through a method that would

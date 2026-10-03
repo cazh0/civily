@@ -31,7 +31,7 @@ const val CIVILY = "dev.cazh0.civily"
  * finger does too.
  *
  * Every step fails loudly and says which step it was. A profile recorded from a run that quietly
- * did half the journey is worse than no profile, because it looks like one (spec §1.2).
+ * did half the journey is worse than no profile, because it looks like one (RULES §1.2).
  */
 
 /** A nation that has existed for as long as the game has. The site's own test subject. */

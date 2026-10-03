@@ -41,7 +41,7 @@ data class Slice(val label: String, val percent: Double, val color: Color)
  * and matching them is what makes a player who knows the game recognise this screen.
  *
  * Drawn on a `Canvas` rather than with a charting library: the whole shape is three arcs and two
- * circles, and a dependency for that would buy nothing while costing every build (spec §3).
+ * circles, and a dependency for that would buy nothing while costing every build (RULES §3).
  *
  * One departure, and it adds rather than changes: the legend carries each slice's percentage. The
  * game hides those behind tapping a wedge, which leaves a chart whose numbers cannot be read at

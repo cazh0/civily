@@ -60,6 +60,6 @@ object Newspaper {
 
     private val EDITIONS = listOf("CITY FINAL", "LATE EDITION", "MORNING EDITION", "EVENING FINAL")
 
-    /** Fixed to US English: the app ships English-only by project rule (README). */
+    /** Fixed to US English: the app ships English-only by project rule (RULES §6). */
     private val DATE_FORMAT = SimpleDateFormat("EEEE d MMMM yyyy", Locale.US)
 }

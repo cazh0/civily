@@ -6,7 +6,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**
- * Spec §5 makes coverage of parsing mandatory.
+ * RULES §5 makes coverage of parsing mandatory.
  *
  * The option ids matter more than anything else here: `c=issue` takes the API's own option
  * number, they count from zero, and a nation that enacts the wrong one cannot take it back.

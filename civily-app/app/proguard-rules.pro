@@ -1,6 +1,6 @@
 # Why: kotlinx.serialization generates a companion `serializer()` per @Serializable class and
 # looks it up reflectively. Without these keeps, R8 strips them and every parse fails at runtime
-# in release builds only -- exactly the class of defect spec §1.2 forbids shipping.
+# in release builds only -- exactly the class of defect RULES §1.2 forbids shipping.
 -keepattributes *Annotation*, InnerClasses
 -dontnote kotlinx.serialization.**
 

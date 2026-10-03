@@ -12,7 +12,7 @@ import nl.adaptivity.xmlutil.serialization.XML
 /**
  * The XML parse boundary in the app.
  *
- * Why a single helper: spec §5 permits catching at parse boundaries only, and requires every
+ * Why a single helper: RULES §5 permits catching at parse boundaries only, and requires every
  * catch to log *and* surface a visible failure. Funnelling XML responses through [decodeNsXml]
  * means that obligation is discharged once for XML, and a repository cannot get it wrong by
  * omission.

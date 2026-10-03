@@ -8,7 +8,7 @@ import java.util.Locale
  * Why hand-rolled rather than `android.graphics.Color.parseColor`: that method throws on
  * anything it does not recognise, and this input is arbitrary text typed by strangers. An
  * unrecognised colour must quietly mean "no colour", not an exception on a parse path or a
- * `try`/`catch` standing in for a check (spec §2 R1).
+ * `try`/`catch` standing in for a check (RULES §2 R1).
  *
  * Returning null rather than a default is deliberate: the caller then leaves the text in the
  * theme's own colour, which stays legible in both light and dark. A guessed colour does not.

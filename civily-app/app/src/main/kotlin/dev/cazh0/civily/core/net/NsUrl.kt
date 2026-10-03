@@ -8,7 +8,7 @@ import java.util.Locale
 /**
  * The single place any NationStates URL is built.
  *
- * Why centralised: spec §3 permits no endpoint other than nationstates.net. One builder
+ * Why centralised: RULES §3 permits no endpoint other than nationstates.net. One builder
  * makes that a property of the codebase you can verify by reading one file, instead of a
  * rule you have to trust 40 scattered format strings to keep.
  */
@@ -118,7 +118,7 @@ object NsUrl {
     fun command(): HttpUrl = API_PATH.toHttpUrl()
 
     /**
-     * @param shards documented shard names only (spec §3). Joined with `+` as the API expects.
+     * @param shards documented shard names only (RULES §3). Joined with `+` as the API expects.
      * @param options extra query parameters such as `scale` or `mode`.
      */
     fun api(

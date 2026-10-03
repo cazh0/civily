@@ -5,7 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**
- * Spec §5 makes coverage of parsing mandatory, including a missing-element case.
+ * RULES §5 makes coverage of parsing mandatory, including a missing-element case.
  *
  * The counter on the Issues button is read from `unread`, alongside the four counters the app
  * has nowhere to show — so the test that matters most is the one proving the others are ignored

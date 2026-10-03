@@ -10,7 +10,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Every frame of the nation screen, measured — spec §4's "60fps, zero jank frames", which
+ * Every frame of the nation screen, measured — RULES §4's "60fps, zero jank frames", which
  * nothing checked before.
  *
  * [FrameTimingMetric] reports the duration of each frame the app produced. What matters is the

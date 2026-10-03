@@ -6,7 +6,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**
- * Spec §5 makes coverage of the rate limiter mandatory.
+ * RULES §5 makes coverage of the rate limiter mandatory.
  *
  * The limiter's clock is wired to the test scheduler's virtual clock, so a 30-second wait
  * costs nothing and every assertion is on exact times rather than tolerances.

@@ -10,7 +10,7 @@ import dev.cazh0.civily.ui.theme.CivilyTheme
 /**
  * The app's only Activity.
  *
- * Why one: the legacy app's fragment-state crashes (spec §5) came from state living in
+ * Why one: the legacy app's fragment-state crashes (RULES §5) came from state living in
  * Activity and Fragment lifecycles that outlived the callbacks writing to them. With
  * navigation inside a single composition there is one lifecycle to reason about.
  */

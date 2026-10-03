@@ -3,7 +3,7 @@ package dev.cazh0.civily.core.result
 /**
  * The only way a repository reports the outcome of work that can fail.
  *
- * Why: spec §1.2 and §5 forbid silent failure. A thrown exception can be swallowed by an
+ * Why: RULES §1.2 and §5 forbid silent failure. A thrown exception can be swallowed by an
  * empty `catch`; a nullable return can be handled with `?: return`. A [Failure] carries a
  * [CivilyError] that already knows which message the user must be shown, so the cheapest
  * path for a caller is also the correct one.

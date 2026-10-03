@@ -41,7 +41,7 @@ data class Accounts(
      * Forgets a nation's credentials.
      *
      * Forgetting the active one leaves no active account rather than promoting the next in
-     * line. This path is also how a rejected token is dropped (spec §5), and quietly changing
+     * line. This path is also how a rejected token is dropped (RULES §5), and quietly changing
      * which nation the app is acting as, in response to a failure, is how a user ends up
      * reading someone else's issues.
      */

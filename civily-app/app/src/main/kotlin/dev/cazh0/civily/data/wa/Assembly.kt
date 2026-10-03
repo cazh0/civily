@@ -7,7 +7,7 @@ import dev.cazh0.civily.core.text.bbcode.BbBlock
  *
  * Why this exists when [AssemblyDto] already holds the same numbers: the resolution's body
  * arrives as BBCode and has to be parsed before it can be drawn. Parsing is CPU work, and
- * spec §2 R2b keeps it off the main thread — so it happens here, in the repository, on a
+ * RULES §2 R2b keeps it off the main thread — so it happens here, in the repository, on a
  * background dispatcher, rather than inside a composable that runs on every recomposition.
  *
  * A null [resolution] is the chamber's ordinary between-votes state, not an error.
