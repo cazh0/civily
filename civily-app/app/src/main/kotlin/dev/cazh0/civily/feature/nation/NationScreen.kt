@@ -23,9 +23,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.ImageLoader
 import dev.cazh0.civily.R
-import dev.cazh0.civily.core.graph
 import dev.cazh0.civily.core.text.NsId
 import dev.cazh0.civily.data.nation.Nation
+import dev.cazh0.civily.graph
 import dev.cazh0.civily.ui.component.LoadStateScaffold
 import dev.cazh0.civily.ui.theme.Dimens
 

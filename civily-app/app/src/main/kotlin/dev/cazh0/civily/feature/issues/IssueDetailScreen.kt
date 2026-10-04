@@ -45,7 +45,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.cazh0.civily.R
-import dev.cazh0.civily.core.graph
 import dev.cazh0.civily.core.result.CivilyError
 import dev.cazh0.civily.core.result.LoadState
 import dev.cazh0.civily.core.text.bbcode.BbBlock
@@ -55,6 +54,7 @@ import dev.cazh0.civily.data.issues.IssuesRepository
 import dev.cazh0.civily.feature.issues.newspaper.NewspaperForIssue
 import dev.cazh0.civily.feature.issues.newspaper.newspaperEdition
 import dev.cazh0.civily.feature.issues.newspaper.newspaperMasthead
+import dev.cazh0.civily.graph
 import dev.cazh0.civily.ui.component.LoadingState
 import dev.cazh0.civily.ui.component.RichText
 import dev.cazh0.civily.ui.theme.Dimens

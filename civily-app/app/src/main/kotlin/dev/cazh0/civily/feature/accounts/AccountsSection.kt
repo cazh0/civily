@@ -37,7 +37,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -52,6 +51,7 @@ import dev.cazh0.civily.data.issues.IssueBadge
 import dev.cazh0.civily.feature.issues.IssuesLinkRow
 import dev.cazh0.civily.ui.component.AmbientFlag
 import dev.cazh0.civily.ui.component.SectionHeader
+import dev.cazh0.civily.ui.theme.AvatarInk
 import dev.cazh0.civily.ui.theme.Dimens
 import dev.cazh0.civily.ui.theme.avatarColor
 
@@ -465,7 +465,7 @@ private fun AccountFlag(session: Session, imageLoader: ImageLoader) {
                 text = Initials.of(session.nationName)
                     ?: stringResource(R.string.avatar_no_initials),
                 style = MaterialTheme.typography.labelLarge,
-                color = Color.White,
+                color = AvatarInk,
             )
         }
     }

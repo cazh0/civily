@@ -11,16 +11,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.ImageLoader
 import dev.cazh0.civily.R
-import dev.cazh0.civily.core.graph
 import dev.cazh0.civily.core.text.Numbers
 import dev.cazh0.civily.core.text.NsId
 import dev.cazh0.civily.data.region.Region
-import dev.cazh0.civily.ui.component.FactCard
+import dev.cazh0.civily.graph
 import dev.cazh0.civily.ui.component.FlagHero
 import dev.cazh0.civily.ui.component.LinkRow
 import dev.cazh0.civily.ui.component.LoadStateScaffold
@@ -127,7 +127,12 @@ private fun RegionContent(
             FactCard(
                 labelRes = R.string.label_delegate,
                 value = region.delegate?.let {
-                    stringResource(R.string.value_delegate, NsId.toName(it), region.delegateVotes)
+                    pluralStringResource(
+                        R.plurals.value_delegate,
+                        region.delegateVotes,
+                        NsId.toName(it),
+                        Numbers.grouped(region.delegateVotes),
+                    )
                 } ?: stringResource(R.string.value_none),
                 modifier = Modifier.padding(bottom = Dimens.ItemSpacing),
                 onClick = region.delegate?.let { { onOpenNation(it) } },

@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import dev.cazh0.civily.R
-import dev.cazh0.civily.core.text.FreedomRating
 import dev.cazh0.civily.core.text.bbcode.BbBlock
 import dev.cazh0.civily.data.nation.Nation
 import dev.cazh0.civily.ui.component.RichText

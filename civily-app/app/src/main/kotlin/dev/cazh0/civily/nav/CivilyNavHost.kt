@@ -16,7 +16,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import dev.cazh0.civily.core.graph
 import dev.cazh0.civily.feature.assembly.AssemblyScreen
 import dev.cazh0.civily.feature.issues.IssueDetailScreen
 import dev.cazh0.civily.feature.issues.IssuesScreen
@@ -26,6 +25,7 @@ import dev.cazh0.civily.feature.nation.NationScreen
 import dev.cazh0.civily.feature.region.RegionScreen
 import dev.cazh0.civily.feature.rmb.RmbScreen
 import dev.cazh0.civily.feature.signin.SignInScreen
+import dev.cazh0.civily.graph
 import dev.cazh0.civily.ui.theme.Motion
 
 /**

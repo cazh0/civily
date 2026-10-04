@@ -1,5 +1,7 @@
-package dev.cazh0.civily.core.text
+package dev.cazh0.civily.feature.nation
 
+import dev.cazh0.civily.core.text.Numbers
+import dev.cazh0.civily.core.text.Population
 import java.util.Locale
 
 /**

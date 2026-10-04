@@ -1,4 +1,4 @@
-package dev.cazh0.civily.core
+package dev.cazh0.civily
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

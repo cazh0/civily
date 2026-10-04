@@ -104,6 +104,13 @@ dependencies {
     baselineProfile(project(":benchmark"))
 }
 
+// Why: ArchitectureTest reads the source tree, which is otherwise no input of the unit tests. An
+// edit that compiles to the same classes would leave the gates up to date and unrun.
+tasks.withType<Test>().configureEach {
+    inputs.dir("src/main/kotlin").withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.dir("src/main/res/values").withPathSensitivity(PathSensitivity.RELATIVE)
+}
+
 baselineProfile {
     // Why generation is not part of assembling: a build that needs a phone plugged into it is
     // not a build. `./gradlew :app:generateReleaseBaselineProfile` regenerates the file, and it

@@ -13,9 +13,6 @@ Inside a section: a row sits above one that is harder to do right while it stays
 
 | # | Task | Done when |
 |---|---|---|
-| T31 | Literals outside `ui/theme` | The initials' `Color.White` (`NationAvatar`, `AccountsSection`) and `RichText`'s `0.75.em` come from `ui/theme`. |
-| T32 | Region prints a raw vote count | The delegate's vote count goes through `Numbers` (`RULES.md` §3). |
-| T1 | No rule has a gate | A JVM test in `src/test` fails `testDebugUnitTest` on each of A1–A7, each proven by mutation; `ARCHITECTURE.md` §1 names it. The A1 and A7 rows of `ARCHITECTURE.md` §7 moved first, as its blocking part; both Baseline Profiles regenerated after (`RULES.md` §4.9). |
 | T3 | Nothing runs the gates on its own | A push cannot land red: CI job or pre-push hook, the owner's pick. |
 
 ## P1 — Stately parity
@@ -53,6 +50,7 @@ Parity = a player moving over loses nothing Stately gave them.
 | # | Task | Done when |
 |---|---|---|
 | T22 | 3 rows of `RULES.md` §4 unmeasured | Transition time, longest main-thread block, release APK size: each has a number. |
+| T33 | Profile journey flakes: `scrollPane` reads a node gone stale (`StaleObjectException`, `CivilyJourney.kt:118`, 1 of 2 runs) | The journey re-finds the pane instead of holding it; three runs in a row pass. |
 | T23 | Frame benchmark reports a count, not durations | A run reports per-frame durations. Today `FrameTimingMetric` gives `frameCount` only here, and `benchmark` 1.5.0-beta01 does not build. |
 
 ---

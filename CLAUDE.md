@@ -59,7 +59,8 @@ Length costs the owner. Shortest complete form.
   noting, leverage, robust, seamless.
 - Documents are written the same way: fragments, `→ · =`, no word that carries nothing, no sentence
   that admits two readings.
-- English throughout (`RULES.md` §6).
+- English in the app, code, documents and commits (`RULES.md` §6). Replies to the owner: any
+  language the owner asks for.
 
 ## 4. Character
 

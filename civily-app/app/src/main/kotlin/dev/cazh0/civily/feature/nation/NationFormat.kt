@@ -3,7 +3,6 @@ package dev.cazh0.civily.feature.nation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import dev.cazh0.civily.R
-import dev.cazh0.civily.core.text.Magnitude
 import dev.cazh0.civily.core.text.Numbers
 import dev.cazh0.civily.core.text.Percent
 import dev.cazh0.civily.core.text.Population

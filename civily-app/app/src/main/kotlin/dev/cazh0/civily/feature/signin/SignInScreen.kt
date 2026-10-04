@@ -36,7 +36,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.cazh0.civily.R
-import dev.cazh0.civily.core.graph
+import dev.cazh0.civily.graph
 import dev.cazh0.civily.ui.theme.Dimens
 
 @OptIn(ExperimentalMaterial3Api::class)

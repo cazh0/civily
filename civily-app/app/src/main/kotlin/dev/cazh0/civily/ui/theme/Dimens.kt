@@ -1,6 +1,7 @@
 package dev.cazh0.civily.ui.theme
 
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 
 /**
  * Every size and radius in the app.
@@ -94,6 +95,13 @@ object Dimens {
 
     /** Space reserved for a list marker, wide enough that "10." does not wrap. */
     val BulletGutter = 28.dp
+
+    /**
+     * A superscript or subscript.
+     *
+     * Why `em`: relative to the line it sits in, so it still works at any font scale.
+     */
+    val ScriptFontSize = 0.75.em
 
     /**
      * One fact in a grid.

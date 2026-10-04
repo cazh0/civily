@@ -22,13 +22,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.ImageLoader
 import dev.cazh0.civily.R
-import dev.cazh0.civily.core.graph
 import dev.cazh0.civily.data.issues.Issue
 import dev.cazh0.civily.data.issues.IssuesPage
 import dev.cazh0.civily.feature.issues.newspaper.Newspaper
 import dev.cazh0.civily.feature.issues.newspaper.NewspaperForIssue
 import dev.cazh0.civily.feature.issues.newspaper.newspaperEdition
 import dev.cazh0.civily.feature.issues.newspaper.newspaperMasthead
+import dev.cazh0.civily.graph
 import dev.cazh0.civily.ui.component.EmptyState
 import dev.cazh0.civily.ui.component.LoadStateScaffold
 import dev.cazh0.civily.ui.theme.Dimens

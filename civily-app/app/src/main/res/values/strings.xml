@@ -244,7 +244,10 @@
     <string name="label_num_nations">Nations</string>
     <string name="value_nations">%1$s</string>
     <string name="label_delegate">Delegate</string>
-    <string name="value_delegate">%1$s (%2$d votes)</string>
+    <plurals name="value_delegate">
+        <item quantity="one">%1$s (%2$s vote)</item>
+        <item quantity="other">%1$s (%2$s votes)</item>
+    </plurals>
     <string name="label_founder">Founder</string>
     <string name="value_none">None</string>
     <string name="description_region_flag">Regional flag</string>

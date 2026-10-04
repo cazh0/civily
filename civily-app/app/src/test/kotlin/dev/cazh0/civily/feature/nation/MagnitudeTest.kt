@@ -1,6 +1,6 @@
-package dev.cazh0.civily.core.text
+package dev.cazh0.civily.feature.nation
 
-import dev.cazh0.civily.core.text.Magnitude.Unit
+import dev.cazh0.civily.feature.nation.Magnitude.Unit
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

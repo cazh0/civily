@@ -46,7 +46,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.em
 import dev.cazh0.civily.R
 import dev.cazh0.civily.core.text.NsId
 import dev.cazh0.civily.core.text.bbcode.BbBlock
@@ -369,8 +368,8 @@ private fun BbStyle.toSpanStyle(): SpanStyle = SpanStyle(
         else -> null
     },
     // Superscripts and subscripts sit smaller as well as higher; only shifting them looks
-    // broken. `em` keeps it relative, so it still works at any font scale.
-    fontSize = if (superscript || subscript) 0.75.em else TextUnit.Unspecified,
+    // broken.
+    fontSize = if (superscript || subscript) Dimens.ScriptFontSize else TextUnit.Unspecified,
 )
 
 private fun BbStyle.decoration(): TextDecoration? = when {

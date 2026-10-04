@@ -163,6 +163,9 @@ private val AvatarPalette = listOf(
     Color(0xFFEF6C00),
 )
 
+/** Initials on any [AvatarPalette] entry. */
+internal val AvatarInk = White
+
 /**
  * The avatar background a nation always gets.
  *

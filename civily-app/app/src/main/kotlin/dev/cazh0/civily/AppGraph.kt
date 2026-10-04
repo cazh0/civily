@@ -1,4 +1,4 @@
-package dev.cazh0.civily.core
+package dev.cazh0.civily
 
 import android.app.ActivityManager
 import android.content.Context
@@ -6,7 +6,6 @@ import coil.ImageLoader
 import coil.decode.SvgDecoder
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
-import dev.cazh0.civily.BuildConfig
 import dev.cazh0.civily.core.net.NsClient
 import dev.cazh0.civily.core.net.RateLimiter
 import dev.cazh0.civily.core.session.SessionStore

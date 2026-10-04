@@ -1,4 +1,4 @@
-package dev.cazh0.civily.ui.component
+package dev.cazh0.civily.feature.region
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable

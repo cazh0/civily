@@ -31,10 +31,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.cazh0.civily.R
-import dev.cazh0.civily.core.graph
 import dev.cazh0.civily.core.text.NsId
 import dev.cazh0.civily.core.text.Numbers
 import dev.cazh0.civily.data.rmb.RmbPost
+import dev.cazh0.civily.graph
 import dev.cazh0.civily.ui.component.EmptyState
 import dev.cazh0.civily.ui.component.LoadStateScaffold
 import dev.cazh0.civily.ui.component.Pill

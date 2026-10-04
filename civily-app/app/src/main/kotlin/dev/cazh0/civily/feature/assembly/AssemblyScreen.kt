@@ -46,13 +46,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.cazh0.civily.R
-import dev.cazh0.civily.core.graph
 import dev.cazh0.civily.core.text.Numbers
 import dev.cazh0.civily.core.text.NsId
 import dev.cazh0.civily.data.assembly.Assembly
 import dev.cazh0.civily.data.assembly.Council
 import dev.cazh0.civily.data.assembly.Resolution
 import dev.cazh0.civily.data.assembly.VoteTally
+import dev.cazh0.civily.graph
 import dev.cazh0.civily.ui.component.LoadStateContent
 import dev.cazh0.civily.ui.component.richTextItems
 import dev.cazh0.civily.ui.theme.Dimens

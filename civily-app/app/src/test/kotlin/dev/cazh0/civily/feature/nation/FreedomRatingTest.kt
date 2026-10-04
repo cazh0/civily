@@ -1,6 +1,6 @@
-package dev.cazh0.civily.core.text
+package dev.cazh0.civily.feature.nation
 
-import dev.cazh0.civily.core.text.FreedomRating.Standing
+import dev.cazh0.civily.feature.nation.FreedomRating.Standing
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

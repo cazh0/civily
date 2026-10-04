@@ -34,13 +34,13 @@ Seven files, one job each. A sentence in the wrong file = defect.
 
 | # | Rule | Gate |
 |---|---|---|
-| A1 | Imports point down: `nav` → `feature` → `ui` → `data` → `core`. Never up a tier. `data` imports no Compose. The package root holds the composition root, above every tier; only `feature` and `nav` import from it (`graph`), `R` and `BuildConfig` aside. | none (T1) |
-| A2 | Failure is a value. A repository returns `Outcome<T>`: never throws, never null for "broke". Every `CivilyError` carries its user-facing string. | none (T1) |
-| A3 | One way out. API → `NsClient`. Images → `AppGraph.imageLoader`. One `OkHttpClient`. | none (T1) |
-| A4 | On-screen colours, sizes, durations only in `ui/theme`. Exceptions: `DESIGN_RULES.md` §1.1. | none (T1) |
-| A5 | Every user-visible string is a resource in `res/values/`. | none (T1) |
-| A6 | Route strings built only in `Routes`. Navigation only via `NavActions`. | none (T1) |
-| A7 | Placement by reach. A file in `core/text/` or `ui/component/` is reached by ≥2 features, or by `data/`; reach counts only calls through those two folders. A path `RULES.md` names is exempt (`Population`). | none (T1) |
+| A1 | Imports point down: `nav` → `feature` → `ui` → `data` → `core`. Never up a tier. `data` imports no Compose. The package root holds the composition root, above every tier; only `feature` and `nav` import from it (`graph`), `R` and `BuildConfig` aside. | `ArchitectureTest` A1 |
+| A2 | Failure is a value. A repository returns `Outcome<T>`: never throws, never null for "broke". Every `CivilyError` carries its user-facing string. | `ArchitectureTest` A2 |
+| A3 | One way out. API → `NsClient`. Images → `AppGraph.imageLoader`. One `OkHttpClient`. | `ArchitectureTest` A3 |
+| A4 | On-screen colours, sizes, durations only in `ui/theme`. Exceptions: `DESIGN_RULES.md` §1.1. | `ArchitectureTest` A4 |
+| A5 | Every user-visible string is a resource in `res/values/`. | `ArchitectureTest` A5 |
+| A6 | Route strings built only in `Routes`. Navigation only via `NavActions`. | `ArchitectureTest` A6 |
+| A7 | Placement by reach. A file in `core/text/` or `ui/component/` is reached by ≥2 features, or by `data/`; reach counts only calls through those two folders. A path `RULES.md` names is exempt (`Population`). | `ArchitectureTest` A7 |
 
 A gate lands only once the code satisfies it, and counts only once mutation proves it: break the
 code, watch it go red.
@@ -161,12 +161,9 @@ names them, in code and on screen.
 ## 7. Where today's code goes
 
 Existence = placement (§0.7). A row moves whole when one of its source files is next edited for
-another reason, or as the blocking part of a gate (T1). Never a task on its own. A test moves with
-its subject.
+another reason, or as the blocking part of a gate. Never a task on its own. A test moves with its
+subject.
 
 | Today | Goes to |
 |---|---|
-| `core/AppGraph` · `core/CivilyApp` · `core/MainActivity`: the composition root, which imports `data/`, `ui/` and `nav/` and so breaks A1 from inside `core/` | package root `dev.cazh0.civily` |
-| `core/text/Magnitude` · `FreedomRating`: nation only (A7) | `feature/nation/` |
-| `ui/component/FactCard`: region only (A7) | `feature/region/` |
 | `lookup`: `feature/lookup` · `LookupScreen` · `LookupViewModel` · `LookupState` · `Routes.LOOKUP` · strings named `lookup` | `home`: `feature/home` · `HomeScreen` · `HomeViewModel` · `HomeState` · `Routes.HOME` · strings named `home` |
